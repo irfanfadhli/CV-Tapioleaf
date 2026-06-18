@@ -82,7 +82,7 @@
 
 <div class="min-h-screen bg-white">
 	<!-- Navbar -->
-	<nav class="fixed top-0 z-50 w-full border-b bg-white/95 backdrop-blur-sm">
+	<nav class="top-center fixed z-50 w-full border-b bg-white/95 backdrop-blur-sm">
 		<div class="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
 			<div class="flex items-center gap-2">
 				<div
