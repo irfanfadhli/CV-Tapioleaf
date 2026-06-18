@@ -18,7 +18,13 @@ export const handle: Handle = async ({ event, resolve }) => {
 		}
 
 		if (event.url.pathname === '/api/auth/sign-out' && event.request.method === 'POST') {
-			event.cookies.delete('better-auth.session_token', { path: '/' });
+			const cookies = ['session_token', 'session_data', 'account_data', 'dont_remember'];
+			const prefixes = ['better-auth.', '__Secure-better-auth.'];
+			for (const p of prefixes) {
+				for (const c of cookies) {
+					event.cookies.delete(`${p}${c}`, { path: '/' });
+				}
+			}
 			return new Response(JSON.stringify({ success: true }), {
 				status: 200,
 				headers: { 'Content-Type': 'application/json' }

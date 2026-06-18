@@ -8,8 +8,14 @@
 
 	function handleLogout() {
 		fetch('/api/auth/sign-out', { method: 'POST', headers: { 'Content-Type': 'application/json' } }).catch(() => {});
-		document.cookie = 'better-auth.session_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-		document.cookie = 'better-auth.session_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=' + location.hostname;
+		const cookies = ['session_token', 'session_data', 'account_data', 'dont_remember'];
+		const prefixes = ['better-auth.', '__Secure-better-auth.'];
+		for (const p of prefixes) {
+			for (const c of cookies) {
+				document.cookie = `${p}${c}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+				document.cookie = `${p}${c}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=${location.hostname};`;
+			}
+		}
 		goto('/');
 	}
 </script>
