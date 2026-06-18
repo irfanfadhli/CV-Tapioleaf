@@ -20,7 +20,10 @@
 	function closeSidebar() { sidebarOpen = false; }
 
 	async function handleLogout() {
-		await fetch('/api/auth/sign-out', { method: 'POST', headers: { 'Content-Type': 'application/json' } });
+		try {
+			await fetch('/api/auth/sign-out', { method: 'POST', headers: { 'Content-Type': 'application/json' } });
+		} catch {}
+		document.cookie = 'better-auth.session_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
 		goto('/login');
 	}
 </script>
