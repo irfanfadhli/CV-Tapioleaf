@@ -5,6 +5,13 @@ import type { CreateProductInput, UpdateProductInput, ProductQuery } from './val
 import { uploadImage, deleteImage, generateImageFilename } from '../storage/s3';
 import { createProductSchema, updateProductSchema, productQuerySchema } from './validation';
 
+function formatError(e: unknown): string {
+	if (e && typeof e === 'object' && 'issues' in e && Array.isArray((e as any).issues)) {
+		return (e as { issues: Array<{ message: string }> }).issues.map((i) => i.message).join(', ');
+	}
+	return e instanceof Error ? e.message : 'Terjadi kesalahan';
+}
+
 async function generateCode(): Promise<string> {
 	const today = new Date();
 	const dateStr = today.toISOString().slice(0, 10).replace(/-/g, '');
@@ -25,7 +32,8 @@ async function generateCode(): Promise<string> {
 }
 
 export async function createProduct(input: CreateProductInput, imageBuffer?: Buffer, mimeType?: string) {
-	const data = createProductSchema.parse(input);
+	let data: any;
+	try { data = createProductSchema.parse(input); } catch (e) { throw new Error(formatError(e)); }
 	const code = data.code || await generateCode();
 
 	const existing = await db.select({ id: products.id }).from(products).where(eq(products.code, code)).limit(1);
@@ -54,7 +62,8 @@ export async function createProduct(input: CreateProductInput, imageBuffer?: Buf
 }
 
 export async function updateProduct(id: string, input: UpdateProductInput, imageBuffer?: Buffer, mimeType?: string) {
-	const data = updateProductSchema.parse(input);
+	let data: any;
+	try { data = updateProductSchema.parse(input); } catch (e) { throw new Error(formatError(e)); }
 
 	let imageUrl: string | undefined;
 	if (imageBuffer && mimeType) {

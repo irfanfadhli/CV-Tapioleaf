@@ -4,6 +4,8 @@
 	import { Label } from '$lib/components/ui/label';
 	import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '$lib/components/ui/dialog';
 	import { Loader2 } from '@lucide/svelte';
+	import { toast } from 'svelte-sonner';
+	import { parse } from 'devalue';
 
 	let {
 		open,
@@ -79,6 +81,11 @@
 			if (json.type === 'success') {
 				handleClose();
 				window.location.reload();
+			} else if (json.type === 'failure') {
+				const decoded = typeof json.data === 'string' ? parse(json.data) : json.data;
+				const msg = (decoded as Record<string, unknown>)?.message as string | undefined;
+				if (msg) toast.error(msg);
+				submitting = false;
 			} else {
 				submitting = false;
 			}

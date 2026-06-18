@@ -20,7 +20,14 @@
 
 	let { data } = $props();
 
-	let checkoutProduct = $state<{ id: string; name: string; code: string; price: string; unit: string; description: string | null } | null>(null);
+	let checkoutProduct = $state<{
+		id: string;
+		name: string;
+		code: string;
+		price: string;
+		unit: string;
+		description: string | null;
+	} | null>(null);
 	let menuOpen = $state(false);
 	let debounceTimer: ReturnType<typeof setTimeout> | undefined;
 	let searchQuery = $state('');
@@ -44,8 +51,18 @@
 	}
 
 	function openCheckout(item: any) {
-		if (!data.user) { goto('/login'); return; }
-		checkoutProduct = { id: item.id, name: item.name, code: item.code, price: item.price, unit: item.unit, description: item.description };
+		if (!data.user) {
+			goto('/login');
+			return;
+		}
+		checkoutProduct = {
+			id: item.id,
+			name: item.name,
+			code: item.code,
+			price: item.price,
+			unit: item.unit,
+			description: item.description
+		};
 	}
 
 	let filtered = $derived(
@@ -123,7 +140,7 @@
 	</nav>
 
 	<!-- Hero -->
-	<section class="via-emerald-60 from-white-700 bg-white to-white pt-16">
+	<section class="via-emerald-60 from-white-700 min-h-screen bg-white to-white pt-16">
 		<div class="mx-auto max-w-6xl px-4 py-16 text-center text-shadow-black md:py-20">
 			<div
 				class="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-2xl bg-white/15 backdrop-blur-sm"
@@ -216,7 +233,7 @@
 								onclick={() => openCheckout(item)}
 								class="mt-2 block w-full rounded-lg bg-emerald-600 py-1.5 text-center text-xs font-medium text-white transition-colors hover:bg-emerald-700"
 							>
-								<ShoppingCart size={14} class="inline mr-1" /> Pesan Sekarang
+								<ShoppingCart size={14} class="mr-1 inline" /> Pesan Sekarang
 							</button>
 							{#if item.currentStock < 10}
 								<div class="mt-1 flex items-center gap-1 text-xs text-red-600">
@@ -525,5 +542,5 @@
 <CheckoutModal
 	open={checkoutProduct !== null}
 	product={checkoutProduct}
-	onClose={() => checkoutProduct = null}
+	onClose={() => (checkoutProduct = null)}
 />

@@ -56,10 +56,13 @@ export const actions: Actions = {
 
 	create: async (event) => {
 		const formData = await event.request.formData();
+		let qty = Number(formData.get('quantityChange')?.toString() ?? '0');
+		const movementType = formData.get('movementType')?.toString() ?? 'MANUAL_IN';
+		if (movementType === 'MANUAL_OUT' && qty > 0) qty = -qty;
 		const input = {
 			productId: formData.get('productId')?.toString() ?? '',
-			quantityChange: Number(formData.get('quantityChange')?.toString() ?? '0'),
-			movementType: formData.get('movementType')?.toString() ?? 'MANUAL_IN',
+			quantityChange: qty,
+			movementType,
 			movementDate: formData.get('movementDate')?.toString() || undefined,
 			note: formData.get('note')?.toString() || undefined,
 			reason: formData.get('reason')?.toString() || undefined
