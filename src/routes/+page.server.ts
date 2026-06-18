@@ -1,0 +1,29 @@
+import type { PageServerLoad } from './$types';
+import { db } from '$lib/server/db';
+import { products } from '$lib/server/db/schema/product';
+import { stockMovements } from '$lib/server/db/schema/stock';
+import { sql, eq, isNull, asc, and } from 'drizzle-orm';
+
+export const load: PageServerLoad = async (event) => {
+	const items = await db.select({
+		id: products.id,
+		code: products.code,
+		name: products.name,
+		description: products.description,
+		price: products.price,
+		unit: products.unit,
+		imageUrl: products.imageUrl,
+		currentStock: sql<number>`COALESCE(SUM(${stockMovements.quantityChange}), 0)`
+	})
+		.from(products)
+		.leftJoin(stockMovements, eq(stockMovements.productId, products.id))
+		.where(and(isNull(products.deletedAt), eq(products.isActive, true)))
+		.groupBy(products.id)
+		.orderBy(asc(products.name))
+		.limit(50);
+
+	return {
+		items: items.map(i => ({ ...i, currentStock: Number(i.currentStock) })),
+		user: event.locals.user ? { name: event.locals.user.name, email: event.locals.user.email } : null
+	};
+};
