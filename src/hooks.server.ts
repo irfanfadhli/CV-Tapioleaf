@@ -17,20 +17,6 @@ export const handle: Handle = async ({ event, resolve }) => {
 			// Session check failed — continue without session
 		}
 
-		if (event.url.pathname === '/api/auth/sign-out' && event.request.method === 'POST') {
-			const cookies = ['session_token', 'session_data', 'account_data', 'dont_remember'];
-			const prefixes = ['better-auth.', '__Secure-better-auth.'];
-			for (const p of prefixes) {
-				for (const c of cookies) {
-					event.cookies.delete(`${p}${c}`, { path: '/' });
-				}
-			}
-			return new Response(JSON.stringify({ success: true }), {
-				status: 200,
-				headers: { 'Content-Type': 'application/json' }
-			});
-		}
-
 		try {
 			const config = getRouteConfig(event.url.pathname);
 			if (config?.protected) {
@@ -50,9 +36,5 @@ export const handle: Handle = async ({ event, resolve }) => {
 		}
 	}
 
-	try {
-		return svelteKitHandler({ event, resolve, auth, building });
-	} catch {
-		return resolve(event);
-	}
+	return svelteKitHandler({ event, resolve, auth, building });
 };
