@@ -6,11 +6,10 @@
 
 	let { data } = $props();
 
-	async function handleLogout() {
-		try {
-			await fetch('/api/auth/sign-out', { method: 'POST', headers: { 'Content-Type': 'application/json' } });
-		} catch {}
+	function handleLogout() {
+		fetch('/api/auth/sign-out', { method: 'POST', headers: { 'Content-Type': 'application/json' } }).catch(() => {});
 		document.cookie = 'better-auth.session_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+		document.cookie = 'better-auth.session_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=' + location.hostname;
 		goto('/');
 	}
 </script>

@@ -17,6 +17,14 @@ export const handle: Handle = async ({ event, resolve }) => {
 			// Session check failed — continue without session
 		}
 
+		if (event.url.pathname === '/api/auth/sign-out' && event.request.method === 'POST') {
+			event.cookies.delete('better-auth.session_token', { path: '/' });
+			return new Response(JSON.stringify({ success: true }), {
+				status: 200,
+				headers: { 'Content-Type': 'application/json' }
+			});
+		}
+
 		try {
 			const config = getRouteConfig(event.url.pathname);
 			if (config?.protected) {
