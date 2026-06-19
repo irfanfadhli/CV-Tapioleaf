@@ -4,6 +4,7 @@
 	import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '$lib/components/ui/dialog';
 	import { Loader2 } from '@lucide/svelte';
 	import { toast } from 'svelte-sonner';
+	import { parse } from 'devalue';
 
 	let {
 		open,
@@ -22,10 +23,13 @@
 	let notes = $state('');
 	let submitting = $state(false);
 
+	let errorMessage = $state('');
+
 	async function handleSubmit(e: Event) {
 		e.preventDefault();
 		if (!product) return;
 		submitting = true;
+		errorMessage = '';
 
 		try {
 			const formData = new FormData();
@@ -37,17 +41,20 @@
 			formData.set('notes', notes);
 
 			const res = await fetch('/orders?/checkout', { method: 'POST', body: formData });
-			const json = await res.json();
+			const body = await res.json();
 
-			if (json.type === 'success' && json.data?.invoiceUrl) {
-				window.location.href = json.data.invoiceUrl;
+			const data = typeof body.data === 'string' ? parse(body.data) : body.data;
+
+			if (body.type === 'success' && data?.invoiceUrl) {
+				window.location.href = data.invoiceUrl;
 			} else {
-				const msg = json.data?.message || 'Gagal membuat pesanan';
-				toast.error(msg);
+				errorMessage = data?.message || 'Gagal membuat pesanan';
+				toast.error(errorMessage);
 				submitting = false;
 			}
 		} catch {
-			toast.error('Gagal membuat pesanan');
+			errorMessage = 'Gagal membuat pesanan. Periksa koneksi internet Anda.';
+			toast.error(errorMessage);
 			submitting = false;
 		}
 	}
@@ -60,6 +67,9 @@
 			<DialogDescription>{product?.name} ({product?.code}) — Rp {Number(product?.price || 0).toLocaleString('id-ID')}/{product?.unit}</DialogDescription>
 		</DialogHeader>
 		<form onsubmit={handleSubmit} class="grid gap-4 py-4">
+			{#if errorMessage}
+				<div class="rounded-lg border border-red-300 bg-red-50 p-3 text-sm text-red-700 whitespace-pre-wrap">{errorMessage}</div>
+			{/if}
 			<div class="grid gap-2">
 				<label for="chk-qty" class="text-sm font-medium">Jumlah ({product?.unit}) *</label>
 				<Input id="chk-qty" type="number" step="0.01" min="0.01" bind:value={quantity} required disabled={submitting} />

@@ -6,11 +6,12 @@ import { createInvoice } from '../xendit/service';
 import type { CheckoutInput } from '../xendit/validation';
 
 export async function createOrder(input: CheckoutInput, userId?: string) {
-	const product = await db.select().from(products).where(and(eq(products.id, input.productId), isNull(products.deletedAt))).limit(1);
-	if (!product.length) throw new Error('Produk tidak ditemukan');
+	const prod = await db.select().from(products).where(and(eq(products.id, input.productId), isNull(products.deletedAt))).limit(1);
+	if (!prod.length) throw new Error('Produk tidak ditemukan');
 
-	const p = product[0];
+	const p = prod[0];
 	const totalAmount = Number(p.price) * input.quantity;
+	if (isNaN(totalAmount) || totalAmount <= 0) throw new Error('Jumlah pesanan tidak valid');
 
 	const [order] = await db.insert(orders).values({
 		userId,
@@ -32,14 +33,30 @@ export async function createOrder(input: CheckoutInput, userId?: string) {
 		unit: p.unit
 	});
 
-	const invoice = await createInvoice(order.id, input, totalAmount);
-	await db.update(orders).set({
-		xenditInvoiceId: invoice.invoiceId,
-		xenditInvoiceUrl: invoice.invoiceUrl,
-		updatedAt: new Date()
-	}).where(eq(orders.id, order.id));
+	let invoiceUrl = '';
+	let invoiceId = '';
+	try {
+		const inv = await createInvoice(order.id, input, totalAmount);
+		invoiceUrl = inv.invoiceUrl;
+		invoiceId = inv.invoiceId;
+	} catch (e) {
+		console.error('Xendit createInvoice error:', e);
+	}
 
-	return { orderId: order.id, invoiceUrl: invoice.invoiceUrl };
+	try {
+		await db.update(orders).set({
+			xenditInvoiceId: invoiceId || null,
+			xenditInvoiceUrl: invoiceUrl || null,
+			updatedAt: new Date()
+		}).where(eq(orders.id, order.id));
+	} catch (e) {
+		console.error('Order update error:', e);
+	}
+
+	return {
+		orderId: order.id,
+		invoiceUrl: invoiceUrl || `/orders/${order.id}`
+	};
 }
 
 export async function getUserOrders(userId: string, page = 1, limit = 10) {
