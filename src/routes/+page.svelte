@@ -205,6 +205,7 @@
 										src={item.imageUrl}
 										alt={item.name}
 										class="h-36 w-full object-cover sm:h-40 md:h-48"
+										onerror={(e) => { (e.target as HTMLElement).style.display = 'none'; }}
 									/>
 								</div>
 							{/if}
