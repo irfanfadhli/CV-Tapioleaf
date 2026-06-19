@@ -32,7 +32,7 @@ export const actions: Actions = {
 			if (!input.customerPhone) return fail(400, { message: 'No. telepon harus diisi' });
 			if (!input.customerAddress) return fail(400, { message: 'Alamat harus diisi' });
 
-			const result = await orderService.createOrder(input, event.locals.user.id);
+			const result = await orderService.createOrder(input, event.locals.user.id, event.url.origin);
 			return { invoiceUrl: result.invoiceUrl, orderId: result.orderId };
 		} catch (e) {
 			const msg = e instanceof Error ? `${e.message}\n${e.stack}` : JSON.stringify(e);

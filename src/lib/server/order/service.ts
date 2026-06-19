@@ -5,7 +5,7 @@ import { products } from '../db/schema/product';
 import { createInvoice } from '../xendit/service';
 import type { CheckoutInput } from '../xendit/validation';
 
-export async function createOrder(input: CheckoutInput, userId?: string) {
+export async function createOrder(input: CheckoutInput, userId: string | undefined, requestOrigin: string) {
 	const prod = await db.select().from(products).where(and(eq(products.id, input.productId), isNull(products.deletedAt))).limit(1);
 	if (!prod.length) throw new Error('Produk tidak ditemukan');
 
@@ -36,7 +36,7 @@ export async function createOrder(input: CheckoutInput, userId?: string) {
 	let invoiceUrl = '';
 	let invoiceId = '';
 	try {
-		const inv = await createInvoice(order.id, input, totalAmount);
+		const inv = await createInvoice(order.id, input, totalAmount, requestOrigin);
 		invoiceUrl = inv.invoiceUrl;
 		invoiceId = inv.invoiceId;
 	} catch (e) {
@@ -55,7 +55,7 @@ export async function createOrder(input: CheckoutInput, userId?: string) {
 
 	return {
 		orderId: order.id,
-		invoiceUrl: invoiceUrl || `/orders/${order.id}`
+		invoiceUrl: invoiceUrl || `${requestOrigin}/orders/${order.id}`
 	};
 }
 

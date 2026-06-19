@@ -18,10 +18,16 @@ async function getInvoiceClient() {
 	}
 }
 
-export async function createInvoice(orderId: string, input: CheckoutInput, totalAmount: number) {
+function toOrigin(origin: string): string {
+	return origin || env.ORIGIN || 'https://tapioleaf.vercel.app';
+}
+
+export async function createInvoice(orderId: string, input: CheckoutInput, totalAmount: number, requestOrigin: string) {
 	const inv = await getInvoiceClient();
+	const origin = toOrigin(requestOrigin);
+
 	if (!inv) {
-		return { invoiceUrl: `${env.ORIGIN}/orders/${orderId}?status=pending`, invoiceId: 'offline' };
+		return { invoiceUrl: `${origin}/orders/${orderId}?status=pending`, invoiceId: 'offline' };
 	}
 	try {
 		const invoice = await inv.createInvoice({
@@ -36,14 +42,14 @@ export async function createInvoice(orderId: string, input: CheckoutInput, total
 					addresses: input.customerAddress ? [{ city: '', country: 'ID', streetLine1: input.customerAddress, postalCode: '' }] : undefined
 				},
 				customerNotificationPreference: { invoicePaid: ['whatsapp', 'email'] },
-				successRedirectUrl: `${env.ORIGIN}/orders/${orderId}`,
-				failureRedirectUrl: `${env.ORIGIN}/orders/${orderId}?status=failed`
+				successRedirectUrl: `${origin}/orders/${orderId}`,
+				failureRedirectUrl: `${origin}/orders/${orderId}?status=failed`
 			}
 		});
 		return { invoiceUrl: invoice.invoiceUrl!, invoiceId: invoice.id! };
 	} catch (e) {
 		console.error('Xendit createInvoice failed:', e);
-		return { invoiceUrl: `${env.ORIGIN}/orders/${orderId}?status=pending`, invoiceId: 'error' };
+		return { invoiceUrl: `${origin}/orders/${orderId}?status=pending`, invoiceId: 'error' };
 	}
 }
 
