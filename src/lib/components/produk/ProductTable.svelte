@@ -60,7 +60,7 @@
 					<td class="px-4 py-3 text-right">{product.minimumStock} {product.unit}</td>
 					<td class="px-4 py-3 text-center">
 						{#if product.imageUrl}
-							<img src={product.imageUrl} alt={product.name} class="mx-auto h-10 w-10 rounded object-cover" />
+							<img src={product.imageUrl} alt={product.name} class="mx-auto h-10 w-10 rounded object-cover" onerror={(e) => { (e.target as HTMLElement).style.display = 'none'; }} />
 						{:else}
 							<span class="text-xs text-muted-foreground">—</span>
 						{/if}

@@ -151,11 +151,11 @@
 					<Label for="image">Gambar (opsional)</Label>
 					<Input id="image" name="image" type="file" accept="image/jpeg,image/png,image/webp" onchange={handleImageSelect} />
 				</div>
-				{#if imagePreview}
-					<div class="flex justify-center">
-						<img src={imagePreview} alt="Preview" class="h-24 w-24 rounded-lg object-cover" />
-					</div>
-				{/if}
+			{#if imagePreview}
+				<div class="flex justify-center">
+					<img src={imagePreview} alt="Preview" class="h-24 w-24 rounded-lg object-cover" onerror={(e) => { (e.target as HTMLElement).style.display = 'none'; }} />
+				</div>
+			{/if}
 				<div class="grid gap-2">
 					<Label for="description">Deskripsi</Label>
 					<textarea id="description" name="description" rows="2" class="rounded-lg border bg-background px-3 py-2 text-sm" bind:value={description}></textarea>
