@@ -237,12 +237,12 @@ async function getCategoryDistribution(start: Date, end: Date) {
 
 async function getMarginSummary(start: Date, end: Date) {
 	const result = await db.select({
-		totalRevenue: sql<string>`COALESCE(SUM(oi.quantity::numeric * oi.unit_price::numeric), 0)`,
-		totalCost: sql<string>`COALESCE(SUM(oi.quantity::numeric * p.cost_price::numeric), 0)`,
+		totalRevenue: sql<string>`COALESCE(SUM(${orderItems.quantity}::numeric * ${orderItems.unitPrice}::numeric), 0)`,
+		totalCost: sql<string>`COALESCE(SUM(${orderItems.quantity}::numeric * ${products.costPrice}::numeric), 0)`,
 	})
-		.from(orderItems as any)
+		.from(orderItems)
 		.innerJoin(orders, eq(orders.id, orderItems.orderId))
-		.innerJoin(products as any, eq(products.id, orderItems.productId))
+		.innerJoin(products, eq(products.id, orderItems.productId))
 		.where(and(eq(orders.status, 'PAID'), gte(orders.createdAt, start), lte(orders.createdAt, end), sql`${products.costPrice} IS NOT NULL`))
 		.limit(1);
 
