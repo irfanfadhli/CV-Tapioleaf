@@ -52,6 +52,7 @@ export async function createProduct(input: CreateProductInput, imageBuffer?: Buf
 		name: data.name,
 		description: data.description,
 		price: String(data.price),
+		costPrice: data.costPrice ? String(data.costPrice) : null,
 		unit: data.unit,
 		minimumStock: data.minimumStock,
 		categoryId: data.categoryId,
@@ -75,11 +76,12 @@ export async function updateProduct(id: string, input: UpdateProductInput, image
 		imageUrl = await uploadImage(filename, imageBuffer, mimeType) ?? undefined;
 	}
 
-	const { price, ...restData } = data;
+	const { price, costPrice, ...restData } = data;
 	const [product] = await db.update(products)
 		.set({
 			...restData,
 			...(price !== undefined ? { price: String(price) } : {}),
+			...(costPrice !== undefined ? { costPrice: costPrice === null || costPrice === undefined ? null : String(costPrice) } : {}),
 			...(imageUrl ? { imageUrl } : {}),
 			updatedAt: new Date()
 		})

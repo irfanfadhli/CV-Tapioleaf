@@ -14,6 +14,7 @@ export const products = pgTable('products', {
 	name: text('name').notNull(),
 	description: text('description'),
 	price: decimal('price', { precision: 15, scale: 2 }).notNull(),
+	costPrice: decimal('cost_price', { precision: 15, scale: 2 }),
 	unit: text('unit', { enum: ['KG', 'TON', 'SAK', 'PCS'] }).notNull(),
 	minimumStock: integer('minimum_stock').default(0).notNull(),
 	imageUrl: text('image_url'),

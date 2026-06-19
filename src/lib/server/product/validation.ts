@@ -5,6 +5,7 @@ export const createProductSchema = z.object({
 	code: z.preprocess((v) => (v === '' ? undefined : v), z.string().regex(/^[A-Za-z0-9\-]+$/, 'Kode hanya huruf, angka, dan tanda hubung').min(3).max(20).optional()),
 	categoryId: z.string().min(1, 'Kategori wajib dipilih'),
 	price: z.coerce.number().positive('Harga harus lebih dari 0').max(100_000_000, 'Harga terlalu besar'),
+	costPrice: z.coerce.number().min(0).optional(),
 	unit: z.enum(['KG', 'TON', 'SAK', 'PCS'], { message: 'Satuan tidak valid' }),
 	minimumStock: z.coerce.number().int().min(0, 'Stok minimum tidak boleh negatif').default(0),
 	description: z.string().max(500).optional()
@@ -13,6 +14,7 @@ export const createProductSchema = z.object({
 export const updateProductSchema = z.object({
 	name: z.string().min(2).max(100).trim().optional(),
 	price: z.coerce.number().positive().max(100_000_000).optional(),
+	costPrice: z.coerce.number().min(0).optional(),
 	unit: z.enum(['KG', 'TON', 'SAK', 'PCS']).optional(),
 	minimumStock: z.coerce.number().int().min(0).optional(),
 	description: z.string().max(500).optional(),

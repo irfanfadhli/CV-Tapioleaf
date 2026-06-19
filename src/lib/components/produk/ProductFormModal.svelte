@@ -23,6 +23,7 @@
 	let name = $state('');
 	let code = $state('');
 	let price = $state('');
+	let costPrice = $state('');
 	let unit = $state('KG');
 	let categoryId = $state('');
 	let minimumStock = $state('0');
@@ -36,6 +37,7 @@
 			name = product?.name || '';
 			code = product?.code || '';
 			price = product?.price?.toString() || '';
+			costPrice = product?.costPrice?.toString() || '';
 			unit = product?.unit || 'KG';
 			categoryId = product?.categoryId || '';
 			minimumStock = product?.minimumStock?.toString() || '0';
@@ -46,6 +48,7 @@
 			name = '';
 			code = '';
 			price = '';
+			costPrice = '';
 			unit = 'KG';
 			categoryId = '';
 			minimumStock = '0';
@@ -124,6 +127,10 @@
 				<div class="grid gap-2">
 					<Label for="price">Harga *</Label>
 					<Input id="price" name="price" type="number" required bind:value={price} />
+				</div>
+				<div class="grid gap-2">
+					<Label for="costPrice">Harga Modal (optional)</Label>
+					<Input id="costPrice" name="costPrice" type="number" bind:value={costPrice} />
 				</div>
 				<div class="grid gap-2">
 					<Label for="unit">Satuan *</Label>
