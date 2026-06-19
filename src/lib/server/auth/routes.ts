@@ -24,6 +24,8 @@ export function getRouteConfig(pathname: string): RouteConfig | null {
 	if (pathname.startsWith('/gudang/')) return routeMap['/gudang'];
 	if (pathname.startsWith('/produksi/')) return routeMap['/produksi'];
 	if (pathname.startsWith('/api/auth')) return { protected: false };
+	if (pathname.startsWith('/api/xendit')) return { protected: false };
+	if (pathname.startsWith('/api/sign-out')) return { protected: false };
 	if (pathname.startsWith('/demo')) return { protected: false };
 	if (pathname.startsWith('/')) return { protected: true, roles: ['owner', 'admin_penjualan', 'petugas_gudang', 'bagian_produksi', 'pembeli_umkm'] };
 	return { protected: true, roles: ['owner', 'admin_penjualan', 'petugas_gudang', 'bagian_produksi', 'pembeli_umkm'] };
