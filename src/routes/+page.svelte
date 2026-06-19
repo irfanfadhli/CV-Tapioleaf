@@ -140,7 +140,9 @@
 	</nav>
 
 	<!-- Hero -->
-	<section class="via-emerald-60 from-white-700 min-h-screen bg-white to-white pt-16">
+	<section
+		class="via-emerald-60 from-white-700 flex min-h-[calc(100vh-4rem)] flex-col items-center justify-center bg-white to-white px-4 pt-16 text-center"
+	>
 		<div class="mx-auto max-w-6xl px-4 py-16 text-center text-shadow-black md:py-20">
 			<div
 				class="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-2xl bg-white/15 backdrop-blur-sm"
@@ -205,7 +207,9 @@
 										src={item.imageUrl}
 										alt={item.name}
 										class="h-36 w-full object-cover sm:h-40 md:h-48"
-										onerror={(e) => { (e.target as HTMLElement).style.display = 'none'; }}
+										onerror={(e) => {
+											(e.target as HTMLElement).style.display = 'none';
+										}}
 									/>
 								</div>
 							{/if}
