@@ -35,7 +35,7 @@
 	<header class="border-b bg-white/80 backdrop-blur-sm sticky top-0 z-10">
 		<div class="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
 			<div class="flex items-center gap-2">
-				<div class="flex h-9 w-9 items-center justify-center rounded-full bg-emerald-600 text-sm font-bold text-white">TL</div>
+				<img src="/img/logo.png" alt="TapioLeaf" class="h-9 w-9 rounded-full object-cover" />
 				<div>
 					<p class="font-bold leading-tight">CV TapioLeaf</p>
 					<p class="text-xs text-muted-foreground">Tepung Tapioka Berkualitas</p>

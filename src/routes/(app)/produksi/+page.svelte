@@ -1,20 +1,18 @@
 <script lang="ts">
-	import { page } from '$app/stores';
-	import { goto } from '$app/navigation';
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
 	import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '$lib/components/ui/dialog';
-	import { Plus, Loader2, CheckCircle2, Factory, History } from '@lucide/svelte';
+	import { Plus, Loader2, CheckCircle2, Factory } from '@lucide/svelte';
 	import { toast } from 'svelte-sonner';
 	import { enhance } from '$app/forms';
 
 	let { data } = $props();
 
 	let showModal = $state(false);
-	let productId = $state('');
 	let quantityKg = $state('');
 	let productionDate = $state(new Date().toISOString().slice(0, 10));
 	let notes = $state('');
+	let showHistory = $state(data.todaySummary.confirmedCount > 0);
 </script>
 
 <div class="space-y-6">
@@ -23,10 +21,7 @@
 			<Factory size={24} class="text-emerald-600" />
 			<h1 class="text-2xl font-bold">Produksi Harian</h1>
 		</div>
-		<div class="flex gap-2">
-			<Button onclick={() => showModal = true}><Plus size={16} class="mr-1" /> Tambah Produksi</Button>
-			<a href="/produksi/riwayat"><Button variant="outline"><History size={16} class="mr-1" /> Riwayat</Button></a>
-		</div>
+		<Button onclick={() => showModal = true}><Plus size={16} class="mr-1" /> Tambah Produksi</Button>
 	</div>
 
 	<div class="rounded-lg border bg-card">
@@ -48,15 +43,56 @@
 				<form method="post" action="?/confirm" use:enhance={() => {
 					return async ({ result, update }) => {
 						update();
-						if (result.type === 'success') { toast.success('Produksi hari ini dikonfirmasi'); }
+						if (result.type === 'success') { toast.success('Produksi hari ini dikonfirmasi'); showHistory = true; }
 						else if (result.type === 'failure') { const msg = (result.data as any)?.message; if (msg) toast.error(msg); }
 					};
 				}} class="mt-4">
-					<Button variant="default" class="w-full"><CheckCircle2 size={16} class="mr-1" /> Konfirmasi Produksi Hari Ini</Button>
+					<Button type="submit" variant="default" class="w-full"><CheckCircle2 size={16} class="mr-1" /> Konfirmasi Produksi Hari Ini</Button>
 				</form>
 			{/if}
 		</div>
 	</div>
+
+	{#if showHistory}
+		<div>
+			<h2 class="mb-3 text-lg font-semibold">Riwayat Produksi Hari Ini</h2>
+			<div class="rounded-lg border">
+				<div class="overflow-x-auto">
+					<table class="w-full text-sm">
+						<thead class="bg-muted/50">
+							<tr>
+								<th class="px-4 py-3 text-left font-medium text-muted-foreground">Produk</th>
+								<th class="px-4 py-3 text-right font-medium text-muted-foreground">Kg</th>
+								<th class="px-4 py-3 text-center font-medium text-muted-foreground">Status</th>
+								<th class="px-4 py-3 text-left font-medium text-muted-foreground">Keterangan</th>
+							</tr>
+						</thead>
+						<tbody>
+							{#each data.todayItems as item}
+								<tr class="border-t transition-colors hover:bg-muted/30">
+									<td class="px-4 py-3">
+										<div class="font-medium">{item.productName}</div>
+										<div class="text-xs text-muted-foreground">{item.productCode}</div>
+									</td>
+									<td class="px-4 py-3 text-right font-medium">{item.quantityKg.toLocaleString('id-ID')}</td>
+									<td class="px-4 py-3 text-center">
+										{#if item.status === 'CONFIRMED'}
+											<span class="inline-flex items-center gap-1 rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700"><CheckCircle2 size={12} /> CONFIRMED</span>
+										{:else}
+											<span class="inline-flex items-center gap-1 rounded-full bg-yellow-100 px-2 py-0.5 text-xs font-medium text-yellow-700">DRAFT</span>
+										{/if}
+									</td>
+									<td class="px-4 py-3 text-xs text-muted-foreground">{item.notes || '—'}</td>
+								</tr>
+							{:else}
+								<tr><td colspan="4" class="px-4 py-8 text-center text-sm text-muted-foreground">Belum ada produksi</td></tr>
+							{/each}
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+	{/if}
 </div>
 
 <Dialog open={showModal} onOpenChange={(o) => { if (!o) showModal = false; }}>

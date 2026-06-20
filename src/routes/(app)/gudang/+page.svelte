@@ -19,7 +19,17 @@
 	afterNavigate(() => { searchRef?.focus(); });
 
 	let showModal = $state(false);
-	let modalType = $state<'in' | 'out' | 'adjust'>('in');
+	let modalType = $state<'in' | 'out'>('in');
+
+	function openModal(type: 'in' | 'out') {
+		modalType = type;
+		productId = '';
+		quantityChange = '';
+		movementDate = new Date().toISOString().slice(0, 10);
+		note = '';
+		reason = '';
+		showModal = true;
+	}
 	let productId = $state('');
 	let quantityChange = $state('');
 	let movementDate = $state(new Date().toISOString().slice(0, 10));
@@ -57,17 +67,6 @@
 		editNote = '';
 	}
 
-	function openModal(type: 'in' | 'out' | 'adjust') {
-		modalType = type;
-		productId = '';
-		quantityChange = '';
-		movementDate = new Date().toISOString().slice(0, 10);
-		note = '';
-		reason = '';
-		showModal = true;
-	}
-
-
 </script>
 
 <div class="space-y-6">
@@ -76,7 +75,6 @@
 		<div class="flex gap-2">
 			<Button onclick={() => openModal('in')}><Plus size={16} class="mr-1" /> Stok Masuk</Button>
 			<Button variant="outline" onclick={() => openModal('out')}>Stok Keluar</Button>
-			<Button variant="outline" onclick={() => openModal('adjust')}>Adjustment</Button>
 		</div>
 	</div>
 
@@ -158,7 +156,7 @@
 	<DialogContent class="sm:max-w-md">
 		<DialogHeader>
 			<DialogTitle>
-				{modalType === 'in' ? 'Stok Masuk' : modalType === 'out' ? 'Stok Keluar' : 'Stock Adjustment'}
+				{modalType === 'in' ? 'Stok Masuk' : 'Stok Keluar'}
 			</DialogTitle>
 			<DialogDescription>Catat pergerakan stok</DialogDescription>
 		</DialogHeader>
@@ -193,12 +191,7 @@
 					<label for="movementDate" class="text-sm font-medium">Tanggal</label>
 					<Input id="movementDate" name="movementDate" type="date" bind:value={movementDate} />
 				</div>
-				{#if modalType === 'adjust'}
-					<div class="grid gap-2">
-						<label for="reason" class="text-sm font-medium">Alasan Adjustment *</label>
-						<textarea id="reason" name="reason" class="rounded-lg border bg-background px-3 py-2 text-sm" rows="2" placeholder="Minimal 10 karakter" required></textarea>
-					</div>
-				{/if}
+
 				<div class="grid gap-2">
 					<label for="note" class="text-sm font-medium">Keterangan</label>
 					<textarea id="note" name="note" class="rounded-lg border bg-background px-3 py-2 text-sm" rows="2"></textarea>

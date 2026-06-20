@@ -1,8 +1,7 @@
-import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 
-export const POST: RequestHandler = async (event) => {
-	const headers = new Headers({ 'Content-Type': 'application/json' });
+export const POST: RequestHandler = async () => {
+	const headers = new Headers({ Location: '/' });
 	const expire = 'Thu, 01 Jan 1970 00:00:00 UTC';
 	const base = `=; expires=${expire}; path=/; secure; samesite=lax; httponly`;
 	const names = [
@@ -18,5 +17,5 @@ export const POST: RequestHandler = async (event) => {
 	for (const name of names) {
 		headers.append('Set-Cookie', `${name}${base}`);
 	}
-	return new Response(JSON.stringify({ success: true }), { status: 200, headers });
+	return new Response(null, { status: 303, headers });
 };

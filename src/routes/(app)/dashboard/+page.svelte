@@ -2,8 +2,7 @@
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
 	import KPICard from '$lib/components/dashboard/KPICard.svelte';
-	import SalesTrendChart from '$lib/components/dashboard/SalesTrendChart.svelte';
-	import ProductionChart from '$lib/components/dashboard/ProductionChart.svelte';
+	import MarginChart from '$lib/components/dashboard/MarginChart.svelte';
 	import CategoryChart from '$lib/components/dashboard/CategoryChart.svelte';
 	import RecentTransactions from '$lib/components/dashboard/RecentTransactions.svelte';
 	import StockAlertBanner from '$lib/components/dashboard/StockAlertBanner.svelte';
@@ -58,8 +57,8 @@
 	<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
 		<KPICard
 			title="Penjualan"
-			value={"Rp " + dashboardData.sales.total.toLocaleString('id-ID')}
-			subtitle={dashboardData.sales.count + " transaksi"}
+			value={'Rp ' + dashboardData.sales.total.toLocaleString('id-ID')}
+			subtitle={dashboardData.sales.count + ' transaksi'}
 			change={dashboardData.sales.change}
 			icon="💰"
 			loading={false}
@@ -74,32 +73,32 @@
 		/>
 		<KPICard
 			title="Stok"
-			value={dashboardData.stock.totalSKU + " SKU"}
-			subtitle={dashboardData.stock.criticalCount > 0 ? dashboardData.stock.criticalCount + " kritis" : "Semua normal"}
+			value={dashboardData.stock.totalSKU + ' SKU'}
+			subtitle={dashboardData.stock.criticalCount > 0
+				? dashboardData.stock.criticalCount + ' kritis'
+				: 'Semua normal'}
 			alert={dashboardData.stock.criticalCount > 0}
 			icon="🏭"
 			loading={false}
 		/>
 		<KPICard
 			title="Pendapatan"
-			value={"Rp " + dashboardData.revenue.total.toLocaleString('id-ID')}
-			subtitle={dashboardData.revenue.margin !== null ? `Margin: ${dashboardData.revenue.margin}%` : ''}
+			value={'Rp ' + dashboardData.revenue.total.toLocaleString('id-ID')}
+			subtitle={dashboardData.revenue.margin !== null
+				? `Margin: ${dashboardData.revenue.margin}%`
+				: ''}
 			change={dashboardData.revenue.change}
 			icon="📈"
 			loading={false}
 		/>
 	</div>
 
-	<!-- Charts Row -->
-	<div class="grid gap-4 lg:grid-cols-2">
-		{#if loading}
-			<SkeletonWidget height="h-64" />
-			<SkeletonWidget height="h-64" />
-		{:else}
-			<SalesTrendChart data={dashboardData.salesTrend} />
-			<ProductionChart data={dashboardData.productionTrend} targetKg={dashboardData.production.targetKg} />
-		{/if}
-	</div>
+	<!-- Margin Chart -->
+	{#if loading}
+		<SkeletonWidget height="h-64" />
+	{:else}
+		<MarginChart data={dashboardData.marginPerProduct} />
+	{/if}
 
 	<!-- Bottom Row -->
 	<div class="grid gap-4 lg:grid-cols-2">

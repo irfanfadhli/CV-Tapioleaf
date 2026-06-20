@@ -4,6 +4,7 @@ import { env } from '$env/dynamic/private';
 import { db } from '$lib/server/db';
 import { user } from '$lib/server/db/auth.schema';
 import { eq } from 'drizzle-orm';
+import * as orderService from '$lib/server/order/service';
 
 const adminEmails = (env.ADMIN_EMAILS || '').split(',').map((e) => e.trim().toLowerCase()).filter(Boolean);
 
@@ -39,5 +40,6 @@ export const load: PageServerLoad = async (event) => {
 		throw redirect(303, roleRedirects[roleAfterUpdate]);
 	}
 
-	return { user: event.locals.user };
+	const ordersData = await orderService.getUserOrders(event.locals.user.id, 1, 10);
+	return { user: event.locals.user, orders: ordersData.items };
 };

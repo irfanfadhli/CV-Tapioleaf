@@ -85,22 +85,34 @@
 	<nav class="top-center fixed z-50 w-full border-b bg-white/95 backdrop-blur-sm">
 		<div class="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
 			<div class="flex items-center gap-2">
-				<div
-					class="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-600 text-sm font-bold text-white"
-				>
-					TL
-				</div>
+				<img src="/img/logo.png" alt="TapioLeaf" class="h-9 w-9 rounded-lg object-cover" />
 				<div class="text-sm font-bold">CV TapioLeaf</div>
 			</div>
 			<div class="hidden items-center gap-4 text-sm md:flex">
 				<a href="#products" class="text-muted-foreground hover:text-emerald-600">Produk</a>
 				<a href="#about" class="text-muted-foreground hover:text-emerald-600">Tentang</a>
 				<a href="#contact" class="text-muted-foreground hover:text-emerald-600">Kontak</a>
-				<a
-					href="/login"
-					class="rounded-lg bg-emerald-50 px-4 py-1.5 text-sm font-medium text-gray-900 hover:bg-emerald-400"
-					>Masuk</a
-				>
+				{#if data.user}
+					<a href="/orders" class="text-muted-foreground hover:text-emerald-600">Pesanan</a>
+					<a href="/account" class="text-muted-foreground hover:text-emerald-600">Dashboard</a>
+					<span
+						class="cursor-default rounded-lg bg-gray-100 px-4 py-1.5 text-sm font-medium text-gray-400"
+						>Login</span
+					>
+					<form method="post" action="/api/sign-out" class="inline">
+						<button
+							type="submit"
+							class="cursor-pointer rounded-lg bg-red-50 px-4 py-1.5 text-sm font-medium text-red-600 hover:bg-red-100"
+							>Logout</button
+						>
+					</form>
+				{:else}
+					<a
+						href="/login"
+						class="rounded-lg bg-emerald-50 px-4 py-1.5 text-sm font-medium text-gray-900 hover:bg-emerald-400"
+						>Masuk</a
+					>
+				{/if}
 			</div>
 			<button
 				onclick={() => (menuOpen = !menuOpen)}
@@ -128,12 +140,36 @@
 						onclick={() => (menuOpen = false)}
 						class="rounded-lg px-3 py-2 hover:bg-gray-50">Kontak</a
 					>
-					<a
-						href="/login"
-						onclick={() => (menuOpen = false)}
-						class="mt-2 rounded-lg bg-emerald-50 px-3 py-2 text-center font-medium text-gray-900 hover:bg-emerald-400"
-						>Masuk</a
-					>
+					{#if data.user}
+						<a
+							href="/orders"
+							onclick={() => (menuOpen = false)}
+							class="rounded-lg px-3 py-2 hover:bg-gray-50">Pesanan</a
+						>
+						<a
+							href="/account"
+							onclick={() => (menuOpen = false)}
+							class="rounded-lg px-3 py-2 hover:bg-gray-50">Dashboard</a
+						>
+						<span class="rounded-lg bg-gray-100 px-3 py-2 text-center font-medium text-gray-400"
+							>Masuk</span
+						>
+						<form method="post" action="/api/sign-out">
+							<button
+								type="submit"
+								onclick={() => (menuOpen = false)}
+								class="w-full cursor-pointer rounded-lg bg-red-50 px-3 py-2 text-center font-medium text-red-600 hover:bg-red-100"
+								>Keluar</button
+							>
+						</form>
+					{:else}
+						<a
+							href="/login"
+							onclick={() => (menuOpen = false)}
+							class="rounded-lg bg-emerald-50 px-3 py-2 text-center font-medium text-gray-900 hover:bg-emerald-400"
+							>Masuk</a
+						>
+					{/if}
 				</div>
 			</div>
 		{/if}
@@ -145,9 +181,9 @@
 	>
 		<div class="mx-auto max-w-6xl px-4 py-16 text-center text-shadow-black md:py-20">
 			<div
-				class="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-2xl bg-white/15 backdrop-blur-sm"
+				class="mx-auto mb-6 flex h-24 w-24 items-center justify-center overflow-hidden rounded-2xl bg-white/15 backdrop-blur-sm"
 			>
-				<Factory size={40} />
+				<img src="/img/logo.png" alt="CV TapioLeaf" class="h-full w-full object-cover" />
 			</div>
 			<h1 class="mb-4 text-3xl font-bold md:text-5xl">CV TapioLeaf</h1>
 			<p class="mx-auto mb-8 max-w-2xl text-lg text-gray-500">
@@ -526,7 +562,7 @@
 				height="300"
 				frameborder="0"
 				style="border:0; display: block;"
-				src="https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d247.70808375662983!2d111.0502544481527!3d-6.605934473380247!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e0!3m2!1sid!2sid!4v1781227102489!5m2!1sid!2sid"
+				src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d31706.63490499471!2d111.0122342743164!3d-6.605931600000001!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e712b006decfbef%3A0xd7021e3f2a13a76b!2sCV%20Tapioleaf!5e0!3m2!1sid!2sid!4v1781956255160!5m2!1sid!2sid"
 				allowfullscreen
 				loading="lazy"
 				referrerpolicy="no-referrer-when-downgrade"

@@ -50,6 +50,7 @@ export type DashboardData = {
 		id: string; name: string; currentStock: number; minimumStock: number; code: string;
 	}>;
 	categoryDistribution: Array<{ category: string; total: number }>;
+	marginPerProduct: Array<{ name: string; revenue: number; cost: number; margin: number | null }>;
 };
 
 export async function getDashboardData(periodStr: string): Promise<DashboardData> {
@@ -87,6 +88,7 @@ export async function getDashboardData(periodStr: string): Promise<DashboardData
 	const productionTrend = productionTrendResult.status === 'fulfilled' ? productionTrendResult.value : [];
 	const transactions = transactionsResult.status === 'fulfilled' ? transactionsResult.value : [];
 	const categoryDist = categoryResult.status === 'fulfilled' ? categoryResult.value : [];
+	const marginPerProductData = await getMarginPerProduct(range.start, range.end);
 
 	const salesChange = prevSales.total > 0 ? ((sales.total - prevSales.total) / prevSales.total) * 100 : null;
 	const percentage = production.totalKg > 0 ? Math.round((production.totalKg / 4000) * 100) : 0;
@@ -101,6 +103,7 @@ export async function getDashboardData(periodStr: string): Promise<DashboardData
 		recentTransactions: transactions,
 		stockAlerts: criticalProducts,
 		categoryDistribution: categoryDist,
+		marginPerProduct: marginPerProductData,
 	};
 }
 
@@ -252,4 +255,31 @@ async function getMarginSummary(start: Date, end: Date) {
 		return Math.round(((revenue - cost) / revenue) * 100 * 10) / 10;
 	}
 	return null;
+}
+
+async function getMarginPerProduct(start: Date, end: Date) {
+	const result = await db.select({
+		name: products.name,
+		revenue: sql<string>`COALESCE(SUM(${orderItems.quantity}::numeric * ${orderItems.unitPrice}::numeric), 0)`,
+		cost: sql<string>`COALESCE(SUM(${orderItems.quantity}::numeric * ${products.costPrice}::numeric), 0)`,
+	})
+		.from(orderItems)
+		.innerJoin(orders, eq(orders.id, orderItems.orderId))
+		.innerJoin(products, eq(products.id, orderItems.productId))
+		.where(and(eq(orders.status, 'PAID'), gte(orders.createdAt, start), lte(orders.createdAt, end), sql`${products.costPrice} IS NOT NULL`))
+		.groupBy(products.name);
+
+	const mapped = result.map(r => {
+		const rev = Number(r.revenue);
+		const cst = Number(r.cost);
+		return {
+			name: r.name,
+			revenue: rev,
+			cost: cst,
+			margin: rev > 0 ? Math.round(((rev - cst) / rev) * 100 * 10) / 10 : null,
+		};
+	});
+
+	mapped.sort((a, b) => (b.margin ?? -999) - (a.margin ?? -999));
+	return mapped;
 }

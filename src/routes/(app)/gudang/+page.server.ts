@@ -23,23 +23,6 @@ export const load: PageServerLoad = async (event) => {
 };
 
 export const actions: Actions = {
-	adjust: async (event) => {
-		const formData = await event.request.formData();
-		const input = {
-			productId: formData.get('productId')?.toString() ?? '',
-			quantityChange: Number(formData.get('quantityChange')?.toString() ?? '0'),
-			movementType: 'ADJUSTMENT',
-			note: formData.get('note')?.toString() || undefined,
-			reason: 'Penyesuaian dari halaman stok'
-		};
-		try {
-			await stockService.addMovement(input as any, event.locals.user?.id);
-		} catch (e) {
-			return fail(400, { message: e instanceof Error ? e.message : 'Gagal' });
-		}
-		return { success: true, message: 'Stok disesuaikan' };
-	},
-
 	deleteStock: async (event) => {
 		const formData = await event.request.formData();
 		const productId = formData.get('productId')?.toString() ?? '';

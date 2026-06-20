@@ -7,7 +7,8 @@ export const load: PageServerLoad = async (event) => {
 	const todaySummary = await productionService.getTodaySummary();
 	const allProducts = await productService.listProducts({ search: '', status: 'all', page: 1, limit: 1000, sort: 'name', order: 'asc' } as any);
 	const query = Object.fromEntries(event.url.searchParams);
-	return { todaySummary, products: allProducts.items, query };
+	const todayItems = await productionService.listProductions({ page: 1, limit: 100, sort: 'productionDate', order: 'desc' } as any);
+	return { todaySummary, products: allProducts.items, query, todayItems: todayItems.items };
 };
 
 export const actions: Actions = {
