@@ -77,16 +77,16 @@
 </script>
 
 <div class="space-y-6">
-	<div class="flex items-center justify-between">
+	<div class="flex flex-wrap items-center gap-2">
 		<div class="flex items-center gap-3">
 			<Tags size={24} class="text-emerald-600" />
-			<h1 class="text-2xl font-bold">Kategori Produk</h1>
+			<h1 class="text-xl font-bold md:text-2xl">Kategori Produk</h1>
 		</div>
-		<Button onclick={openCreate}><Plus size={16} class="mr-1" /> Tambah Kategori</Button>
+		<Button onclick={openCreate} size="sm" class="md:default"><Plus size={16} class="mr-1" /> Tambah Kategori</Button>
 	</div>
 
-	<div class="flex gap-4">
-		<div class="relative flex-1">
+	<div class="flex flex-wrap gap-2 md:gap-4">
+		<div class="relative min-w-[200px] flex-1">
 			<Search size={16} class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
 			<input
 				type="text"

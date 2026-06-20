@@ -177,28 +177,28 @@
 
 	<!-- Hero -->
 	<section
-		class="via-emerald-60 from-white-700 flex min-h-[calc(100vh-4rem)] flex-col items-center justify-center bg-white to-white px-4 pt-16 text-center"
+		class="flex min-h-[calc(100vh-4rem)] flex-col items-center justify-center bg-white px-4 pt-16 text-center"
 	>
-		<div class="mx-auto max-w-6xl px-4 py-16 text-center text-shadow-black md:py-20">
+		<div class="mx-auto max-w-6xl px-4 py-12 md:py-20">
 			<div
-				class="mx-auto mb-6 flex h-24 w-24 items-center justify-center overflow-hidden rounded-2xl bg-white/15 backdrop-blur-sm"
+				class="mx-auto mb-6 flex h-20 w-20 md:h-24 md:w-24 items-center justify-center overflow-hidden rounded-2xl bg-white/80"
 			>
 				<img src="/img/logo.png" alt="CV TapioLeaf" class="h-full w-full object-cover" />
 			</div>
-			<h1 class="mb-4 text-3xl font-bold md:text-5xl">CV TapioLeaf</h1>
-			<p class="mx-auto mb-8 max-w-2xl text-lg text-gray-500">
+			<h1 class="mb-3 text-3xl font-bold md:text-5xl">CV TapioLeaf</h1>
+			<p class="mx-auto mb-8 max-w-2xl text-base text-gray-500 md:text-lg">
 				Produsen tepung tapioka berkualitas tinggi. Mengolah singkong pilihan menjadi tepung tapioka
 				premium untuk kebutuhan industri dan rumah tangga.
 			</p>
-			<div class="flex items-center justify-center gap-4">
+			<div class="flex flex-col items-center gap-3 sm:flex-row sm:justify-center sm:gap-4">
 				<a
 					href="#products"
-					class="rounded-xl bg-white px-6 py-3 font-semibold shadow-lg text-shadow-black hover:bg-emerald-500"
+					class="w-full sm:w-auto rounded-xl bg-emerald-600 px-8 py-3 font-semibold text-white shadow-lg transition-all hover:bg-emerald-700 active:scale-95"
 					>Lihat Produk</a
 				>
 				<a
 					href="#about"
-					class="rounded-xl border border-emerald-400 px-6 py-3 font-semibold text-shadow-black hover:bg-emerald-500"
+					class="w-full sm:w-auto rounded-xl border-2 border-emerald-600 px-8 py-3 font-semibold text-emerald-700 transition-all hover:bg-emerald-50 active:scale-95"
 					>Tentang Kami</a
 				>
 			</div>
@@ -206,7 +206,7 @@
 	</section>
 
 	<!-- Products -->
-	<section id="products" class="px-4 py-16">
+	<section id="products" class="px-4 py-12 md:py-12 md:py-16">
 		<div class="mx-auto max-w-6xl">
 			<div class="mb-8 text-center">
 				<h2 class="mb-2 text-xl font-bold md:text-2xl">Produk Kami</h2>
@@ -235,7 +235,7 @@
 				<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
 					{#each filtered as item}
 						<div
-							class="group rounded-xl border bg-white p-4 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md"
+							class="group rounded-xl border bg-white p-4 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md active:scale-[0.98]"
 						>
 							{#if item.imageUrl}
 								<div class="-mx-4 -mt-4 mb-3 overflow-hidden rounded-t-xl bg-gray-50">
@@ -289,7 +289,7 @@
 	</section>
 
 	<!-- About -->
-	<section id="about" class="bg-gray-50 px-4 py-16">
+	<section id="about" class="bg-gray-50 px-4 py-12 md:py-16">
 		<div class="mx-auto max-w-4xl">
 			<h2 class="mb-6 text-center text-xl font-bold md:mb-8 md:text-2xl">Tentang CV TapioLeaf</h2>
 			<div class="grid gap-6 md:grid-cols-2 md:gap-8">
@@ -327,6 +327,7 @@
 				</div>
 				<div class="rounded-xl border bg-white p-6 shadow-sm">
 					<h3 class="mb-4 font-semibold">Biodata Perusahaan</h3>
+					<div class="overflow-x-auto">
 					<table class="w-full text-sm">
 						<tbody>
 							<tr class="border-b"
@@ -361,13 +362,14 @@
 							>
 						</tbody>
 					</table>
+					</div>
 				</div>
 			</div>
 		</div>
 	</section>
 
 	<!-- Visi & Misi -->
-	<section id="vision" class="border-t bg-white px-4 py-16">
+	<section id="vision" class="border-t bg-white px-4 py-12 md:py-16">
 		<div class="mx-auto max-w-4xl text-center">
 			<h2 class="mb-8 text-2xl font-bold">Visi CV TapioLeaf</h2>
 			<div class="mx-auto mb-8 max-w-2xl rounded-xl border bg-emerald-50 p-6">
@@ -419,7 +421,7 @@
 	</section>
 
 	<!-- Proses Produksi -->
-	<section id="process" class="bg-gray-50 px-4 py-16">
+	<section id="process" class="bg-gray-50 px-4 py-12 md:py-16">
 		<div class="mx-auto max-w-4xl">
 			<h2 class="mb-6 text-center text-xl font-bold md:mb-8 md:text-2xl">Proses Produksi</h2>
 			<div class="grid gap-4 md:grid-cols-2 md:gap-6">
@@ -533,7 +535,7 @@
 	</section>
 
 	<!-- Contact -->
-	<section id="contact" class="px-4 py-16">
+	<section id="contact" class="px-4 py-12 md:py-16">
 		<div class="mx-auto max-w-4xl">
 			<h2 class="mb-6 text-center text-xl font-bold md:mb-8 md:text-2xl">Hubungi Kami</h2>
 			<div class="grid gap-4 md:grid-cols-3 md:gap-6">

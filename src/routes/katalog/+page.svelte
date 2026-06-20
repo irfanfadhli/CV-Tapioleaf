@@ -73,7 +73,7 @@
 		{:else}
 			<div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
 				{#each data.items as item}
-					<div class="group rounded-xl border bg-white p-5 shadow-sm transition-all hover:shadow-md hover:-translate-y-0.5">
+					<div class="group rounded-xl border bg-white p-5 shadow-sm transition-all hover:shadow-md hover:-translate-y-0.5 active:scale-[0.98]">
 						<div class="mb-3 flex items-start justify-between">
 							<div class="flex h-12 w-12 items-center justify-center rounded-lg bg-emerald-50 text-lg font-bold text-emerald-700">
 								{item.name.charAt(0)}

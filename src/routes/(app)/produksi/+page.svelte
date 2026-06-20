@@ -16,12 +16,12 @@
 </script>
 
 <div class="space-y-6">
-	<div class="flex items-center justify-between">
+	<div class="flex flex-wrap items-center gap-2">
 		<div class="flex items-center gap-3">
 			<Factory size={24} class="text-emerald-600" />
-			<h1 class="text-2xl font-bold">Produksi Harian</h1>
+			<h1 class="text-xl font-bold md:text-2xl">Produksi Harian</h1>
 		</div>
-		<Button onclick={() => showModal = true}><Plus size={16} class="mr-1" /> Tambah Produksi</Button>
+		<Button onclick={() => showModal = true} size="sm" class="md:default"><Plus size={16} class="mr-1" /> Tambah Produksi</Button>
 	</div>
 
 	<div class="rounded-lg border bg-card">

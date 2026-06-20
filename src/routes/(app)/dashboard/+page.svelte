@@ -41,9 +41,9 @@
 </script>
 
 <div class="space-y-4">
-	<div class="flex items-center justify-between">
+	<div class="flex flex-wrap items-center gap-2">
 		<div>
-			<h1 class="text-2xl font-bold">Dashboard</h1>
+			<h1 class="text-xl font-bold md:text-2xl">Dashboard</h1>
 			<p class="text-sm text-muted-foreground">Selamat datang, {data.user?.name}!</p>
 		</div>
 		<div class="flex items-center gap-2">

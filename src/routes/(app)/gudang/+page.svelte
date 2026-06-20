@@ -70,15 +70,15 @@
 </script>
 
 <div class="space-y-6">
-	<div class="flex items-center justify-between">
-		<h1 class="text-2xl font-bold">Manajemen Stok Gudang</h1>
+	<div class="flex flex-wrap items-center gap-2">
+		<h1 class="text-xl font-bold md:text-2xl">Manajemen Stok Gudang</h1>
 		<div class="flex gap-2">
-			<Button onclick={() => openModal('in')}><Plus size={16} class="mr-1" /> Stok Masuk</Button>
-			<Button variant="outline" onclick={() => openModal('out')}>Stok Keluar</Button>
+			<Button onclick={() => openModal('in')} size="sm" class="md:default"><Plus size={16} class="mr-1" /> Stok Masuk</Button>
+			<Button variant="outline" onclick={() => openModal('out')} size="sm" class="md:default">Stok Keluar</Button>
 		</div>
 	</div>
 
-	<div class="flex gap-4">
+	<div class="flex flex-wrap gap-2 md:gap-4">
 		<div class="relative flex-1">
 			<Search size={16} class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
 			<input type="text" bind:this={searchRef} placeholder="Cari produk..." class="w-full rounded-lg border bg-background py-2 pl-10 pr-4 text-sm outline-none focus:ring-2 focus:ring-ring" bind:value={searchQuery} oninput={handleSearch} />

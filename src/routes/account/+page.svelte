@@ -82,7 +82,7 @@
 						{#each data.orders as order}
 							<a
 								href="/orders/{order.id}"
-								class="flex items-center justify-between rounded-lg border p-3 transition-colors hover:bg-gray-50"
+								class="flex items-center justify-between rounded-lg border p-3 transition-colors hover:bg-gray-50 active:scale-[0.98]"
 							>
 								<div>
 									<p class="text-sm font-medium">
