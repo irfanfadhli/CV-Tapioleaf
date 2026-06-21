@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
+	import { FileDown } from '@lucide/svelte';
+	import { Button } from '$lib/components/ui/button';
 	import KPICard from '$lib/components/dashboard/KPICard.svelte';
 	import MarginChart from '$lib/components/dashboard/MarginChart.svelte';
 	import CategoryChart from '$lib/components/dashboard/CategoryChart.svelte';
@@ -48,6 +50,7 @@
 		</div>
 		<div class="flex items-center gap-2">
 			<PeriodFilter active={currentPeriod} onChange={changePeriod} />
+			<a href={`/api/dashboard/report?period=${currentPeriod}`} target="_blank"><Button variant="outline" size="sm"><FileDown size={14} class="mr-1" /> PDF</Button></a>
 		</div>
 	</div>
 

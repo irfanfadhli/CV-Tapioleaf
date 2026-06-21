@@ -2,7 +2,7 @@
 	import { page } from '$app/stores';
 	import { Button } from '$lib/components/ui/button';
 	import { Separator } from '$lib/components/ui/separator';
-	import { LogOut, LayoutDashboard, Package, Warehouse, Factory, Tags, Menu, X } from '@lucide/svelte';
+	import { LogOut, LayoutDashboard, Package, Warehouse, Factory, Tags, Menu, X, Wheat, Building2 } from '@lucide/svelte';
 	import { goto } from '$app/navigation';
 	import { Toaster } from 'svelte-sonner';
 
@@ -53,17 +53,26 @@
 			<a href="/dashboard" onclick={closeSidebar} class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors hover:bg-accent hover:text-accent-foreground" class:bg-accent={$page.url.pathname === '/dashboard'}>
 				<LayoutDashboard size={18} /> Dashboard
 			</a>
+			<div class="px-3 pt-2 pb-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Bahan Baku</div>
+			<a href="/suppliers" onclick={closeSidebar} class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors hover:bg-accent hover:text-accent-foreground" class:bg-accent={$page.url.pathname === '/suppliers'}>
+				<Building2 size={18} /> Supplier
+			</a>
+			<a href="/cassava" onclick={closeSidebar} class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors hover:bg-accent hover:text-accent-foreground" class:bg-accent={$page.url.pathname === '/cassava'}>
+				<Wheat size={18} /> Penerimaan Singkong
+			</a>
+			<div class="px-3 pt-2 pb-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Produksi</div>
+			<a href="/produksi" onclick={closeSidebar} class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors hover:bg-accent hover:text-accent-foreground" class:bg-accent={$page.url.pathname === '/produksi' || $page.url.pathname === '/produksi/riwayat'}>
+				<Factory size={18} /> Produksi Harian
+			</a>
+			<div class="px-3 pt-2 pb-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Stok & Produk</div>
+			<a href="/gudang" onclick={closeSidebar} class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors hover:bg-accent hover:text-accent-foreground" class:bg-accent={$page.url.pathname === '/gudang' || $page.url.pathname === '/gudang/riwayat'}>
+				<Warehouse size={18} /> Gudang
+			</a>
 			<a href="/kategori" onclick={closeSidebar} class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors hover:bg-accent hover:text-accent-foreground" class:bg-accent={$page.url.pathname === '/kategori'}>
 				<Tags size={18} /> Kategori Produk
 			</a>
 			<a href="/produk" onclick={closeSidebar} class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors hover:bg-accent hover:text-accent-foreground" class:bg-accent={$page.url.pathname === '/produk'}>
 				<Package size={18} /> Produk
-			</a>
-			<a href="/gudang" onclick={closeSidebar} class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors hover:bg-accent hover:text-accent-foreground" class:bg-accent={$page.url.pathname === '/gudang' || $page.url.pathname === '/gudang/riwayat'}>
-				<Warehouse size={18} /> Gudang
-			</a>
-			<a href="/produksi" onclick={closeSidebar} class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors hover:bg-accent hover:text-accent-foreground" class:bg-accent={$page.url.pathname === '/produksi' || $page.url.pathname === '/produksi/riwayat'}>
-				<Factory size={18} /> Produksi
 			</a>
 		</nav>
 		<Separator class="my-4" />

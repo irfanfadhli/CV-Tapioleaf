@@ -24,6 +24,17 @@
 		<Button onclick={() => showModal = true} size="sm" class="md:default"><Plus size={16} class="mr-1" /> Tambah Produksi</Button>
 	</div>
 
+	<!-- Cassava Stock -->
+	<div class="rounded-xl border bg-emerald-50 p-4 shadow-sm">
+		<div class="flex items-center justify-between">
+			<div>
+				<p class="text-xs font-medium text-emerald-700">Stok Singkong Tersedia</p>
+				<p class="text-2xl font-bold text-emerald-800">{data.cassavaStock.toLocaleString('id-ID')} kg</p>
+			</div>
+			<p class="text-xs text-emerald-600">Bahan baku untuk produksi</p>
+		</div>
+	</div>
+
 	<div class="rounded-lg border bg-card">
 		<div class="p-6">
 			<div class="mb-4 flex items-center justify-between">

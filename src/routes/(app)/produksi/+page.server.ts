@@ -2,13 +2,19 @@ import { fail } from '@sveltejs/kit';
 import type { PageServerLoad, Actions } from './$types';
 import * as productionService from '$lib/server/production/service';
 import * as productService from '$lib/server/product/service';
+import { db } from '$lib/server/db';
+import { cassavaReceipts } from '$lib/server/db/schema/cassava';
+import { sql } from 'drizzle-orm';
 
 export const load: PageServerLoad = async (event) => {
 	const todaySummary = await productionService.getTodaySummary();
 	const allProducts = await productService.listProducts({ search: '', status: 'all', page: 1, limit: 1000, sort: 'name', order: 'asc' } as any);
 	const query = Object.fromEntries(event.url.searchParams);
 	const todayItems = await productionService.listProductions({ page: 1, limit: 100, sort: 'productionDate', order: 'desc' } as any);
-	return { todaySummary, products: allProducts.items, query, todayItems: todayItems.items };
+
+	const [cassavaResult] = await db.select({ total: sql<string>`COALESCE(SUM(final_weight::numeric), 0)` }).from(cassavaReceipts).limit(1);
+
+	return { todaySummary, products: allProducts.items, query, todayItems: todayItems.items, cassavaStock: Number(cassavaResult?.total || 0) };
 };
 
 export const actions: Actions = {

@@ -16,6 +16,8 @@ const routeMap: Record<string, RouteConfig> = {
 	'/kategori': { protected: true, roles: ['owner', 'admin_penjualan'] },
 	'/gudang': { protected: true, roles: ['owner', 'petugas_gudang'] },
 	'/produksi': { protected: true, roles: ['owner', 'bagian_produksi'] },
+	'/suppliers': { protected: true, roles: ['owner', 'petugas_gudang'] },
+	'/cassava': { protected: true, roles: ['owner', 'petugas_gudang'] },
 	'/403': { protected: false }
 };
 

@@ -12,3 +12,5 @@ export * from './schema/product';
 export * from './schema/stock';
 export * from './schema/production';
 export * from './schema/order';
+export * from './schema/supplier';
+export * from './schema/cassava';
