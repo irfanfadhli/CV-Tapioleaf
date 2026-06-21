@@ -16,6 +16,7 @@ export async function createProduction(input: CreateProductionInput, userId?: st
 	const [entry] = await db.insert(productionEntries).values({
 		productId: data.productId,
 		quantityKg: String(data.quantityKg),
+		cassavaUsedKg: data.cassavaUsedKg ? String(data.cassavaUsedKg) : null,
 		productionDate: date,
 		notes: data.notes,
 		isLateEntry: isLate,

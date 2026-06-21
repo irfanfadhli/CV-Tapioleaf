@@ -2,19 +2,27 @@ import { error, fail } from '@sveltejs/kit';
 import type { PageServerLoad, Actions } from './$types';
 import * as stockService from '$lib/server/stock/service';
 import * as productService from '$lib/server/product/service';
+import { db } from '$lib/server/db';
+import { cassavaReceipts } from '$lib/server/db/schema/cassava';
+import { productionEntries } from '$lib/server/db/schema/production';
+import { sql } from 'drizzle-orm';
 
 export const load: PageServerLoad = async (event) => {
 	try {
 		const query = Object.fromEntries(event.url.searchParams) as Record<string, string>;
 		const result = await stockService.getAllCurrentStock(query as any);
 		const allProducts = await productService.listProducts({ search: '', status: 'all', page: 1, limit: 50, sort: 'name', order: 'asc' } as any);
+		const [cassavaIn] = await db.select({ total: sql<string>`COALESCE(SUM(final_weight::numeric), 0)` }).from(cassavaReceipts).limit(1);
+		const [cassavaOut] = await db.select({ total: sql<string>`COALESCE(SUM(cassava_used_kg::numeric), 0)` }).from(productionEntries).limit(1);
+		const cassavaStock = Number(cassavaIn?.total || 0) - Number(cassavaOut?.total || 0);
 		return {
 			items: result.items,
 			pagination: result.pagination,
 			products: allProducts.items,
 			query,
 			sort: query.sort || 'name',
-			order: query.order || 'asc'
+			order: query.order || 'asc',
+			cassavaStock
 		};
 	} catch (e) {
 		console.error('Gudang load error:', e);

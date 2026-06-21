@@ -2,7 +2,7 @@
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
 	import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '$lib/components/ui/dialog';
-	import { Plus, Loader2, CheckCircle2, Factory } from '@lucide/svelte';
+	import { Plus, Loader2, CheckCircle2, Factory, Trash2 } from '@lucide/svelte';
 	import { toast } from 'svelte-sonner';
 	import { enhance } from '$app/forms';
 
@@ -76,6 +76,7 @@
 								<th class="px-4 py-3 text-right font-medium text-muted-foreground">Kg</th>
 								<th class="px-4 py-3 text-center font-medium text-muted-foreground">Status</th>
 								<th class="px-4 py-3 text-left font-medium text-muted-foreground">Keterangan</th>
+								<th class="px-4 py-3 text-center font-medium text-muted-foreground">Aksi</th>
 							</tr>
 						</thead>
 						<tbody>
@@ -94,9 +95,17 @@
 										{/if}
 									</td>
 									<td class="px-4 py-3 text-xs text-muted-foreground">{item.notes || '—'}</td>
+									<td class="px-4 py-3 text-center">
+										{#if item.status === 'DRAFT'}
+											<form method="post" action="?/delete" onsubmit={(e) => { if (!confirm('Hapus entry produksi ini?')) e.preventDefault(); }}>
+												<input type="hidden" name="id" value={item.id} />
+												<Button variant="ghost" size="sm" type="submit" class="text-red-500 hover:text-red-700"><Trash2 size={14} /></Button>
+											</form>
+										{/if}
+									</td>
 								</tr>
 							{:else}
-								<tr><td colspan="4" class="px-4 py-8 text-center text-sm text-muted-foreground">Belum ada produksi</td></tr>
+								<tr><td colspan="5" class="px-4 py-8 text-center text-sm text-muted-foreground">Belum ada produksi</td></tr>
 							{/each}
 						</tbody>
 					</table>
@@ -131,6 +140,13 @@
 				<div class="grid gap-2">
 					<label for="prod-quantityKg" class="text-sm font-medium">Quantity (kg) *</label>
 					<Input id="prod-quantityKg" name="quantityKg" type="number" step="0.1" required placeholder="Contoh: 2500" />
+				</div>
+				<div class="rounded-lg border bg-emerald-50 p-3 text-sm">
+					<p class="font-medium text-emerald-800">Stok Singkong: {Math.max(0, data.cassavaStock).toLocaleString('id-ID')} kg</p>
+				</div>
+				<div class="grid gap-2">
+					<label for="prod-cassava" class="text-sm font-medium">Singkong Digunakan (kg)</label>
+					<Input id="prod-cassava" name="cassavaUsedKg" type="number" step="0.1" placeholder="Opsional" />
 				</div>
 				<div class="grid gap-2">
 					<label for="prod-productionDate" class="text-sm font-medium">Tanggal</label>

@@ -5,6 +5,7 @@ export const productionEntries = pgTable('production_entries', {
 	id: text('id').$defaultFn(() => crypto.randomUUID()).primaryKey(),
 	productId: text('product_id').notNull().references(() => products.id),
 	quantityKg: decimal('quantity_kg', { precision: 10, scale: 2 }).notNull(),
+	cassavaUsedKg: decimal('cassava_used_kg', { precision: 10, scale: 2 }),
 	productionDate: timestamp('production_date', { withTimezone: true }).defaultNow().notNull(),
 	status: text('status', { enum: ['DRAFT', 'CONFIRMED'] }).default('DRAFT').notNull(),
 	notes: text('notes'),

@@ -35,9 +35,7 @@
 	let movementDate = $state(new Date().toISOString().slice(0, 10));
 	let note = $state('');
 	let reason = $state('');
-	let editTarget = $state<{ id: string; name: string; currentStock: number } | null>(null);
-	let editQty = $state('');
-	let editNote = $state('');
+
 	let deleteTarget = $state<{ id: string; name: string } | null>(null);
 	let submitting = $state(false);
 
@@ -61,15 +59,23 @@
 		goto(url.toString(), { replaceState: true });
 	}
 
-	function openEdit(item: any) {
-		editTarget = { id: item.id, name: item.name, currentStock: item.currentStock };
-		editQty = '';
-		editNote = '';
-	}
-
 </script>
 
 <div class="space-y-6">
+	<!-- Stock Summary -->
+	<div class="grid gap-4 sm:grid-cols-2">
+		<div class="rounded-xl border bg-emerald-50 p-4 shadow-sm">
+			<p class="text-xs font-medium text-emerald-700">Stok Singkong (Bahan Baku)</p>
+			<p class="text-2xl font-bold text-emerald-800">{data.cassavaStock.toLocaleString('id-ID')} kg</p>
+			<p class="text-xs text-emerald-600">Dari penerimaan singkong</p>
+		</div>
+		<div class="rounded-xl border bg-blue-50 p-4 shadow-sm">
+			<p class="text-xs font-medium text-blue-700">Stok Produk Jadi</p>
+			<p class="text-2xl font-bold text-blue-800">{data.items.length} SKU</p>
+			<p class="text-xs text-blue-600">{data.items.filter((i: any) => i.stockStatus === 'CRITICAL').length} kritis</p>
+		</div>
+	</div>
+
 	<div class="flex flex-wrap items-center gap-2">
 		<h1 class="text-xl font-bold md:text-2xl">Manajemen Stok Gudang</h1>
 		<div class="flex gap-2">
@@ -130,7 +136,6 @@
 							</td>
 							<td class="px-4 py-3">
 								<div class="flex items-center justify-center gap-1">
-									<button onclick={() => openEdit(item)} class="inline-flex items-center justify-center rounded-md p-1 text-muted-foreground hover:text-foreground"><Pencil size={14} /></button>
 									<button onclick={() => deleteTarget = { id: item.id, name: item.name }} class="inline-flex items-center justify-center rounded-md p-1 text-muted-foreground hover:text-destructive"><Trash2 size={14} /></button>
 								</div>
 							</td>
@@ -201,39 +206,6 @@
 		</form>
 	</DialogContent>
 </Dialog>
-
-<Dialog open={editTarget !== null} onOpenChange={(o) => { if (!o) editTarget = null; }}>
-	<DialogContent class="sm:max-w-sm">
-		<DialogHeader>
-			<DialogTitle>Adjust Stok: {editTarget?.name}</DialogTitle>
-			<DialogDescription>Stok saat ini: {editTarget?.currentStock}. Masukkan perubahan (+/-).</DialogDescription>
-		</DialogHeader>
-		<form method="post" action="?/adjust" use:enhance={() => {
-			return async ({ result, update }) => {
-				update();
-				if (result.type === 'success') { toast.success('Stok disesuaikan'); editTarget = null; }
-				else if (result.type === 'failure') { const msg = (result.data as any)?.message; if (msg) toast.error(msg); }
-			};
-		}}>
-			<input type="hidden" name="productId" value={editTarget?.id || ''} />
-			<div class="grid gap-4 py-4">
-				<div class="grid gap-2">
-					<label for="adj-qty" class="text-sm font-medium">Perubahan Stok *</label>
-					<input id="adj-qty" name="quantityChange" type="number" step="0.01" required placeholder="+ untuk tambah, - untuk kurangi" bind:value={editQty} class="rounded-lg border bg-background px-3 py-2 text-sm" />
-				</div>
-				<div class="grid gap-2">
-					<label for="adj-note" class="text-sm font-medium">Keterangan</label>
-					<textarea id="adj-note" name="note" class="rounded-lg border bg-background px-3 py-2 text-sm" rows="2" bind:value={editNote}></textarea>
-				</div>
-			</div>
-			<DialogFooter class="gap-2">
-				<Button type="button" variant="outline" onclick={() => editTarget = null}>Batal</Button>
-				<Button type="submit">Simpan</Button>
-			</DialogFooter>
-		</form>
-	</DialogContent>
-</Dialog>
-
 <Dialog open={deleteTarget !== null} onOpenChange={(o) => { if (!o) deleteTarget = null; }}>
 	<DialogContent class="sm:max-w-sm">
 		<DialogHeader>
@@ -242,7 +214,12 @@
 		</DialogHeader>
 		<DialogFooter class="gap-2">
 			<Button variant="outline" onclick={() => deleteTarget = null}>Batal</Button>
-			<form method="post" action="?/deleteStock">
+			<form method="post" action="?/deleteStock" use:enhance={() => {
+				return async ({ result }) => {
+					if (result.type === 'success') { deleteTarget = null; window.location.reload(); }
+					else if (result.type === 'failure') { const msg = (result.data as any)?.message; if (msg) toast.error(msg); }
+				};
+			}}>
 				<input type="hidden" name="productId" value={deleteTarget?.id || ''} />
 				<Button variant="destructive" type="submit">Hapus</Button>
 			</form>
