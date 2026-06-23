@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 export const createProductSchema = z.object({
 	name: z.string().min(2, 'Nama minimal 2 karakter').max(100, 'Nama maksimal 100 karakter').trim(),
-	code: z.preprocess((v) => (v === '' ? undefined : v), z.string().regex(/^[A-Za-z0-9\-]+$/, 'Kode hanya huruf, angka, dan tanda hubung').min(3).max(20).optional()),
+	code: z.preprocess((v) => (v === '' ? undefined : v), z.string().regex(/^[A-Za-z0-9\-]+$/, 'Kode hanya huruf, angka, dan tanda hubung').min(3, 'Kode minimal 3 karakter').max(20).optional()),
 	categoryId: z.string().min(1, 'Kategori wajib dipilih'),
 	price: z.coerce.number().positive('Harga harus lebih dari 0').max(100_000_000, 'Harga terlalu besar'),
 	costPrice: z.coerce.number().min(0).optional(),

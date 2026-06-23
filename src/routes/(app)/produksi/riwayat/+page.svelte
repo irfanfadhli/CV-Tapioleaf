@@ -69,34 +69,50 @@
 						<th class="px-4 py-3 text-left font-medium text-muted-foreground">Produk</th>
 						<th class="px-4 py-3 text-right font-medium text-muted-foreground">
 							<button onclick={() => toggleSort('quantityKg')} class="inline-flex items-center gap-1 hover:text-foreground">
-								Kg
+								Tepung
 								{#if data.sort === 'quantityKg' && data.order === 'asc'}<ArrowUp size={14} />{:else if data.sort === 'quantityKg' && data.order === 'desc'}<ArrowDown size={14} />{:else}<ArrowUpDown size={14} />{/if}
 							</button>
 						</th>
+						<th class="px-4 py-3 text-right font-medium text-muted-foreground">Singkong</th>
+						<th class="px-4 py-3 text-right font-medium text-muted-foreground">Yield</th>
 						<th class="px-4 py-3 text-center font-medium text-muted-foreground">Status</th>
-						<th class="px-4 py-3 text-left font-medium text-muted-foreground">Keterangan</th>
-					</tr>
-				</thead>
-				<tbody>
-					{#each data.items as item}
-						<tr class="border-t transition-colors hover:bg-muted/30">
-							<td class="px-4 py-3 text-xs text-muted-foreground">{new Date(item.productionDate).toLocaleDateString('id-ID')}</td>
-							<td class="px-4 py-3">
-								<div class="font-medium">{item.productName}</div>
-								<div class="text-xs text-muted-foreground">{item.productCode}</div>
-							</td>
-							<td class="px-4 py-3 text-right font-medium">{item.quantityKg.toLocaleString('id-ID')}</td>
-							<td class="px-4 py-3 text-center">
-								{#if item.status === 'CONFIRMED'}
-									<span class="inline-flex items-center gap-1 rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700"><CheckCircle2 size={12} /> CONFIRMED</span>
-								{:else}
-									<span class="inline-flex items-center gap-1 rounded-full bg-yellow-100 px-2 py-0.5 text-xs font-medium text-yellow-700">DRAFT</span>
-								{/if}
-							</td>
-							<td class="px-4 py-3 text-xs text-muted-foreground">{item.notes || '—'}</td>
+							<th class="px-4 py-3 text-left font-medium text-muted-foreground">Keterangan</th>
+							<th class="px-4 py-3 text-center font-medium text-muted-foreground">Aksi</th>
 						</tr>
-					{:else}
-						<tr><td colspan="5" class="px-4 py-8 text-center text-sm text-muted-foreground">Belum ada produksi</td></tr>
+					</thead>
+					<tbody>
+						{#each data.items as item}
+							<tr class="border-t transition-colors hover:bg-muted/30">
+								<td class="px-4 py-3 text-xs text-muted-foreground">{new Date(item.productionDate).toLocaleDateString('id-ID')}</td>
+								<td class="px-4 py-3">
+									<div class="font-medium">{item.productName}</div>
+									<div class="text-xs text-muted-foreground">{item.productCode}</div>
+								</td>
+								<td class="px-4 py-3 text-right font-medium">{item.quantityKg.toLocaleString('id-ID')}</td>
+								<td class="px-4 py-3 text-right">{item.cassavaUsedKg?.toLocaleString('id-ID') || '—'}</td>
+								<td class="px-4 py-3 text-right text-xs text-muted-foreground">{item.yieldPercentage ? `${item.yieldPercentage}%` : '—'}</td>
+								<td class="px-4 py-3 text-center">
+									{#if item.status === 'CONFIRMED'}
+										<span class="inline-flex items-center gap-1 rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700"><CheckCircle2 size={12} /> CONFIRMED</span>
+									{:else}
+										<span class="inline-flex items-center gap-1 rounded-full bg-yellow-100 px-2 py-0.5 text-xs font-medium text-yellow-700">DRAFT</span>
+									{/if}
+								</td>
+								<td class="px-4 py-3 text-xs text-muted-foreground">{item.notes || '—'}</td>
+								<td class="px-4 py-3 text-center">
+									<form method="post" action="?/delete" use:enhance={() => {
+										return async ({ result }) => {
+											if (result.type === 'success') { window.location.reload(); }
+											else if (result.type === 'failure') { const msg = (result.data as any)?.message; if (msg) toast.error(msg); }
+										};
+									}} onsubmit={(e) => { if (!confirm('Hapus entry produksi ini?')) e.preventDefault(); }}>
+										<input type="hidden" name="id" value={item.id} />
+										<button type="submit" class="inline-flex items-center justify-center rounded-md p-1 text-red-500 hover:text-red-700"><Trash2 size={14} /></button>
+									</form>
+								</td>
+							</tr>
+						{:else}
+							<tr><td colspan="8" class="px-4 py-8 text-center text-sm text-muted-foreground">Belum ada produksi</td></tr>
 					{/each}
 				</tbody>
 			</table>

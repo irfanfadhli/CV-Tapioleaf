@@ -1,4 +1,5 @@
-import type { PageServerLoad } from './$types';
+import { fail } from '@sveltejs/kit';
+import type { PageServerLoad, Actions } from './$types';
 import * as productionService from '$lib/server/production/service';
 
 export const load: PageServerLoad = async (event) => {
@@ -11,4 +12,17 @@ export const load: PageServerLoad = async (event) => {
 		sort: query.sort || 'productionDate',
 		order: query.order || 'desc'
 	};
+};
+
+export const actions: Actions = {
+	delete: async (event) => {
+		const formData = await event.request.formData();
+		const id = formData.get('id')?.toString() ?? '';
+		try {
+			await productionService.deleteProduction(id);
+		} catch (e) {
+			return fail(400, { message: e instanceof Error ? e.message : 'Gagal menghapus' });
+		}
+		return { success: true, message: 'Produksi dihapus' };
+	}
 };

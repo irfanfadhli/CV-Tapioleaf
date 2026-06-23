@@ -1,7 +1,8 @@
-import { and, eq, desc, isNull, sql, gte, lte } from 'drizzle-orm';
+import { and, eq, ne, desc, isNull, sql, gte, lte } from 'drizzle-orm';
 import { db } from '../db';
 import { cassavaReceipts } from '../db/schema/cassava';
 import { suppliers } from '../db/schema/supplier';
+import { productionEntries } from '../db/schema/production';
 
 export async function createReceipt(input: {
 	receiptDate: string; supplierId: string; vehicleNumber: string;
@@ -115,6 +116,20 @@ export async function updateReceipt(id: string, input: {
 }
 
 export async function deleteReceipt(id: string) {
+	const [receipt] = await db.select().from(cassavaReceipts).where(eq(cassavaReceipts.id, id)).limit(1);
+	if (!receipt) return;
+	const receiptFinal = Number(receipt.finalWeight);
+
+	const [usedResult] = await db.select({ total: sql<string>`COALESCE(SUM(cassava_used_kg::numeric), 0)` }).from(productionEntries).limit(1);
+	const totalUsed = Number(usedResult?.total || 0);
+
+	const [remainingResult] = await db.select({ total: sql<string>`COALESCE(SUM(final_weight::numeric), 0)` }).from(cassavaReceipts).where(ne(cassavaReceipts.id, id)).limit(1);
+	const remainingFinal = Number(remainingResult?.total || 0);
+
+	if (remainingFinal < totalUsed) {
+		throw new Error('Tidak bisa menghapus penerimaan ini karena sudah digunakan dalam produksi');
+	}
+
 	await db.delete(cassavaReceipts).where(eq(cassavaReceipts.id, id));
 }
 

@@ -15,7 +15,7 @@ export const load: PageServerLoad = async (event) => {
 
 	const [cassavaIn] = await db.select({ total: sql<string>`COALESCE(SUM(final_weight::numeric), 0)` }).from(cassavaReceipts).limit(1);
 	const [cassavaOut] = await db.select({ total: sql<string>`COALESCE(SUM(cassava_used_kg::numeric), 0)` }).from(productionEntries).limit(1);
-	const cassavaStock = Number(cassavaIn?.total || 0) - Number(cassavaOut?.total || 0);
+	const cassavaStock = Math.max(0, Number(cassavaIn?.total || 0) - Number(cassavaOut?.total || 0));
 
 	return { todaySummary, products: allProducts.items, query, todayItems: todayItems.items, cassavaStock };
 };
@@ -26,7 +26,8 @@ export const actions: Actions = {
 		const input = {
 			productId: formData.get('productId')?.toString() ?? '',
 			quantityKg: Number(formData.get('quantityKg')?.toString() ?? '0'),
-			cassavaUsedKg: formData.get('cassavaUsedKg') ? Number(formData.get('cassavaUsedKg')) : undefined,
+			cassavaUsedKg: Number(formData.get('cassavaUsedKg') ?? '0'),
+			yieldPercentage: formData.get('yieldPercentage') ? Number(formData.get('yieldPercentage')) : undefined,
 			productionDate: formData.get('productionDate')?.toString() || undefined,
 			notes: formData.get('notes')?.toString() || undefined
 		};

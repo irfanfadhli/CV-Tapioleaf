@@ -36,7 +36,6 @@
 	let note = $state('');
 	let reason = $state('');
 
-	let deleteTarget = $state<{ id: string; name: string } | null>(null);
 	let submitting = $state(false);
 
 	function handleSearch() {
@@ -66,7 +65,7 @@
 	<div class="grid gap-4 sm:grid-cols-2">
 		<div class="rounded-xl border bg-emerald-50 p-4 shadow-sm">
 			<p class="text-xs font-medium text-emerald-700">Stok Singkong (Bahan Baku)</p>
-			<p class="text-2xl font-bold text-emerald-800">{data.cassavaStock.toLocaleString('id-ID')} kg</p>
+			<p class="text-2xl font-bold text-emerald-800">{Math.max(0, data.cassavaStock).toLocaleString('id-ID')} kg</p>
 			<p class="text-xs text-emerald-600">Dari penerimaan singkong</p>
 		</div>
 		<div class="rounded-xl border bg-blue-50 p-4 shadow-sm">
@@ -115,6 +114,7 @@
 							</button>
 						</th>
 						<th class="px-4 py-3 text-right font-medium text-muted-foreground">Stok</th>
+						<th class="px-4 py-3 text-right font-medium text-muted-foreground">Harga</th>
 						<th class="px-4 py-3 text-right font-medium text-muted-foreground">Min</th>
 						<th class="px-4 py-3 text-center font-medium text-muted-foreground">Status</th>
 						<th class="px-4 py-3 text-center font-medium text-muted-foreground">Aksi</th>
@@ -126,6 +126,7 @@
 							<td class="px-4 py-3 font-mono text-xs">{item.code}</td>
 							<td class="px-4 py-3 font-medium">{item.name}</td>
 							<td class="px-4 py-3 text-right font-medium" class:text-red-600={item.stockStatus === 'CRITICAL'}>{item.currentStock} {item.unit}</td>
+							<td class="px-4 py-3 text-right font-medium">Rp {Number(item.price).toLocaleString('id-ID')}</td>
 							<td class="px-4 py-3 text-right text-muted-foreground">{item.minimumStock}</td>
 							<td class="px-4 py-3 text-center">
 								{#if item.stockStatus === 'CRITICAL'}
@@ -136,12 +137,12 @@
 							</td>
 							<td class="px-4 py-3">
 								<div class="flex items-center justify-center gap-1">
-									<button onclick={() => deleteTarget = { id: item.id, name: item.name }} class="inline-flex items-center justify-center rounded-md p-1 text-muted-foreground hover:text-destructive"><Trash2 size={14} /></button>
+
 								</div>
 							</td>
 						</tr>
 					{:else}
-						<tr><td colspan="5" class="px-4 py-8 text-center text-sm text-muted-foreground">Belum ada produk</td></tr>
+						<tr><td colspan="6" class="px-4 py-8 text-center text-sm text-muted-foreground">Belum ada produk</td></tr>
 					{/each}
 				</tbody>
 			</table>
@@ -204,25 +205,5 @@
 			</div>
 			<DialogFooter><Button type="submit">Simpan</Button></DialogFooter>
 		</form>
-	</DialogContent>
-</Dialog>
-<Dialog open={deleteTarget !== null} onOpenChange={(o) => { if (!o) deleteTarget = null; }}>
-	<DialogContent class="sm:max-w-sm">
-		<DialogHeader>
-			<DialogTitle>Hapus Stok</DialogTitle>
-			<DialogDescription>Yakin ingin menghapus semua pergerakan stok untuk "{deleteTarget?.name}"?</DialogDescription>
-		</DialogHeader>
-		<DialogFooter class="gap-2">
-			<Button variant="outline" onclick={() => deleteTarget = null}>Batal</Button>
-			<form method="post" action="?/deleteStock" use:enhance={() => {
-				return async ({ result }) => {
-					if (result.type === 'success') { deleteTarget = null; window.location.reload(); }
-					else if (result.type === 'failure') { const msg = (result.data as any)?.message; if (msg) toast.error(msg); }
-				};
-			}}>
-				<input type="hidden" name="productId" value={deleteTarget?.id || ''} />
-				<Button variant="destructive" type="submit">Hapus</Button>
-			</form>
-		</DialogFooter>
 	</DialogContent>
 </Dialog>

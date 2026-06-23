@@ -6,6 +6,8 @@ export const productionEntries = pgTable('production_entries', {
 	productId: text('product_id').notNull().references(() => products.id),
 	quantityKg: decimal('quantity_kg', { precision: 10, scale: 2 }).notNull(),
 	cassavaUsedKg: decimal('cassava_used_kg', { precision: 10, scale: 2 }),
+	yieldPercentage: decimal('yield_percentage', { precision: 5, scale: 2 }),
+	tapiocaFlourResult: decimal('tapioca_flour_result', { precision: 10, scale: 2 }),
 	productionDate: timestamp('production_date', { withTimezone: true }).defaultNow().notNull(),
 	status: text('status', { enum: ['DRAFT', 'CONFIRMED'] }).default('DRAFT').notNull(),
 	notes: text('notes'),

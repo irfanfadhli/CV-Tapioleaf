@@ -14,7 +14,7 @@ export const load: PageServerLoad = async (event) => {
 		const allProducts = await productService.listProducts({ search: '', status: 'all', page: 1, limit: 50, sort: 'name', order: 'asc' } as any);
 		const [cassavaIn] = await db.select({ total: sql<string>`COALESCE(SUM(final_weight::numeric), 0)` }).from(cassavaReceipts).limit(1);
 		const [cassavaOut] = await db.select({ total: sql<string>`COALESCE(SUM(cassava_used_kg::numeric), 0)` }).from(productionEntries).limit(1);
-		const cassavaStock = Number(cassavaIn?.total || 0) - Number(cassavaOut?.total || 0);
+		const cassavaStock = Math.max(0, Number(cassavaIn?.total || 0) - Number(cassavaOut?.total || 0));
 		return {
 			items: result.items,
 			pagination: result.pagination,

@@ -2,7 +2,7 @@
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
 	import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '$lib/components/ui/dialog';
-	import { Plus, Loader2, CheckCircle2, Factory, Trash2 } from '@lucide/svelte';
+	import { Plus, Loader2, CheckCircle2, Factory, Trash2, AlertTriangle } from '@lucide/svelte';
 	import { toast } from 'svelte-sonner';
 	import { enhance } from '$app/forms';
 
@@ -13,6 +13,9 @@
 	let productionDate = $state(new Date().toISOString().slice(0, 10));
 	let notes = $state('');
 	let showHistory = $state(data.todaySummary.confirmedCount > 0);
+	let cassavaInput = $state(0);
+	let yieldInput = $state(0);
+	let flourResult = $derived(cassavaInput * (yieldInput / 100));
 </script>
 
 <div class="space-y-6">
@@ -29,7 +32,7 @@
 		<div class="flex items-center justify-between">
 			<div>
 				<p class="text-xs font-medium text-emerald-700">Stok Singkong Tersedia</p>
-				<p class="text-2xl font-bold text-emerald-800">{data.cassavaStock.toLocaleString('id-ID')} kg</p>
+				<p class="text-2xl font-bold text-emerald-800">{Math.max(0, data.cassavaStock).toLocaleString('id-ID')} kg</p>
 			</div>
 			<p class="text-xs text-emerald-600">Bahan baku untuk produksi</p>
 		</div>
@@ -39,7 +42,7 @@
 		<div class="p-6">
 			<div class="mb-4 flex items-center justify-between">
 				<div>
-					<h2 class="text-sm font-medium text-muted-foreground">Produksi Hari Ini</h2>
+					<h2 class="text-sm font-medium text-muted-foreground">Singkong Diproses</h2>
 					<p class="text-3xl font-bold">{data.todaySummary.totalKg.toLocaleString('id-ID')} <span class="text-lg font-normal text-muted-foreground">/ {data.todaySummary.targetKg.toLocaleString('id-ID')} kg</span></p>
 				</div>
 				<div class="text-right">
@@ -52,13 +55,12 @@
 			</div>
 			{#if data.todaySummary.draftCount > 0}
 				<form method="post" action="?/confirm" use:enhance={() => {
-					return async ({ result, update }) => {
-						update();
-						if (result.type === 'success') { toast.success('Produksi hari ini dikonfirmasi'); showHistory = true; }
+					return async ({ result }) => {
+						if (result.type === 'success') { window.location.reload(); }
 						else if (result.type === 'failure') { const msg = (result.data as any)?.message; if (msg) toast.error(msg); }
 					};
 				}} class="mt-4">
-					<Button type="submit" variant="default" class="w-full"><CheckCircle2 size={16} class="mr-1" /> Konfirmasi Produksi Hari Ini</Button>
+					<Button type="submit" variant="default" class="w-full"><CheckCircle2 size={16} class="mr-1" /> Konfirmasi Semua Produksi</Button>
 				</form>
 			{/if}
 		</div>
@@ -73,7 +75,9 @@
 						<thead class="bg-muted/50">
 							<tr>
 								<th class="px-4 py-3 text-left font-medium text-muted-foreground">Produk</th>
-								<th class="px-4 py-3 text-right font-medium text-muted-foreground">Kg</th>
+								<th class="px-4 py-3 text-right font-medium text-muted-foreground">Tepung</th>
+								<th class="px-4 py-3 text-right font-medium text-muted-foreground">Singkong</th>
+								<th class="px-4 py-3 text-right font-medium text-muted-foreground">Yield</th>
 								<th class="px-4 py-3 text-center font-medium text-muted-foreground">Status</th>
 								<th class="px-4 py-3 text-left font-medium text-muted-foreground">Keterangan</th>
 								<th class="px-4 py-3 text-center font-medium text-muted-foreground">Aksi</th>
@@ -86,7 +90,9 @@
 										<div class="font-medium">{item.productName}</div>
 										<div class="text-xs text-muted-foreground">{item.productCode}</div>
 									</td>
-									<td class="px-4 py-3 text-right font-medium">{item.quantityKg.toLocaleString('id-ID')}</td>
+									<td class="px-4 py-3 text-right font-medium">{item.tapiocaFlourResult?.toLocaleString('id-ID') || '—'}</td>
+									<td class="px-4 py-3 text-right">{item.cassavaUsedKg?.toLocaleString('id-ID') || '—'}</td>
+									<td class="px-4 py-3 text-right text-xs text-muted-foreground">{item.yieldPercentage ? `${item.yieldPercentage}%` : '—'}</td>
 									<td class="px-4 py-3 text-center">
 										{#if item.status === 'CONFIRMED'}
 											<span class="inline-flex items-center gap-1 rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700"><CheckCircle2 size={12} /> CONFIRMED</span>
@@ -96,16 +102,19 @@
 									</td>
 									<td class="px-4 py-3 text-xs text-muted-foreground">{item.notes || '—'}</td>
 									<td class="px-4 py-3 text-center">
-										{#if item.status === 'DRAFT'}
-											<form method="post" action="?/delete" onsubmit={(e) => { if (!confirm('Hapus entry produksi ini?')) e.preventDefault(); }}>
-												<input type="hidden" name="id" value={item.id} />
-												<Button variant="ghost" size="sm" type="submit" class="text-red-500 hover:text-red-700"><Trash2 size={14} /></Button>
-											</form>
-										{/if}
+										<form method="post" action="?/delete" use:enhance={() => {
+											return async ({ result }) => {
+												if (result.type === 'success') { window.location.reload(); }
+												else if (result.type === 'failure') { const msg = (result.data as any)?.message; if (msg) toast.error(msg); }
+											};
+										}} onsubmit={(e) => { if (!confirm('Hapus entry produksi ini?')) e.preventDefault(); }}>
+											<input type="hidden" name="id" value={item.id} />
+											<button type="submit" class="inline-flex items-center justify-center rounded-md p-1 text-red-500 hover:text-red-700"><Trash2 size={14} /></button>
+										</form>
 									</td>
 								</tr>
 							{:else}
-								<tr><td colspan="5" class="px-4 py-8 text-center text-sm text-muted-foreground">Belum ada produksi</td></tr>
+								<tr><td colspan="7" class="px-4 py-8 text-center text-sm text-muted-foreground">Belum ada produksi</td></tr>
 							{/each}
 						</tbody>
 					</table>
@@ -143,11 +152,27 @@
 				</div>
 				<div class="rounded-lg border bg-emerald-50 p-3 text-sm">
 					<p class="font-medium text-emerald-800">Stok Singkong: {Math.max(0, data.cassavaStock).toLocaleString('id-ID')} kg</p>
+					{#if Math.max(0, data.cassavaStock) <= 0}
+						<p class="mt-1 flex items-center gap-1 text-xs text-red-600"><AlertTriangle size={12} /> Stok singkong habis!</p>
+					{/if}
 				</div>
+				{#if Math.max(0, data.cassavaStock) > 0}
 				<div class="grid gap-2">
-					<label for="prod-cassava" class="text-sm font-medium">Singkong Digunakan (kg)</label>
-					<Input id="prod-cassava" name="cassavaUsedKg" type="number" step="0.1" placeholder="Opsional" />
+					<label for="prod-cassava" class="text-sm font-medium">Singkong Digunakan (kg) *</label>
+					<Input id="prod-cassava" name="cassavaUsedKg" type="number" step="0.1" required placeholder="Berapa kg singkong diproses?" bind:value={cassavaInput} />
 				</div>
+				{/if}
+				<div class="grid gap-2">
+					<label for="prod-yield" class="text-sm font-medium">Yield (%)</label>
+					<Input id="prod-yield" name="yieldPercentage" type="number" step="0.1" placeholder="Contoh: 25" bind:value={yieldInput} />
+					<p class="text-xs text-muted-foreground">Persentase tepung yang dihasilkan dari singkong</p>
+				</div>
+				{#if flourResult > 0}
+				<div class="rounded-lg border bg-blue-50 p-3 text-sm">
+					<p class="font-medium text-blue-800">Hasil Tepung: {flourResult.toLocaleString('id-ID')} kg</p>
+					<p class="text-xs text-blue-600">Hasil tepung tapioka dari singkong yang diproses</p>
+				</div>
+				{/if}
 				<div class="grid gap-2">
 					<label for="prod-productionDate" class="text-sm font-medium">Tanggal</label>
 					<Input id="prod-productionDate" name="productionDate" type="date" bind:value={productionDate} />
