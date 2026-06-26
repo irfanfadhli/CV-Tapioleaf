@@ -4,7 +4,8 @@
 	import { FileDown } from '@lucide/svelte';
 	import { Button } from '$lib/components/ui/button';
 	import KPICard from '$lib/components/dashboard/KPICard.svelte';
-	import MarginChart from '$lib/components/dashboard/MarginChart.svelte';
+	import SalesAreaChart from '$lib/components/dashboard/SalesAreaChart.svelte';
+	import ProductionAreaChart from '$lib/components/dashboard/ProductionAreaChart.svelte';
 	import CategoryChart from '$lib/components/dashboard/CategoryChart.svelte';
 	import RecentTransactions from '$lib/components/dashboard/RecentTransactions.svelte';
 	import StockAlertBanner from '$lib/components/dashboard/StockAlertBanner.svelte';
@@ -85,23 +86,28 @@
 			loading={false}
 		/>
 		<KPICard
-			title="Pendapatan"
-			value={'Rp ' + dashboardData.revenue.total.toLocaleString('id-ID')}
+			title="Laba"
+			value={'Rp ' + Math.round(dashboardData.revenue.total * (dashboardData.revenue.margin ?? 0) / 100).toLocaleString('id-ID')}
 			subtitle={dashboardData.revenue.margin !== null
-				? `Margin: ${dashboardData.revenue.margin}%`
-				: ''}
+				? `Margin ${dashboardData.revenue.margin}%`
+				: 'Isi harga modal'}
 			change={dashboardData.revenue.change}
 			icon="📈"
 			loading={false}
 		/>
 	</div>
 
-	<!-- Margin Chart -->
-	{#if loading}
-		<SkeletonWidget height="h-64" />
-	{:else}
-		<MarginChart data={dashboardData.marginPerProduct} />
-	{/if}
+	<!-- Charts Row 1: Area Charts -->
+	<div class="grid gap-4 lg:grid-cols-2">
+		{#if loading}
+			<SkeletonWidget height="h-64" />
+			<SkeletonWidget height="h-64" />
+		{:else}
+			<SalesAreaChart data={dashboardData.salesTrend} />
+			<ProductionAreaChart data={dashboardData.productionTrend} targetKg={dashboardData.production.targetKg} />
+		{/if}
+	</div>
+
 
 	<!-- Bottom Row -->
 	<div class="grid gap-4 lg:grid-cols-2">

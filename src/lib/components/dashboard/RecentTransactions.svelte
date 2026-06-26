@@ -33,7 +33,7 @@
 				<button onclick={() => goto(`/orders/${t.id}`)} class="flex w-full items-center justify-between rounded-lg p-2 text-left transition-colors hover:bg-gray-50">
 					<div class="min-w-0 flex-1">
 						<p class="truncate text-sm font-medium">{t.customerName || 'Anonim'}</p>
-						<p class="text-xs text-muted-foreground">{t.createdAt ? new Date(t.createdAt).toLocaleString('id-ID') : '-'}</p>
+						<p class="text-xs text-muted-foreground">#{t.id.slice(0, 8).toUpperCase()} · {t.createdAt ? new Date(t.createdAt).toLocaleString('id-ID') : '-'}</p>
 					</div>
 					<div class="flex items-center gap-2 shrink-0">
 						<span class="text-sm font-semibold">Rp {Number(t.totalAmount).toLocaleString('id-ID')}</span>
