@@ -6,7 +6,7 @@
 	import KPICard from '$lib/components/dashboard/KPICard.svelte';
 	import SalesAreaChart from '$lib/components/dashboard/SalesAreaChart.svelte';
 	import ProductionAreaChart from '$lib/components/dashboard/ProductionAreaChart.svelte';
-	import CategoryChart from '$lib/components/dashboard/CategoryChart.svelte';
+	import MarginPieChart from '$lib/components/dashboard/MarginPieChart.svelte';
 	import RecentTransactions from '$lib/components/dashboard/RecentTransactions.svelte';
 	import StockAlertBanner from '$lib/components/dashboard/StockAlertBanner.svelte';
 	import PeriodFilter from '$lib/components/dashboard/PeriodFilter.svelte';
@@ -44,14 +44,14 @@
 </script>
 
 <div class="space-y-4">
-	<div class="flex flex-wrap items-center gap-2">
+	<div class="flex flex-wrap items-center justify-between gap-2">
 		<div>
-			<h1 class="text-xl font-bold md:text-2xl">Dashboard</h1>
+			<h1 class="text-xl font-bold md:text-2xl">CV TapioLeaf</h1>
 			<p class="text-sm text-muted-foreground">Selamat datang, {data.user?.name}!</p>
 		</div>
 		<div class="flex items-center gap-2">
-			<PeriodFilter active={currentPeriod} onChange={changePeriod} />
 			<a href={`/api/dashboard/report?period=${currentPeriod}`} target="_blank"><Button variant="outline" size="sm"><FileDown size={14} class="mr-1" /> PDF</Button></a>
+			<PeriodFilter active={currentPeriod} onChange={changePeriod} />
 		</div>
 	</div>
 
@@ -68,9 +68,9 @@
 			loading={false}
 		/>
 		<KPICard
-			title="Produksi"
+			title="Singkong Diproses"
 			value={formatKg(dashboardData.production.totalKg)}
-			subtitle={`${dashboardData.production.percentage}% dari ${formatKg(dashboardData.production.targetKg)}`}
+			subtitle={`${dashboardData.production.percentage}% dari kapasitas ${formatKg(dashboardData.production.targetKg)}`}
 			alert={dashboardData.production.percentage < 80}
 			icon="📦"
 			loading={false}
@@ -116,7 +116,7 @@
 			<SkeletonWidget height="h-64" />
 		{:else}
 			<RecentTransactions transactions={dashboardData.recentTransactions} />
-			<CategoryChart data={dashboardData.categoryDistribution} />
+			<MarginPieChart data={dashboardData.marginPerProduct} />
 		{/if}
 	</div>
 </div>

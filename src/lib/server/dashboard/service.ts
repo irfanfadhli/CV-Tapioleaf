@@ -131,7 +131,7 @@ async function getSalesSummary(start: Date, end: Date) {
 
 async function getProductionSummary(start: Date, end: Date) {
 	const result = await db.select({
-		totalKg: sql<string>`COALESCE(SUM(tapioca_flour_result), 0)`,
+		totalKg: sql<string>`COALESCE(SUM(cassava_used_kg), 0)`,
 		count: sql<number>`COUNT(*)`,
 	}).from(productionEntries)
 		.where(and(eq(productionEntries.status, 'CONFIRMED'), gte(productionEntries.productionDate, start), lte(productionEntries.productionDate, end)))
@@ -191,7 +191,7 @@ async function getSalesTrend() {
 async function getProductionTrend(start: Date, end: Date) {
 	const result = await db.select({
 		date: sql<string>`DATE(${productionEntries.productionDate})`,
-		totalKg: sql<string>`COALESCE(SUM(tapioca_flour_result), 0)`,
+		totalKg: sql<string>`COALESCE(SUM(cassava_used_kg), 0)`,
 	})
 		.from(productionEntries)
 		.where(and(eq(productionEntries.status, 'CONFIRMED'), gte(productionEntries.productionDate, start), lte(productionEntries.productionDate, end)))

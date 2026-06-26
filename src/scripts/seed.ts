@@ -49,7 +49,7 @@ async function seed() {
 		return id;
 	}
 
-	const ownerId = await createUser('Pak Budi', '2200018467@webmail.uad.ac.id', 'owner');
+	const ownerId = await createUser('CV TapioLeaf', '2200018467@webmail.uad.ac.id', 'owner');
 	console.log('Owner: 2200018467@webmail.uad.ac.id / Admin123!');
 	await createUser('Budi Produksi', 'produksi@tapioleaf.com', 'bagian_produksi');
 	await createUser('Ani Keuangan', 'admin@tapioleaf.com', 'admin_penjualan');
