@@ -8,6 +8,7 @@
 	import { toast } from 'svelte-sonner';
 	import { enhance } from '$app/forms';
 	import { onMount } from 'svelte';
+	import ConfirmDialog from '$lib/components/ui/confirm-dialog.svelte';
 
 	let { data } = $props();
 
@@ -37,6 +38,7 @@
 	let reason = $state('');
 
 	let submitting = $state(false);
+	let deleteTargetId = $state<string | null>(null);
 
 	function handleSearch() {
 		clearTimeout(debounceTimer);
@@ -137,7 +139,7 @@
 							</td>
 							<td class="px-4 py-3">
 								<div class="flex items-center justify-center gap-1">
-
+									<button type="button" onclick={() => deleteTargetId = item.id} class="inline-flex items-center justify-center rounded-md p-1 text-red-500 hover:text-red-700"><Trash2 size={14} /></button>
 								</div>
 							</td>
 						</tr>
@@ -207,3 +209,21 @@
 		</form>
 	</DialogContent>
 </Dialog>
+
+<ConfirmDialog
+	open={deleteTargetId !== null}
+	title="Hapus Stok Produk?"
+	description="Semua riwayat pergerakan stok produk ini akan dihapus."
+	confirmLabel="Hapus"
+	onConfirm={async () => {
+		const id = deleteTargetId;
+		deleteTargetId = null;
+		if (!id) return;
+		const fd = new FormData();
+		fd.set('productId', id);
+		const res = await fetch('?/deleteStock', { method: 'POST', body: fd });
+		if (res.ok) { toast.success('Stok dihapus'); window.location.reload(); }
+		else { const err = await res.json(); toast.error(err?.message || 'Gagal menghapus'); }
+	}}
+	onCancel={() => deleteTargetId = null}
+/>

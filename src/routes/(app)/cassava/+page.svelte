@@ -23,7 +23,6 @@ import ConfirmDialog from '$lib/components/ui/confirm-dialog.svelte';
 	let notes = $state('');
 	let submitting = $state(false);
 	let editTarget = $state<any>(null);
-	let deleteForm = $state<HTMLFormElement | undefined>();
 
 	let netWeight = $derived(Math.max(grossWeight - taraWeight, 0));
 	let finalWeight = $derived(Math.max(netWeight - refraction, 0));
@@ -285,23 +284,20 @@ import ConfirmDialog from '$lib/components/ui/confirm-dialog.svelte';
 	</DialogContent>
 </Dialog>
 
-<form method="post" action="?/delete" use:enhance={() => {
-		return async ({ result }) => {
-			if (result.type === 'success') { toast.success('Penerimaan dihapus'); window.location.reload(); }
-			else if (result.type === 'failure') { const msg = (result.data as any)?.message; if (msg) toast.error(msg); }
-		};
-	}} bind:this={deleteForm} class="hidden">
-	<input type="hidden" name="id" value={deleteTargetId ?? ''} />
-</form>
-
 <ConfirmDialog
 	open={deleteTargetId !== null}
 	title="Hapus Penerimaan?"
 	description="Tindakan ini tidak bisa dibatalkan."
 	confirmLabel="Hapus"
-	onConfirm={() => {
-		deleteForm?.requestSubmit();
+	onConfirm={async () => {
+		const id = deleteTargetId;
 		deleteTargetId = null;
+		if (!id) return;
+		const fd = new FormData();
+		fd.set('id', id);
+		const res = await fetch('?/delete', { method: 'POST', body: fd });
+		if (res.ok) { toast.success('Penerimaan dihapus'); window.location.reload(); }
+		else { const err = await res.json(); toast.error(err?.message || 'Gagal menghapus'); }
 	}}
 	onCancel={() => deleteTargetId = null}
 />
