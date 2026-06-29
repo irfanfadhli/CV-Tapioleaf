@@ -285,7 +285,12 @@ import ConfirmDialog from '$lib/components/ui/confirm-dialog.svelte';
 	</DialogContent>
 </Dialog>
 
-<form method="post" action="?/delete" bind:this={deleteForm} class="hidden">
+<form method="post" action="?/delete" use:enhance={() => {
+		return async ({ result }) => {
+			if (result.type === 'success') { toast.success('Penerimaan dihapus'); window.location.reload(); }
+			else if (result.type === 'failure') { const msg = (result.data as any)?.message; if (msg) toast.error(msg); }
+		};
+	}} bind:this={deleteForm} class="hidden">
 	<input type="hidden" name="id" value={deleteTargetId ?? ''} />
 </form>
 
