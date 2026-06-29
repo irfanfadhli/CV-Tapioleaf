@@ -6,7 +6,8 @@
 		change = null as number | null,
 		icon = null as string | null,
 		alert = false,
-		loading = false
+		loading = false,
+		compareLabel = ''
 	}: {
 		title: string;
 		value: string;
@@ -15,6 +16,7 @@
 		icon?: string | null;
 		alert?: boolean;
 		loading?: boolean;
+		compareLabel?: string;
 	} = $props();
 </script>
 
@@ -36,6 +38,7 @@
 			{#if change !== null}
 				<span class="inline-flex items-center gap-0.5 text-xs font-medium {change >= 0 ? 'text-green-600' : 'text-red-600'}">
 					{change >= 0 ? '↑' : '↓'} {Math.abs(change).toFixed(1)}%
+					{#if compareLabel}<span class="text-muted-foreground/60">{compareLabel}</span>{/if}
 				</span>
 			{/if}
 		</div>

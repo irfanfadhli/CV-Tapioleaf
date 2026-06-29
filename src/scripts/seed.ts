@@ -217,6 +217,7 @@ async function seed() {
 	}
 	console.log('Created 12 orders with varied customers');
 
+
 	console.log('\n=== Seed Complete! ===');
 	console.log('Owner: 2200018467@webmail.uad.ac.id / Admin123!');
 	console.log('Customer: customer@tapioleaf.com / Admin123!');

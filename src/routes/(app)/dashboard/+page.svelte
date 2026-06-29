@@ -18,6 +18,9 @@
 	let currentPeriod = $state(data.period);
 	let loading = $state(false);
 
+	const compareLabels: Record<string, string> = { today: 'vs kemarin', week: 'vs pekan lalu', month: 'vs bulan lalu' };
+	let compareLabel = $derived(compareLabels[currentPeriod] || '');
+
 	function formatKg(kg: number): string {
 		if (kg >= 1000) return `${(kg / 1000).toFixed(1)} ton`;
 		return `${kg.toLocaleString('id-ID')} kg`;
@@ -66,14 +69,16 @@
 			change={dashboardData.sales.change}
 			icon="💰"
 			loading={false}
+			{compareLabel}
 		/>
 		<KPICard
-			title="Singkong Diproses"
+			title="Produksi"
 			value={formatKg(dashboardData.production.totalKg)}
-			subtitle={`${dashboardData.production.percentage}% dari kapasitas ${formatKg(dashboardData.production.targetKg)}`}
+			subtitle={`${dashboardData.production.percentage}% dari ${formatKg(dashboardData.production.targetKg)}`}
 			alert={dashboardData.production.percentage < 80}
-			icon="📦"
+			icon="🏭"
 			loading={false}
+			{compareLabel}
 		/>
 		<KPICard
 			title="Stok"
@@ -82,18 +87,20 @@
 				? dashboardData.stock.criticalCount + ' kritis'
 				: 'Semua normal'}
 			alert={dashboardData.stock.criticalCount > 0}
-			icon="🏭"
+			icon="📦"
 			loading={false}
+			{compareLabel}
 		/>
 		<KPICard
 			title="Laba"
-			value={'Rp ' + Math.round(dashboardData.revenue.total * (dashboardData.revenue.margin ?? 0) / 100).toLocaleString('id-ID')}
+			value={'Rp ' + dashboardData.revenue.total.toLocaleString('id-ID')}
 			subtitle={dashboardData.revenue.margin !== null
 				? `Margin ${dashboardData.revenue.margin}%`
 				: 'Isi harga modal'}
 			change={dashboardData.revenue.change}
 			icon="📈"
 			loading={false}
+			{compareLabel}
 		/>
 	</div>
 

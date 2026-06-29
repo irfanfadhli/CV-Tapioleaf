@@ -43,6 +43,12 @@
 		}, 300);
 	}
 
+	function formatStock(stock: number, unit: string): string {
+		if (unit === 'SAK' || unit === 'PCS') return Math.floor(stock).toLocaleString('id-ID');
+		if (unit === 'TON') return stock.toFixed(1);
+		return Math.round(stock).toLocaleString('id-ID');
+	}
+
 	function formatPrice(price: string, unit: string): string {
 		const num = Number(price);
 		if (num >= 1000000) return `Rp ${(num / 1000000).toFixed(1)} juta/${unit.toLowerCase()}`;
@@ -95,10 +101,6 @@
 				{#if data.user}
 					<a href="/orders" class="text-muted-foreground hover:text-emerald-600">Pesanan</a>
 					<a href="/account" class="text-muted-foreground hover:text-emerald-600">Dashboard</a>
-					<span
-						class="cursor-default rounded-lg bg-gray-100 px-4 py-1.5 text-sm font-medium text-gray-400"
-						>Login</span
-					>
 					<form method="post" action="/api/sign-out" class="inline">
 						<button
 							type="submit"
@@ -150,9 +152,6 @@
 							href="/account"
 							onclick={() => (menuOpen = false)}
 							class="rounded-lg px-3 py-2 hover:bg-gray-50">Dashboard</a
-						>
-						<span class="rounded-lg bg-gray-100 px-3 py-2 text-center font-medium text-gray-400"
-							>Masuk</span
 						>
 						<form method="post" action="/api/sign-out">
 							<button
@@ -258,8 +257,8 @@
 									{/if}
 								</div>
 								<div class="min-w-0 flex-1">
-									<h3 class="truncate font-semibold">{item.name}</h3>
-									<p class="truncate text-xs text-muted-foreground">
+									<h3 class="font-semibold leading-tight">{item.name}</h3>
+									<p class="mt-0.5 text-xs text-muted-foreground">
 										{item.description || 'Produk CV TapioLeaf'}
 									</p>
 								</div>
@@ -268,7 +267,7 @@
 								<span class="text-sm font-bold text-emerald-700"
 									>{formatPrice(item.price, item.unit)}</span
 								>
-								<span class="text-xs text-muted-foreground">{item.currentStock} {item.unit}</span>
+								<span class="text-xs text-muted-foreground">{formatStock(item.currentStock, item.unit)} {item.unit}</span>
 							</div>
 							<button
 								onclick={() => openCheckout(item)}
@@ -276,7 +275,7 @@
 							>
 								<ShoppingCart size={14} class="mr-1 inline" /> Pesan Sekarang
 							</button>
-							{#if item.currentStock < 10}
+							{#if (item.unit === 'SAK' || item.unit === 'PCS' ? Math.floor(item.currentStock) : Math.round(item.currentStock)) < 10}
 								<div class="mt-1 flex items-center gap-1 text-xs text-red-600">
 									<AlertTriangle size={12} /> Stok terbatas
 								</div>
@@ -370,15 +369,18 @@
 
 	<!-- Visi & Misi -->
 	<section id="vision" class="border-t bg-white px-4 py-12 md:py-16">
-		<div class="mx-auto max-w-4xl text-center">
-			<h2 class="mb-8 text-2xl font-bold">Visi CV TapioLeaf</h2>
-			<div class="mx-auto mb-8 max-w-2xl rounded-xl border bg-emerald-50 p-6">
-				<h3 class="mb-2 text-lg font-semibold text-emerald-800">Visi</h3>
-				<p class="text-muted-foreground">
-					Menjadi produsen tepung tapioka terkemuka yang mendukung ketahanan pangan nasional dan
-					memberdayakan petani singkong lokal.
-				</p>
+		<div class="mx-auto max-w-4xl">
+			<div class="text-center">
+				<h2 class="mb-8 text-2xl font-bold">Visi & Misi</h2>
+				<div class="mx-auto mb-8 max-w-2xl rounded-xl border bg-emerald-50 p-6">
+					<h3 class="mb-2 text-lg font-semibold text-emerald-800">Visi</h3>
+					<p class="text-muted-foreground">
+						Menjadi produsen tepung tapioka terkemuka yang mendukung ketahanan pangan nasional dan
+						memberdayakan petani singkong lokal.
+					</p>
+				</div>
 			</div>
+			<h3 class="mb-6 text-center text-lg font-semibold">Misi Kami</h3>
 			<div class="grid gap-6 md:grid-cols-3">
 				<div class="rounded-xl border p-5 text-left shadow-sm">
 					<div

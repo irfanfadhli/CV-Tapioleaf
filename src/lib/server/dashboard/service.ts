@@ -74,7 +74,7 @@ export async function getDashboardData(periodStr: string): Promise<DashboardData
 		getStockSummary(),
 		getStockAlerts(),
 		getSalesTrend(),
-		getProductionTrend(range.start, range.end),
+		getProductionTrend(),
 		getRecentTransactions(),
 		getCategoryDistribution(range.start, range.end),
 	]);
@@ -93,11 +93,16 @@ export async function getDashboardData(periodStr: string): Promise<DashboardData
 	const salesChange = prevSales.total > 0 ? ((sales.total - prevSales.total) / prevSales.total) * 100 : null;
 	const percentage = production.totalKg > 0 ? Math.round((production.totalKg / 4000) * 100) : 0;
 
+	const marginPct = await getMarginSummary(range.start, range.end);
+	const profitTotal = marginPct !== null ? Math.round(sales.total * marginPct / 100) : sales.total;
+	const prevProfitTotal = marginPct !== null && prevSales.total > 0 ? Math.round(prevSales.total * marginPct / 100) : prevSales.total;
+	const profitChange = prevProfitTotal > 0 ? ((profitTotal - prevProfitTotal) / prevProfitTotal) * 100 : null;
+
 	return {
 		sales: { total: sales.total, count: sales.count, change: salesChange },
 		production: { totalKg: production.totalKg, targetKg: 4000, percentage, count: production.count },
 		stock: { totalSKU: stock.totalSKU, criticalCount: criticalProducts.length },
-		revenue: { total: sales.total, change: salesChange, margin: null },
+		revenue: { total: profitTotal, change: profitChange, margin: marginPct },
 		salesTrend,
 		productionTrend,
 		recentTransactions: transactions,
@@ -108,15 +113,7 @@ export async function getDashboardData(periodStr: string): Promise<DashboardData
 }
 
 export async function getDashboardDataWithMargins(periodStr: string): Promise<DashboardData> {
-	const data = await getDashboardData(periodStr);
-	const period = (periodStr === 'week' || periodStr === 'month') ? periodStr : 'today';
-	const range = getPeriodRange(period);
-
-	const marginResult = await getMarginSummary(range.start, range.end);
-	if (marginResult !== null) {
-		data.revenue.margin = marginResult;
-	}
-	return data;
+	return await getDashboardData(periodStr);
 }
 
 async function getSalesSummary(start: Date, end: Date) {
@@ -188,13 +185,13 @@ async function getSalesTrend() {
 	return result.map(r => ({ date: r.date, total: Number(r.total), count: Number(r.count) }));
 }
 
-async function getProductionTrend(start: Date, end: Date) {
+async function getProductionTrend() {
 	const result = await db.select({
 		date: sql<string>`DATE(${productionEntries.productionDate})`,
 		totalKg: sql<string>`COALESCE(SUM(cassava_used_kg), 0)`,
 	})
 		.from(productionEntries)
-		.where(and(eq(productionEntries.status, 'CONFIRMED'), gte(productionEntries.productionDate, start), lte(productionEntries.productionDate, end)))
+		.where(and(eq(productionEntries.status, 'CONFIRMED'), gte(productionEntries.productionDate, sql`NOW() - INTERVAL '7 days'`)))
 		.groupBy(sql`DATE(${productionEntries.productionDate})`)
 		.orderBy(sql`DATE(${productionEntries.productionDate})`);
 

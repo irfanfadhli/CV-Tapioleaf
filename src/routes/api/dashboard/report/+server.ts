@@ -46,9 +46,9 @@ export const GET: RequestHandler = async (event) => {
 	doc.text(`Stok Kritis: ${data.stock.criticalCount}`);
 	doc.moveDown(0.5);
 
-	doc.font('Helvetica-Bold').fontSize(12).fillColor('#333').text('Pendapatan & Margin');
+	doc.font('Helvetica-Bold').fontSize(12).fillColor('#333').text('Laba & Margin');
 	doc.font('Helvetica').fontSize(10).fillColor('#555');
-	doc.text(`Total Pendapatan: Rp ${data.revenue.total.toLocaleString('id-ID')}`);
+	doc.text(`Total Laba: Rp ${data.revenue.total.toLocaleString('id-ID')}`);
 	if (data.revenue.margin !== null) doc.text(`Margin: ${data.revenue.margin}%`);
 	doc.moveDown(1);
 
