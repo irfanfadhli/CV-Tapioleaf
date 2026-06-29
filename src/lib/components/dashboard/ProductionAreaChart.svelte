@@ -11,7 +11,7 @@
 	let maxVal = $derived(dataMax * 1.3);
 	let points = $derived(data.map((d, i) => `${(i / (data.length - 1 || 1)) * 100},${100 - (d.totalKg / maxVal) * 100}`).join(' '));
 	let areaPoints = $derived(`0,100 ${points} 100,100`);
-	let targetY = $derived(Math.min(100 - (targetKg / maxVal) * 100, 0));
+	let targetY = $derived(100 - (targetKg / maxVal) * 100);
 </script>
 
 <div class="rounded-xl border bg-white p-5 shadow-sm">
@@ -21,18 +21,18 @@
 	{:else if data.length === 0}
 		<div class="flex h-48 items-center justify-center text-sm text-muted-foreground">Belum ada data produksi</div>
 	{:else}
-		<div class="relative h-48 w-full">
-			<!-- Target line -->
-			<div class="absolute left-0 right-0 border-t-2 border-dashed border-red-400" style="top: {targetY}%;">
-				<span class="absolute -top-4 right-0 text-xs text-red-500">{targetKg}kg</span>
-			</div>
-			<svg viewBox="0 0 100 100" class="h-full w-full overflow-visible" preserveAspectRatio="none">
-				<defs>
-					<linearGradient id="prodGrad" x1="0" y1="0" x2="0" y2="1">
-						<stop offset="0%" stop-color="#2563eb" stop-opacity="0.2" />
-						<stop offset="100%" stop-color="#2563eb" stop-opacity="0.02" />
-					</linearGradient>
-				</defs>
+		<div class="relative h-48 w-full overflow-hidden">
+			<svg viewBox="0 0 100 100" class="h-full w-full" preserveAspectRatio="none">
+		<defs>
+				<linearGradient id="prodGrad" x1="0" y1="0" x2="0" y2="1">
+					<stop offset="0%" stop-color="#2563eb" stop-opacity="0.2" />
+					<stop offset="100%" stop-color="#2563eb" stop-opacity="0.02" />
+				</linearGradient>
+			</defs>
+			{#if targetKg > 0}
+				<line x1="0" y1={targetY} x2="100" y2={targetY} stroke="#f87171" stroke-width="1.5" stroke-dasharray="4,3" />
+				<text x="100" y={Math.max(targetY, -4)} fill="#f87171" font-size="6" text-anchor="end" dominant-baseline="auto">{targetKg}kg</text>
+			{/if}
 				<polyline fill="url(#prodGrad)" stroke="none" points={areaPoints} />
 				<polyline fill="none" stroke="#2563eb" stroke-width="2" points={points} vector-effect="non-scaling-stroke" />
 			</svg>

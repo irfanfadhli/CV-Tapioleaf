@@ -3,6 +3,7 @@
 	import { Input } from '$lib/components/ui/input';
 	import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '$lib/components/ui/dialog';
 	import { Plus, Loader2, Wheat, Truck, Scale, DollarSign, Pencil, Trash2 } from '@lucide/svelte';
+import ConfirmDialog from '$lib/components/ui/confirm-dialog.svelte';
 	import { toast } from 'svelte-sonner';
 	import { enhance } from '$app/forms';
 
@@ -10,6 +11,7 @@
 
 	let showModal = $state(false);
 	let showSupplierModal = $state(false);
+	let deleteTargetId = $state<string | null>(null);
 	let receiptDate = $state(new Date().toISOString().slice(0, 10));
 	let supplierId = $state('');
 	let vehicleNumber = $state('');
@@ -21,6 +23,7 @@
 	let notes = $state('');
 	let submitting = $state(false);
 	let editTarget = $state<any>(null);
+	let deleteForm = $state<HTMLFormElement | undefined>();
 
 	let netWeight = $derived(Math.max(grossWeight - taraWeight, 0));
 	let finalWeight = $derived(Math.max(netWeight - refraction, 0));
@@ -92,10 +95,7 @@
 							<td class="px-4 py-3 text-center">
 								<div class="flex items-center justify-center gap-1">
 									<Button variant="ghost" size="sm" onclick={() => editTarget = r}><Pencil size={14} /></Button>
-									<form method="post" action="?/delete" onsubmit={(e) => { if (!confirm('Hapus penerimaan ini?')) e.preventDefault(); }}>
-										<input type="hidden" name="id" value={r.id} />
-										<Button variant="ghost" size="sm" type="submit" class="text-red-500 hover:text-red-700"><Trash2 size={14} /></Button>
-									</form>
+									<Button variant="ghost" size="sm" type="button" onclick={() => deleteTargetId = r.id} class="text-red-500 hover:text-red-700"><Trash2 size={14} /></Button>
 								</div>
 							</td>
 						</tr>
@@ -284,3 +284,19 @@
 		</form>
 	</DialogContent>
 </Dialog>
+
+<form method="post" action="?/delete" bind:this={deleteForm} class="hidden">
+	<input type="hidden" name="id" value={deleteTargetId ?? ''} />
+</form>
+
+<ConfirmDialog
+	open={deleteTargetId !== null}
+	title="Hapus Penerimaan?"
+	description="Tindakan ini tidak bisa dibatalkan."
+	confirmLabel="Hapus"
+	onConfirm={() => {
+		deleteForm?.requestSubmit();
+		deleteTargetId = null;
+	}}
+	onCancel={() => deleteTargetId = null}
+/>

@@ -3,8 +3,12 @@
 	import { Button } from '$lib/components/ui/button';
 	import { toast } from 'svelte-sonner';
 	import { enhance } from '$app/forms';
+	import ConfirmDialog from '$lib/components/ui/confirm-dialog.svelte';
 
 	let { data } = $props();
+
+	let deleteTargetId = $state<string | null>(null);
+	let deleteForm = $state<HTMLFormElement | undefined>();
 </script>
 
 <div class="space-y-6">
@@ -31,18 +35,31 @@
 								{/if}
 							</div>
 						</div>
-						<form method="post" action="?/delete" use:enhance={() => {
-							return async ({ result }) => {
-								if (result.type === 'success') { toast.success('Supplier dihapus'); }
-								else if (result.type === 'failure') { const msg = (result.data as any)?.message; if (msg) toast.error(msg); }
-							};
-						}} onsubmit={(e) => { if (!confirm('Hapus supplier ini?')) e.preventDefault(); }}>
-							<input type="hidden" name="id" value={s.id} />
-							<Button variant="ghost" size="sm" type="submit" class="text-red-500 hover:text-red-700"><Trash2 size={16} /></Button>
-						</form>
+						<Button variant="ghost" size="sm" type="button" onclick={() => deleteTargetId = s.id} class="text-red-500 hover:text-red-700"><Trash2 size={16} /></Button>
 					</div>
 				</div>
 			{/each}
 		</div>
 	{/if}
 </div>
+
+<form method="post" action="?/delete" use:enhance={() => {
+		return async ({ result }) => {
+			if (result.type === 'success') { toast.success('Supplier dihapus'); }
+			else if (result.type === 'failure') { const msg = (result.data as any)?.message; if (msg) toast.error(msg); }
+		};
+	}} bind:this={deleteForm} class="hidden">
+	<input type="hidden" name="id" value={deleteTargetId ?? ''} />
+</form>
+
+<ConfirmDialog
+	open={deleteTargetId !== null}
+	title="Hapus Supplier?"
+	description="Tindakan ini tidak bisa dibatalkan."
+	confirmLabel="Hapus"
+	onConfirm={() => {
+		deleteForm?.requestSubmit();
+		deleteTargetId = null;
+	}}
+	onCancel={() => deleteTargetId = null}
+/>

@@ -3,12 +3,15 @@
 	import { Input } from '$lib/components/ui/input';
 	import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '$lib/components/ui/dialog';
 	import { Plus, Loader2, CheckCircle2, Factory, Trash2, AlertTriangle } from '@lucide/svelte';
+import ConfirmDialog from '$lib/components/ui/confirm-dialog.svelte';
 	import { toast } from 'svelte-sonner';
 	import { enhance } from '$app/forms';
 
 	let { data } = $props();
 
 	let showModal = $state(false);
+	let deleteTargetId = $state<string | null>(null);
+	let deleteForm = $state<HTMLFormElement | undefined>();
 	let quantityKg = $state('');
 	let productionDate = $state(new Date().toISOString().slice(0, 10));
 	let notes = $state('');
@@ -99,15 +102,7 @@
 									</td>
 									<td class="px-4 py-3 text-xs text-muted-foreground">{item.notes || '—'}</td>
 									<td class="px-4 py-3 text-center">
-										<form method="post" action="?/delete" use:enhance={() => {
-											return async ({ result }) => {
-												if (result.type === 'success') { window.location.reload(); }
-												else if (result.type === 'failure') { const msg = (result.data as any)?.message; if (msg) toast.error(msg); }
-											};
-										}} onsubmit={(e) => { if (!confirm('Hapus entry produksi ini?')) e.preventDefault(); }}>
-											<input type="hidden" name="id" value={item.id} />
-											<button type="submit" class="inline-flex items-center justify-center rounded-md p-1 text-red-500 hover:text-red-700"><Trash2 size={14} /></button>
-										</form>
+										<button type="button" onclick={() => deleteTargetId = item.id} class="inline-flex items-center justify-center rounded-md p-1 text-red-500 hover:text-red-700"><Trash2 size={14} /></button>
 									</td>
 								</tr>
 							{:else}
@@ -183,3 +178,24 @@
 		</form>
 	</DialogContent>
 </Dialog>
+
+<form method="post" action="?/delete" use:enhance={() => {
+		return async ({ result }) => {
+			if (result.type === 'success') { window.location.reload(); }
+			else if (result.type === 'failure') { const msg = (result.data as any)?.message; if (msg) toast.error(msg); }
+		};
+	}} bind:this={deleteForm} class="hidden">
+	<input type="hidden" name="id" value={deleteTargetId ?? ''} />
+</form>
+
+<ConfirmDialog
+	open={deleteTargetId !== null}
+	title="Hapus Entry Produksi?"
+	description="Tindakan ini tidak bisa dibatalkan."
+	confirmLabel="Hapus"
+	onConfirm={() => {
+		deleteForm?.requestSubmit();
+		deleteTargetId = null;
+	}}
+	onCancel={() => deleteTargetId = null}
+/>
