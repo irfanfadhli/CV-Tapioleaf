@@ -40,18 +40,15 @@
 
 	<div class="rounded-lg border bg-card">
 		<div class="p-6">
-			<div class="mb-4 flex items-center justify-between">
+			<div class="flex items-center justify-between">
 				<div>
 					<h2 class="text-sm font-medium text-muted-foreground">Singkong Diproses</h2>
-					<p class="text-3xl font-bold">{data.todaySummary.totalKg.toLocaleString('id-ID')} <span class="text-lg font-normal text-muted-foreground">/ {data.todaySummary.targetKg.toLocaleString('id-ID')} kg</span></p>
+					<p class="mt-1 text-3xl font-bold">{data.todaySummary.totalKg.toLocaleString('id-ID')} <span class="text-base font-normal text-muted-foreground">kg</span></p>
 				</div>
 				<div class="text-right">
-					<p class="text-sm text-muted-foreground">{data.todaySummary.percentage}%</p>
+					<span class="text-xs text-muted-foreground">Sesuai Permintaan</span>
 					<p class="text-xs text-muted-foreground">{data.todaySummary.draftCount} DRAFT · {data.todaySummary.confirmedCount} CONFIRMED</p>
 				</div>
-			</div>
-			<div class="h-4 w-full overflow-hidden rounded-full bg-muted">
-				<div class="h-full rounded-full bg-emerald-600 transition-all duration-500" style="width: {data.todaySummary.percentage}%"></div>
 			</div>
 			{#if data.todaySummary.draftCount > 0}
 				<form method="post" action="?/confirm" use:enhance={() => {

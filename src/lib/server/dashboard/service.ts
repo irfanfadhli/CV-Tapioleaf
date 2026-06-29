@@ -4,6 +4,7 @@ import { orders, orderItems } from '../db/schema/order';
 import { products, productCategories } from '../db/schema/product';
 import { productionEntries } from '../db/schema/production';
 import { stockMovements } from '../db/schema/stock';
+import { getCassavaTargetKg } from '../production/service';
 
 type Period = 'today' | 'week' | 'month';
 
@@ -91,7 +92,8 @@ export async function getDashboardData(periodStr: string): Promise<DashboardData
 	const marginPerProductData = await getMarginPerProduct(range.start, range.end);
 
 	const salesChange = prevSales.total > 0 ? ((sales.total - prevSales.total) / prevSales.total) * 100 : null;
-	const percentage = production.totalKg > 0 ? Math.round((production.totalKg / 4000) * 100) : 0;
+	const targetKg = await getCassavaTargetKg();
+	const percentage = production.totalKg > 0 ? Math.round((production.totalKg / targetKg) * 100) : 0;
 
 	const marginPct = await getMarginSummary(range.start, range.end);
 	const profitTotal = marginPct !== null ? Math.round(sales.total * marginPct / 100) : sales.total;
@@ -100,7 +102,7 @@ export async function getDashboardData(periodStr: string): Promise<DashboardData
 
 	return {
 		sales: { total: sales.total, count: sales.count, change: salesChange },
-		production: { totalKg: production.totalKg, targetKg: 4000, percentage, count: production.count },
+		production: { totalKg: production.totalKg, targetKg, percentage, count: production.count },
 		stock: { totalSKU: stock.totalSKU, criticalCount: criticalProducts.length },
 		revenue: { total: profitTotal, change: profitChange, margin: marginPct },
 		salesTrend,

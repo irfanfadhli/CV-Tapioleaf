@@ -136,6 +136,22 @@ export async function listProductions(query: ProductionQuery) {
 	};
 }
 
+export async function getCassavaTargetKg(): Promise<number> {
+	const TAPIOCA_FLOUR_TARGET_KG = 4000;
+	const result = await db.select({
+		avgYield: sql<number>`COALESCE(AVG(yield_percentage), 0)`,
+	})
+		.from(productionEntries)
+		.where(and(eq(productionEntries.status, 'CONFIRMED'), sql`yield_percentage IS NOT NULL`))
+		.limit(1);
+
+	const avgYield = Number(result[0]?.avgYield || 0);
+	if (avgYield > 0) {
+		return Math.round(TAPIOCA_FLOUR_TARGET_KG / (avgYield / 100));
+	}
+	return Math.round(TAPIOCA_FLOUR_TARGET_KG / 0.25);
+}
+
 export async function getTodaySummary() {
 	const [result] = await db.select({
 		totalKg: sql<string>`COALESCE(SUM(cassava_used_kg), 0)`,
@@ -144,7 +160,7 @@ export async function getTodaySummary() {
 	})
 		.from(productionEntries);
 
-	const targetKg = 4000;
+	const targetKg = await getCassavaTargetKg();
 	const totalKg = Number(result?.totalKg || 0);
 
 	return {

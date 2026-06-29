@@ -74,8 +74,7 @@
 		<KPICard
 			title="Produksi"
 			value={formatKg(dashboardData.production.totalKg)}
-			subtitle={`${dashboardData.production.percentage}% dari ${formatKg(dashboardData.production.targetKg)}`}
-			alert={dashboardData.production.percentage < 80}
+			subtitle={`${dashboardData.production.count} batch`}
 			icon="🏭"
 			loading={false}
 			{compareLabel}
