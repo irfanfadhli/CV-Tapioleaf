@@ -18,9 +18,10 @@
 	const cfg = statusConfig[data.order.status] || { label: data.order.status, icon: Clock, color: 'text-gray-600' };
 </script>
 
-<div class="mb-4">
-	<BackButton fallbackHref="/orders" label="Kembali ke Pesanan" variant="ghost" />
-</div>
+<div class="mx-auto max-w-2xl px-4 py-8">
+	<div class="mb-4">
+		<BackButton fallbackHref="/orders" label="Kembali ke Pesanan" variant="ghost" />
+	</div>
 
 	<Card>
 		<CardHeader class="flex flex-row items-center justify-between">
