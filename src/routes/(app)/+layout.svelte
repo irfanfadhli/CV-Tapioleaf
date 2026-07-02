@@ -2,7 +2,7 @@
 	import { page } from '$app/stores';
 	import { Button } from '$lib/components/ui/button';
 	import { Separator } from '$lib/components/ui/separator';
-	import { LogOut, LayoutDashboard, Package, Warehouse, Factory, Tags, Menu, X, Wheat, Building2 } from '@lucide/svelte';
+	import { LogOut, LayoutDashboard, Package, Warehouse, Factory, Tags, Menu, X, Wheat, Building2, Home } from '@lucide/svelte';
 	import { goto } from '$app/navigation';
 	import { Toaster } from 'svelte-sonner';
 
@@ -36,7 +36,7 @@
 	<aside class="fixed inset-y-0 left-0 z-50 flex w-64 flex-col border-r bg-card px-4 py-6 transition-transform md:static md:translate-x-0" class:-translate-x-full={!sidebarOpen}>
 		<div class="mb-6 flex items-center justify-between px-2 md:justify-start md:gap-3">
 			<div class="flex items-center gap-3">
-				<img src="/img/logo.png" alt="TapioLeaf" class="h-10 w-10 rounded-full object-cover" />
+				<a href="/dashboard"><img src="/img/logo.png" alt="TapioLeaf" class="h-10 w-10 rounded-full object-cover" /></a>
 				<div class="hidden md:block">
 					<p class="font-semibold leading-tight">{data.user.name}</p>
 					<p class="text-xs text-muted-foreground">{roleLabels[data.user.role] || data.user.role}</p>
@@ -76,6 +76,7 @@
 			</a>
 		</nav>
 		<Separator class="my-4" />
+		<a href="/" class="mb-2"><Button variant="ghost" class="w-full justify-start gap-3"><Home size={18} /> Landing Page</Button></a>
 		<Button variant="outline" class="w-full justify-start gap-3" onclick={handleLogout}>
 			<LogOut size={18} /> Keluar
 		</Button>
@@ -86,10 +87,10 @@
 		<!-- Mobile header -->
 		<div class="sticky top-0 z-30 flex items-center gap-3 border-b bg-background px-4 py-3 md:hidden">
 			<button onclick={() => sidebarOpen = true}><Menu size={22} /></button>
-			<div class="flex items-center gap-2">
+			<a href="/dashboard" class="flex items-center gap-2">
 				<img src="/img/logo.png" alt="TapioLeaf" class="h-7 w-7 rounded-full object-cover" />
 				<span class="text-sm font-semibold">CV TapioLeaf</span>
-			</div>
+			</a>
 		</div>
 		<div class="p-4 md:p-8">
 			{@render children()}

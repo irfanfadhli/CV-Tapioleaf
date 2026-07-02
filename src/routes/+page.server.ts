@@ -24,6 +24,6 @@ export const load: PageServerLoad = async (event) => {
 
 	return {
 		items: items.map(i => ({ ...i, currentStock: Number(i.currentStock) })),
-		user: event.locals.user ? { name: event.locals.user.name, email: event.locals.user.email } : null
+		user: event.locals.user ? { name: event.locals.user.name, email: event.locals.user.email, role: event.locals.user.role } : null
 	};
 };

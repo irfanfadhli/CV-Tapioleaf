@@ -20,6 +20,15 @@
 
 	let { data } = $props();
 
+	let scrolled = $state(false);
+
+	$effect(() => {
+		const onScroll = () => scrolled = window.scrollY > 10;
+		onScroll();
+		addEventListener('scroll', onScroll, { passive: true });
+		return () => removeEventListener('scroll', onScroll);
+	});
+
 	let checkoutProduct = $state<{
 		id: string;
 		name: string;
@@ -88,7 +97,7 @@
 
 <div class="min-h-screen bg-white">
 	<!-- Navbar -->
-	<nav class="top-center fixed z-50 w-full border-b bg-white/95 backdrop-blur-sm">
+	<nav class="top-center fixed z-50 w-full bg-white transition-all duration-300 {scrolled ? 'backdrop-blur-sm' : ''}">
 		<div class="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
 			<div class="flex items-center gap-2">
 				<img src="/img/logo.png" alt="TapioLeaf" class="h-9 w-9 rounded-lg object-cover" />
@@ -99,7 +108,9 @@
 				<a href="#about" class="text-muted-foreground hover:text-emerald-600">Tentang</a>
 				<a href="#contact" class="text-muted-foreground hover:text-emerald-600">Kontak</a>
 				{#if data.user}
-					<a href="/orders" class="text-muted-foreground hover:text-emerald-600">Pesanan</a>
+					{#if data.user.role === 'pembeli_umkm'}
+						<a href="/orders" class="text-muted-foreground hover:text-emerald-600">Pesanan</a>
+					{/if}
 					<a href="/account" class="text-muted-foreground hover:text-emerald-600">Dashboard</a>
 					<form method="post" action="/api/sign-out" class="inline">
 						<button
@@ -143,11 +154,13 @@
 						class="rounded-lg px-3 py-2 hover:bg-gray-50">Kontak</a
 					>
 					{#if data.user}
+						{#if data.user.role === 'pembeli_umkm'}
 						<a
 							href="/orders"
 							onclick={() => (menuOpen = false)}
 							class="rounded-lg px-3 py-2 hover:bg-gray-50">Pesanan</a
 						>
+						{/if}
 						<a
 							href="/account"
 							onclick={() => (menuOpen = false)}
@@ -176,16 +189,18 @@
 
 	<!-- Hero -->
 	<section
-		class="flex min-h-[calc(100vh-4rem)] flex-col items-center justify-center bg-white px-4 pt-16 text-center"
+		class="relative flex min-h-[calc(100vh-4rem)] flex-col items-center justify-center bg-cover bg-center px-4 pt-16 text-center"
+		style="background-image: url('/img/cassava.jpg')"
 	>
-		<div class="mx-auto max-w-6xl px-4 py-12 md:py-20">
+		<div class="absolute inset-0 bg-black/60 backdrop-blur-md"></div>
+		<div class="relative z-10 mx-auto max-w-6xl px-4 py-12 md:py-20">
 			<div
-				class="mx-auto mb-6 flex h-20 w-20 md:h-24 md:w-24 items-center justify-center overflow-hidden rounded-2xl bg-white/80"
+				class="mx-auto mb-6 flex h-20 w-20 md:h-24 md:w-24 items-center justify-center overflow-hidden rounded-2xl bg-white/20"
 			>
 				<img src="/img/logo.png" alt="CV TapioLeaf" class="h-full w-full object-cover" />
 			</div>
-			<h1 class="mb-3 text-3xl font-bold md:text-5xl">CV TapioLeaf</h1>
-			<p class="mx-auto mb-8 max-w-2xl text-base text-gray-500 md:text-lg">
+			<h1 class="mb-3 text-3xl font-bold text-white md:text-5xl">CV TapioLeaf</h1>
+			<p class="mx-auto mb-8 max-w-2xl text-base text-gray-200 md:text-lg">
 				Produsen tepung tapioka berkualitas tinggi. Mengolah singkong pilihan menjadi tepung tapioka
 				premium untuk kebutuhan industri dan rumah tangga.
 			</p>
@@ -197,7 +212,7 @@
 				>
 				<a
 					href="#about"
-					class="w-full sm:w-auto rounded-xl border-2 border-emerald-600 px-8 py-3 font-semibold text-emerald-700 transition-all hover:bg-emerald-50 active:scale-95"
+					class="w-full sm:w-auto rounded-xl border-2 border-white px-8 py-3 font-semibold text-white transition-all hover:bg-white/10 active:scale-95"
 					>Tentang Kami</a
 				>
 			</div>
