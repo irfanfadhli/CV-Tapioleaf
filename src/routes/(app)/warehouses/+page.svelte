@@ -8,11 +8,9 @@
 	import { toast } from 'svelte-sonner';
 	import { enhance } from '$app/forms';
 	import { onMount } from 'svelte';
-	import ConfirmDialog from '$lib/components/ui/confirm-dialog.svelte';
+let { data } = $props();
 
-	let { data } = $props();
-
-	let searchQuery = $state($page.url.searchParams.get('search') || '');
+let searchQuery = $state($page.url.searchParams.get('search') || '');
 	let statusFilter = $state($page.url.searchParams.get('status') || 'all');
 	let searchRef: HTMLInputElement | undefined;
 	let debounceTimer: ReturnType<typeof setTimeout> | undefined;
@@ -39,7 +37,6 @@
 
 	let submitting = $state(false);
 	let deleteTargetId = $state<string | null>(null);
-	let deleteLoading = $state(false);
 
 	function handleSearch() {
 		clearTimeout(debounceTimer);
@@ -96,7 +93,7 @@
 			<option value="all">Semua</option>
 			<option value="critical">Stok Kritis</option>
 		</select>
-		<a href="/gudang/riwayat"><Button variant="outline"><History size={16} class="mr-1" /> Riwayat</Button></a>
+		<a href="/warehouses/history"><Button variant="outline"><History size={16} class="mr-1" /> Riwayat</Button></a>
 	</div>
 
 	<div class="rounded-lg border">
@@ -211,24 +208,24 @@
 	</DialogContent>
 </Dialog>
 
-<ConfirmDialog
-	open={deleteTargetId !== null && !deleteLoading}
-	title="Hapus Stok Produk?"
-	description="Produk akan dihapus dan tidak muncul lagi di daftar stok."
-	confirmLabel={deleteLoading ? 'Menghapus...' : 'Hapus'}
-	onConfirm={async () => {
-		const id = deleteTargetId;
-		deleteTargetId = null;
-		if (!id) return;
-		deleteLoading = true;
-		try {
-			const fd = new FormData();
-			fd.set('productId', id);
-			const res = await fetch('?/deleteStock', { method: 'POST', body: fd });
-			if (res.ok) { toast.success('Produk dihapus dari gudang'); invalidateAll(); }
-			else { const err = await res.json(); toast.error(err?.message || 'Gagal menghapus'); }
-		} catch (e) { toast.error('Gagal menghapus'); }
-		finally { deleteLoading = false; }
-	}}
-	onCancel={() => deleteTargetId = null}
-/>
+<Dialog open={deleteTargetId !== null} onOpenChange={(o) => { if (!o) deleteTargetId = null; }}>
+	<DialogContent class="sm:max-w-sm">
+		<DialogHeader>
+			<DialogTitle>Hapus Stok Produk?</DialogTitle>
+			<DialogDescription>Produk akan dihapus dan tidak muncul lagi di daftar stok.</DialogDescription>
+		</DialogHeader>
+		<DialogFooter class="gap-2">
+			<Button variant="outline" onclick={() => deleteTargetId = null}>Batal</Button>
+			<form method="post" action="?/deleteStock" use:enhance={() => {
+				return async ({ result, update }) => {
+					update();
+					if (result.type === 'success') { deleteTargetId = null; toast.success('Produk dihapus dari gudang'); await invalidateAll(); }
+					else if (result.type === 'failure') { const msg = (result.data as any)?.message; if (msg) toast.error(msg); }
+				};
+			}}>
+				<input type="hidden" name="productId" value={deleteTargetId ?? ''} />
+				<Button variant="destructive" type="submit">Hapus</Button>
+			</form>
+		</DialogFooter>
+	</DialogContent>
+</Dialog>

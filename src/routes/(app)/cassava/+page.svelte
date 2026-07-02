@@ -3,9 +3,9 @@
 	import { Input } from '$lib/components/ui/input';
 	import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '$lib/components/ui/dialog';
 	import { Plus, Loader2, Wheat, Truck, Scale, DollarSign, Pencil, Trash2 } from '@lucide/svelte';
-import ConfirmDialog from '$lib/components/ui/confirm-dialog.svelte';
 	import { toast } from 'svelte-sonner';
 	import { enhance } from '$app/forms';
+	import { invalidateAll } from '$app/navigation';
 
 	let { data } = $props();
 
@@ -284,20 +284,24 @@ import ConfirmDialog from '$lib/components/ui/confirm-dialog.svelte';
 	</DialogContent>
 </Dialog>
 
-<ConfirmDialog
-	open={deleteTargetId !== null}
-	title="Hapus Penerimaan?"
-	description="Tindakan ini tidak bisa dibatalkan."
-	confirmLabel="Hapus"
-	onConfirm={async () => {
-		const id = deleteTargetId;
-		deleteTargetId = null;
-		if (!id) return;
-		const fd = new FormData();
-		fd.set('id', id);
-		const res = await fetch('?/delete', { method: 'POST', body: fd });
-		if (res.ok) { toast.success('Penerimaan dihapus'); window.location.reload(); }
-		else { const err = await res.json(); toast.error(err?.message || 'Gagal menghapus'); }
-	}}
-	onCancel={() => deleteTargetId = null}
-/>
+<Dialog open={deleteTargetId !== null} onOpenChange={(o) => { if (!o) deleteTargetId = null; }}>
+	<DialogContent class="sm:max-w-sm">
+		<DialogHeader>
+			<DialogTitle>Hapus Penerimaan?</DialogTitle>
+			<DialogDescription>Tindakan ini tidak bisa dibatalkan.</DialogDescription>
+		</DialogHeader>
+		<DialogFooter class="gap-2">
+			<Button variant="outline" onclick={() => deleteTargetId = null}>Batal</Button>
+			<form method="post" action="?/delete" use:enhance={() => {
+				return async ({ result, update }) => {
+					update();
+					if (result.type === 'success') { deleteTargetId = null; toast.success('Penerimaan dihapus'); await invalidateAll(); }
+					else if (result.type === 'failure') { const msg = (result.data as any)?.message; if (msg) toast.error(msg); }
+				};
+			}}>
+				<input type="hidden" name="id" value={deleteTargetId ?? ''} />
+				<Button variant="destructive" type="submit">Hapus</Button>
+			</form>
+		</DialogFooter>
+	</DialogContent>
+</Dialog>

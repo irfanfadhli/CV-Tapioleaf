@@ -54,7 +54,7 @@
 <div class="space-y-6">
 	<div class="flex items-center justify-between">
 		<div class="flex items-center gap-3">
-			<a href="/gudang"><Button variant="ghost" size="sm"><ArrowLeft size={16} /></Button></a>
+			<a href="/warehouses"><Button variant="ghost" size="sm"><ArrowLeft size={16} /></Button></a>
 			<h1 class="text-2xl font-bold">Riwayat Stok</h1>
 		</div>
 	</div>

@@ -61,17 +61,17 @@
 				<Wheat size={18} /> Penerimaan Singkong
 			</a>
 			<div class="px-3 pt-2 pb-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Produksi</div>
-			<a href="/produksi" onclick={closeSidebar} class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors hover:bg-accent hover:text-accent-foreground" class:bg-accent={$page.url.pathname === '/produksi' || $page.url.pathname === '/produksi/riwayat'}>
+			<a href="/production" onclick={closeSidebar} class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors hover:bg-accent hover:text-accent-foreground" class:bg-accent={$page.url.pathname === '/production' || $page.url.pathname === '/production/history'}>
 				<Factory size={18} /> Produksi Harian
 			</a>
 			<div class="px-3 pt-2 pb-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Stok & Produk</div>
-			<a href="/gudang" onclick={closeSidebar} class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors hover:bg-accent hover:text-accent-foreground" class:bg-accent={$page.url.pathname === '/gudang' || $page.url.pathname === '/gudang/riwayat'}>
+			<a href="/warehouses" onclick={closeSidebar} class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors hover:bg-accent hover:text-accent-foreground" class:bg-accent={$page.url.pathname === '/warehouses' || $page.url.pathname === '/warehouses/history'}>
 				<Warehouse size={18} /> Gudang
 			</a>
-			<a href="/kategori" onclick={closeSidebar} class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors hover:bg-accent hover:text-accent-foreground" class:bg-accent={$page.url.pathname === '/kategori'}>
+			<a href="/categories" onclick={closeSidebar} class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors hover:bg-accent hover:text-accent-foreground" class:bg-accent={$page.url.pathname === '/categories'}>
 				<Tags size={18} /> Kategori Produk
 			</a>
-			<a href="/produk" onclick={closeSidebar} class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors hover:bg-accent hover:text-accent-foreground" class:bg-accent={$page.url.pathname === '/produk'}>
+			<a href="/products" onclick={closeSidebar} class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors hover:bg-accent hover:text-accent-foreground" class:bg-accent={$page.url.pathname === '/products'}>
 				<Package size={18} /> Produk
 			</a>
 		</nav>

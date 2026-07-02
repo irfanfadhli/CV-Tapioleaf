@@ -6,8 +6,8 @@
 	import { Plus, Search, ArrowUpDown, ArrowUp, ArrowDown } from '@lucide/svelte';
 	import { toast } from 'svelte-sonner';
 	import { onMount } from 'svelte';
-	import ProductTable from '$lib/components/produk/ProductTable.svelte';
-	import ProductFormModal from '$lib/components/produk/ProductFormModal.svelte';
+import ProductTable from '$lib/components/products/ProductTable.svelte';
+import ProductFormModal from '$lib/components/products/ProductFormModal.svelte';
 
 	let { data, form } = $props();
 

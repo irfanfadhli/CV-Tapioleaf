@@ -23,7 +23,7 @@
 				</div>
 			</div>
 			<div class="flex items-center gap-2 shrink-0">
-				<button onclick={() => goto('/gudang')} class="text-sm font-medium text-yellow-800 underline hover:text-yellow-900">Lihat Detail →</button>
+				<button onclick={() => goto('/warehouses')} class="text-sm font-medium text-yellow-800 underline hover:text-yellow-900">Lihat Detail →</button>
 				<button onclick={() => dismissed = true} class="text-sm text-yellow-500 hover:text-yellow-700">✕</button>
 			</div>
 		</div>

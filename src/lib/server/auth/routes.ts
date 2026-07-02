@@ -8,14 +8,14 @@ export interface RouteConfig {
 const routeMap: Record<string, RouteConfig> = {
 	'/': { protected: false },
 	'/login': { protected: false },
-	'/katalog': { protected: false },
+	'/catalog': { protected: false },
 	'/account': { protected: true, roles: ['owner', 'admin_penjualan', 'petugas_gudang', 'bagian_produksi', 'pembeli_umkm'] },
 	'/orders': { protected: true, roles: ['owner', 'admin_penjualan', 'petugas_gudang', 'bagian_produksi', 'pembeli_umkm'] },
 	'/dashboard': { protected: true, roles: ['owner', 'admin_penjualan'] },
-	'/produk': { protected: true, roles: ['owner', 'admin_penjualan'] },
-	'/kategori': { protected: true, roles: ['owner', 'admin_penjualan'] },
-	'/gudang': { protected: true, roles: ['owner', 'petugas_gudang'] },
-	'/produksi': { protected: true, roles: ['owner', 'bagian_produksi'] },
+	'/products': { protected: true, roles: ['owner', 'admin_penjualan'] },
+	'/categories': { protected: true, roles: ['owner', 'admin_penjualan'] },
+	'/warehouses': { protected: true, roles: ['owner', 'petugas_gudang'] },
+	'/production': { protected: true, roles: ['owner', 'bagian_produksi'] },
 	'/suppliers': { protected: true, roles: ['owner', 'petugas_gudang'] },
 	'/cassava': { protected: true, roles: ['owner', 'petugas_gudang'] },
 	'/403': { protected: false }
@@ -23,8 +23,8 @@ const routeMap: Record<string, RouteConfig> = {
 
 export function getRouteConfig(pathname: string): RouteConfig | null {
 	if (routeMap[pathname]) return routeMap[pathname];
-	if (pathname.startsWith('/gudang/')) return routeMap['/gudang'];
-	if (pathname.startsWith('/produksi/')) return routeMap['/produksi'];
+	if (pathname.startsWith('/warehouses/')) return routeMap['/warehouses'];
+	if (pathname.startsWith('/production/')) return routeMap['/production'];
 	if (pathname.startsWith('/api/auth')) return { protected: false };
 	if (pathname.startsWith('/api/xendit')) return { protected: false };
 	if (pathname.startsWith('/api/sign-out')) return { protected: false };

@@ -1,8 +1,10 @@
 <script lang="ts">
 	import { Building2, Phone, MapPin, Trash2 } from '@lucide/svelte';
 	import { Button } from '$lib/components/ui/button';
+	import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '$lib/components/ui/dialog';
 	import { toast } from 'svelte-sonner';
-	import ConfirmDialog from '$lib/components/ui/confirm-dialog.svelte';
+	import { enhance } from '$app/forms';
+	import { invalidateAll } from '$app/navigation';
 
 	let { data } = $props();
 
@@ -41,20 +43,24 @@
 	{/if}
 </div>
 
-<ConfirmDialog
-	open={deleteTargetId !== null}
-	title="Hapus Supplier?"
-	description="Tindakan ini tidak bisa dibatalkan."
-	confirmLabel="Hapus"
-	onConfirm={async () => {
-		const id = deleteTargetId;
-		deleteTargetId = null;
-		if (!id) return;
-		const fd = new FormData();
-		fd.set('id', id);
-		const res = await fetch('?/delete', { method: 'POST', body: fd });
-		if (res.ok) { toast.success('Supplier dihapus'); window.location.reload(); }
-		else { const err = await res.json(); toast.error(err?.message || 'Gagal menghapus'); }
-	}}
-	onCancel={() => deleteTargetId = null}
-/>
+<Dialog open={deleteTargetId !== null} onOpenChange={(o) => { if (!o) deleteTargetId = null; }}>
+	<DialogContent class="sm:max-w-sm">
+		<DialogHeader>
+			<DialogTitle>Hapus Supplier?</DialogTitle>
+			<DialogDescription>Tindakan ini tidak bisa dibatalkan.</DialogDescription>
+		</DialogHeader>
+		<DialogFooter class="gap-2">
+			<Button variant="outline" onclick={() => deleteTargetId = null}>Batal</Button>
+			<form method="post" action="?/delete" use:enhance={() => {
+				return async ({ result, update }) => {
+					update();
+					if (result.type === 'success') { deleteTargetId = null; toast.success('Supplier dihapus'); await invalidateAll(); }
+					else if (result.type === 'failure') { const msg = (result.data as any)?.message; if (msg) toast.error(msg); }
+				};
+			}}>
+				<input type="hidden" name="id" value={deleteTargetId ?? ''} />
+				<Button variant="destructive" type="submit">Hapus</Button>
+			</form>
+		</DialogFooter>
+	</DialogContent>
+</Dialog>

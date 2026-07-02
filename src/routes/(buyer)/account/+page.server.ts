@@ -31,9 +31,9 @@ export const load: PageServerLoad = async (event) => {
 
 	const roleRedirects: Record<string, string> = {
 		owner: '/dashboard',
-		admin_penjualan: '/produk',
-		petugas_gudang: '/gudang',
-		bagian_produksi: '/produksi'
+		admin_penjualan: '/products',
+		petugas_gudang: '/warehouses',
+		bagian_produksi: '/production'
 	};
 
 	if (roleRedirects[roleAfterUpdate]) {

@@ -4,7 +4,7 @@
 	import { TriangleAlert } from '@lucide/svelte';
 
 	let {
-		open = $bindable(false),
+		open = false,
 		title = 'Konfirmasi',
 		description = '',
 		confirmLabel = 'Hapus',
@@ -30,18 +30,9 @@
 			requestAnimationFrame(() => cancelRef?.focus());
 		}
 	});
-
-	function handleKeydown(e: KeyboardEvent) {
-		if (e.key === 'Escape' && open) {
-			open = false;
-			onCancel?.();
-		}
-	}
 </script>
 
-<svelte:window onkeydown={handleKeydown} />
-
-<Dialog.Root bind:open>
+<Dialog.Root open={open} onOpenChange={(v) => { if (!v) onCancel?.(); }}>
 	<Dialog.Content showCloseButton={false}>
 		<div class="flex flex-col items-center gap-4 text-center">
 			{#if variant === 'danger'}
@@ -57,10 +48,10 @@
 			</div>
 		</div>
 		<div class="flex justify-center gap-3">
-			<Button variant="outline" onclick={() => { open = false; onCancel?.(); }} bind:ref={cancelRef}>{cancelLabel}</Button>
+			<Button variant="outline" onclick={() => { onCancel?.(); }} bind:ref={cancelRef}>{cancelLabel}</Button>
 			<Button
 				variant={variant === 'danger' ? 'destructive' : 'default'}
-				onclick={() => { open = false; onConfirm(); }}
+				onclick={() => { onConfirm(); }}
 			>{confirmLabel}</Button>
 		</div>
 	</Dialog.Content>

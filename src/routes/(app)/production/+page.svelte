@@ -3,16 +3,14 @@
 	import { Input } from '$lib/components/ui/input';
 	import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '$lib/components/ui/dialog';
 	import { Plus, Loader2, CheckCircle2, Factory, Trash2, AlertTriangle } from '@lucide/svelte';
-import ConfirmDialog from '$lib/components/ui/confirm-dialog.svelte';
 	import { toast } from 'svelte-sonner';
 	import { enhance } from '$app/forms';
-import { invalidateAll } from '$app/navigation';
+	import { invalidateAll } from '$app/navigation';
 
 	let { data } = $props();
 
 	let showModal = $state(false);
 	let deleteTargetId = $state<string | null>(null);
-	let deleteLoading = $state(false);
 	let quantityKg = $state('');
 	let productionDate = $state(new Date().toISOString().slice(0, 10));
 	let notes = $state('');
@@ -180,24 +178,24 @@ import { invalidateAll } from '$app/navigation';
 	</DialogContent>
 </Dialog>
 
-<ConfirmDialog
-	open={deleteTargetId !== null && !deleteLoading}
-	title="Hapus Entry Produksi?"
-	description={data.todayItems.find((i: any) => i.id === deleteTargetId)?.status === 'CONFIRMED' ? 'Batch CONFIRMED tidak bisa dihapus.' : 'Tindakan ini tidak bisa dibatalkan.'}
-	confirmLabel={deleteLoading ? 'Menghapus...' : 'Hapus'}
-	onConfirm={async () => {
-		const id = deleteTargetId;
-		deleteTargetId = null;
-		if (!id) return;
-		deleteLoading = true;
-		try {
-			const fd = new FormData();
-			fd.set('id', id);
-			const res = await fetch('?/delete', { method: 'POST', body: fd });
-			if (res.ok) { toast.success('Produksi dihapus'); invalidateAll(); }
-			else { const err = await res.json(); toast.error(err?.message || 'Gagal menghapus'); }
-		} catch (e) { toast.error('Gagal menghapus'); }
-		finally { deleteLoading = false; }
-	}}
-	onCancel={() => deleteTargetId = null}
-/>
+<Dialog open={deleteTargetId !== null} onOpenChange={(o) => { if (!o) deleteTargetId = null; }}>
+	<DialogContent class="sm:max-w-sm">
+		<DialogHeader>
+			<DialogTitle>Hapus Entry Produksi?</DialogTitle>
+			<DialogDescription>Tindakan ini tidak bisa dibatalkan.</DialogDescription>
+		</DialogHeader>
+		<DialogFooter class="gap-2">
+			<Button variant="outline" onclick={() => deleteTargetId = null}>Batal</Button>
+			<form method="post" action="?/delete" use:enhance={() => {
+				return async ({ result, update }) => {
+					update();
+					if (result.type === 'success') { deleteTargetId = null; toast.success('Produksi dihapus'); await invalidateAll(); }
+					else if (result.type === 'failure') { const msg = (result.data as any)?.message; if (msg) toast.error(msg); }
+				};
+			}}>
+				<input type="hidden" name="id" value={deleteTargetId ?? ''} />
+				<Button variant="destructive" type="submit">Hapus</Button>
+			</form>
+		</DialogFooter>
+	</DialogContent>
+</Dialog>
