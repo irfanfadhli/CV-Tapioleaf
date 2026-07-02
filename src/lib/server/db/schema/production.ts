@@ -16,7 +16,8 @@ export const productionEntries = pgTable('production_entries', {
 	confirmedByUserId: text('confirmed_by_user_id'),
 	confirmedAt: timestamp('confirmed_at', { withTimezone: true }),
 	createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
-	updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull()
+	updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+	deletedAt: timestamp('deleted_at', { withTimezone: true })
 }, (table) => [
 	index('prod_product_idx').on(table.productId),
 	index('prod_date_idx').on(table.productionDate),

@@ -6,12 +6,13 @@
 import ConfirmDialog from '$lib/components/ui/confirm-dialog.svelte';
 	import { toast } from 'svelte-sonner';
 	import { enhance } from '$app/forms';
+import { invalidateAll } from '$app/navigation';
 
 	let { data } = $props();
 
 	let showModal = $state(false);
 	let deleteTargetId = $state<string | null>(null);
-	let deleteForm = $state<HTMLFormElement | undefined>();
+	let deleteLoading = $state(false);
 	let quantityKg = $state('');
 	let productionDate = $state(new Date().toISOString().slice(0, 10));
 	let notes = $state('');
@@ -102,7 +103,7 @@ import ConfirmDialog from '$lib/components/ui/confirm-dialog.svelte';
 									</td>
 									<td class="px-4 py-3 text-xs text-muted-foreground">{item.notes || '—'}</td>
 									<td class="px-4 py-3 text-center">
-										<button type="button" onclick={() => deleteTargetId = item.id} class="inline-flex items-center justify-center rounded-md p-1 text-red-500 hover:text-red-700"><Trash2 size={14} /></button>
+										<Button variant="ghost" size="sm" type="button" onclick={() => deleteTargetId = item.id} class="text-red-500 hover:text-red-700"><Trash2 size={14} /></Button>
 									</td>
 								</tr>
 							{:else}
@@ -179,23 +180,24 @@ import ConfirmDialog from '$lib/components/ui/confirm-dialog.svelte';
 	</DialogContent>
 </Dialog>
 
-<form method="post" action="?/delete" use:enhance={() => {
-		return async ({ result }) => {
-			if (result.type === 'success') { window.location.reload(); }
-			else if (result.type === 'failure') { const msg = (result.data as any)?.message; if (msg) toast.error(msg); }
-		};
-	}} bind:this={deleteForm} class="hidden">
-	<input type="hidden" name="id" value={deleteTargetId ?? ''} />
-</form>
-
 <ConfirmDialog
-	open={deleteTargetId !== null}
+	open={deleteTargetId !== null && !deleteLoading}
 	title="Hapus Entry Produksi?"
-	description="Tindakan ini tidak bisa dibatalkan."
-	confirmLabel="Hapus"
-	onConfirm={() => {
-		deleteForm?.requestSubmit();
+	description={data.todayItems.find((i: any) => i.id === deleteTargetId)?.status === 'CONFIRMED' ? 'Batch CONFIRMED tidak bisa dihapus.' : 'Tindakan ini tidak bisa dibatalkan.'}
+	confirmLabel={deleteLoading ? 'Menghapus...' : 'Hapus'}
+	onConfirm={async () => {
+		const id = deleteTargetId;
 		deleteTargetId = null;
+		if (!id) return;
+		deleteLoading = true;
+		try {
+			const fd = new FormData();
+			fd.set('id', id);
+			const res = await fetch('?/delete', { method: 'POST', body: fd });
+			if (res.ok) { toast.success('Produksi dihapus'); invalidateAll(); }
+			else { const err = await res.json(); toast.error(err?.message || 'Gagal menghapus'); }
+		} catch (e) { toast.error('Gagal menghapus'); }
+		finally { deleteLoading = false; }
 	}}
 	onCancel={() => deleteTargetId = null}
 />

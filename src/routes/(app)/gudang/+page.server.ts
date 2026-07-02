@@ -5,7 +5,8 @@ import * as productService from '$lib/server/product/service';
 import { db } from '$lib/server/db';
 import { cassavaReceipts } from '$lib/server/db/schema/cassava';
 import { productionEntries } from '$lib/server/db/schema/production';
-import { sql } from 'drizzle-orm';
+import { products } from '$lib/server/db/schema/product';
+import { sql, eq } from 'drizzle-orm';
 
 export const load: PageServerLoad = async (event) => {
 	try {
@@ -34,15 +35,13 @@ export const actions: Actions = {
 	deleteStock: async (event) => {
 		const formData = await event.request.formData();
 		const productId = formData.get('productId')?.toString() ?? '';
+		if (!productId) return fail(400, { message: 'ID tidak valid' });
 		try {
-			const movements = await stockService.getMovements({ productId, page: 1, limit: 100 } as any);
-			for (const m of movements.items) {
-				await stockService.deleteMovement(m.id);
-			}
+			await db.update(products).set({ deletedAt: new Date(), updatedAt: new Date() }).where(eq(products.id, productId));
 		} catch (e) {
-			return fail(400, { message: e instanceof Error ? e.message : 'Gagal' });
+			return fail(400, { message: e instanceof Error ? e.message : 'Gagal menghapus' });
 		}
-		return { success: true, message: 'Stok dihapus' };
+		return { success: true };
 	},
 
 	create: async (event) => {

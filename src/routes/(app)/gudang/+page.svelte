@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import { goto, afterNavigate, invalidate } from '$app/navigation';
+	import { goto, afterNavigate, invalidateAll } from '$app/navigation';
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
 	import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '$lib/components/ui/dialog';
@@ -39,6 +39,7 @@
 
 	let submitting = $state(false);
 	let deleteTargetId = $state<string | null>(null);
+	let deleteLoading = $state(false);
 
 	function handleSearch() {
 		clearTimeout(debounceTimer);
@@ -139,7 +140,7 @@
 							</td>
 							<td class="px-4 py-3">
 								<div class="flex items-center justify-center gap-1">
-									<button type="button" onclick={() => deleteTargetId = item.id} class="inline-flex items-center justify-center rounded-md p-1 text-red-500 hover:text-red-700"><Trash2 size={14} /></button>
+									<Button variant="ghost" size="sm" type="button" onclick={() => deleteTargetId = item.id} class="text-red-500 hover:text-red-700"><Trash2 size={14} /></Button>
 								</div>
 							</td>
 						</tr>
@@ -211,19 +212,23 @@
 </Dialog>
 
 <ConfirmDialog
-	open={deleteTargetId !== null}
+	open={deleteTargetId !== null && !deleteLoading}
 	title="Hapus Stok Produk?"
-	description="Semua riwayat pergerakan stok produk ini akan dihapus."
-	confirmLabel="Hapus"
+	description="Produk akan dihapus dan tidak muncul lagi di daftar stok."
+	confirmLabel={deleteLoading ? 'Menghapus...' : 'Hapus'}
 	onConfirm={async () => {
 		const id = deleteTargetId;
 		deleteTargetId = null;
 		if (!id) return;
-		const fd = new FormData();
-		fd.set('productId', id);
-		const res = await fetch('?/deleteStock', { method: 'POST', body: fd });
-		if (res.ok) { toast.success('Stok dihapus'); window.location.reload(); }
-		else { const err = await res.json(); toast.error(err?.message || 'Gagal menghapus'); }
+		deleteLoading = true;
+		try {
+			const fd = new FormData();
+			fd.set('productId', id);
+			const res = await fetch('?/deleteStock', { method: 'POST', body: fd });
+			if (res.ok) { toast.success('Produk dihapus dari gudang'); invalidateAll(); }
+			else { const err = await res.json(); toast.error(err?.message || 'Gagal menghapus'); }
+		} catch (e) { toast.error('Gagal menghapus'); }
+		finally { deleteLoading = false; }
 	}}
 	onCancel={() => deleteTargetId = null}
 />

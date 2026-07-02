@@ -19,6 +19,7 @@ export const cassavaReceipts = pgTable('cassava_receipts', {
 	receivedById: text('received_by_id').notNull().references(() => user.id),
 	createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
 	updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+	deletedAt: timestamp('deleted_at', { withTimezone: true })
 }, (table) => [
 	index('cassava_supplier_idx').on(table.supplierId),
 	index('cassava_date_idx').on(table.receiptDate),

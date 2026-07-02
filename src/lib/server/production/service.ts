@@ -1,8 +1,7 @@
-import { and, eq, gte, lte, ilike, isNull, or, sql, desc, asc, type SQL, like } from 'drizzle-orm';
+import { and, eq, gte, lte, isNull, or, sql, desc, asc, type SQL } from 'drizzle-orm';
 import { db } from '../db';
 import { products } from '../db/schema/product';
 import { productionEntries } from '../db/schema/production';
-import { stockMovements } from '../db/schema/stock';
 import { createProductionSchema, productionQuerySchema } from './validation';
 import type { CreateProductionInput, ProductionQuery } from './validation';
 import { addMovement } from '../stock/service';
@@ -85,16 +84,15 @@ export async function confirmTodayProduction(userId?: string) {
 }
 
 export async function deleteProduction(id: string) {
-	const [existing] = await db.select().from(productionEntries).where(eq(productionEntries.id, id)).limit(1);
+	const [existing] = await db.select().from(productionEntries).where(and(eq(productionEntries.id, id), isNull(productionEntries.deletedAt))).limit(1);
 	if (!existing) throw new Error('Entry produksi tidak ditemukan');
 
-	await db.delete(stockMovements).where(like(stockMovements.note, `%${id}%`));
-	await db.delete(productionEntries).where(eq(productionEntries.id, id));
+	await db.update(productionEntries).set({ deletedAt: new Date() }).where(eq(productionEntries.id, id));
 }
 
 export async function listProductions(query: ProductionQuery) {
 	const q = productionQuerySchema.parse(query);
-	const conditions: SQL<unknown>[] = [];
+	const conditions: SQL<unknown>[] = [isNull(productionEntries.deletedAt)];
 	if (q.productId) conditions.push(eq(productionEntries.productId, q.productId));
 	if (q.startDate) conditions.push(gte(productionEntries.productionDate, new Date(q.startDate)));
 	if (q.endDate) conditions.push(lte(productionEntries.productionDate, new Date(q.endDate)));
@@ -158,7 +156,8 @@ export async function getTodaySummary() {
 		draftCount: sql<number>`COUNT(*) FILTER (WHERE status = 'DRAFT')`,
 		confirmedCount: sql<number>`COUNT(*) FILTER (WHERE status = 'CONFIRMED')`
 	})
-		.from(productionEntries);
+		.from(productionEntries)
+		.where(isNull(productionEntries.deletedAt));
 
 	const targetKg = await getCassavaTargetKg();
 	const totalKg = Number(result?.totalKg || 0);

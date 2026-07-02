@@ -5,7 +5,7 @@ import * as productService from '$lib/server/product/service';
 import { db } from '$lib/server/db';
 import { cassavaReceipts } from '$lib/server/db/schema/cassava';
 import { productionEntries } from '$lib/server/db/schema/production';
-import { sql } from 'drizzle-orm';
+import { sql, eq } from 'drizzle-orm';
 
 export const load: PageServerLoad = async (event) => {
 	const todaySummary = await productionService.getTodaySummary();
@@ -51,6 +51,13 @@ export const actions: Actions = {
 	delete: async (event) => {
 		const formData = await event.request.formData();
 		const id = formData.get('id')?.toString() ?? '';
+		if (!id) return fail(400, { message: 'ID tidak valid' });
+
+		const [entry] = await db.select().from(productionEntries).where(eq(productionEntries.id, id)).limit(1);
+		if (entry?.status === 'CONFIRMED') {
+			return fail(400, { message: 'Batch yang sudah CONFIRMED tidak bisa dihapus langsung.' });
+		}
+
 		try {
 			await productionService.deleteProduction(id);
 		} catch (e) {

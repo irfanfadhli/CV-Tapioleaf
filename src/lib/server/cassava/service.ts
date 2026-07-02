@@ -35,7 +35,7 @@ export async function createReceipt(input: {
 }
 
 export async function listReceipts(query: { page?: number; limit?: number; supplierId?: string; startDate?: string; endDate?: string }) {
-	const conditions = [];
+	const conditions = [isNull(cassavaReceipts.deletedAt)];
 	if (query.supplierId) conditions.push(eq(cassavaReceipts.supplierId, query.supplierId));
 	if (query.startDate) conditions.push(gte(cassavaReceipts.receiptDate, new Date(query.startDate)));
 	if (query.endDate) conditions.push(lte(cassavaReceipts.receiptDate, new Date(query.endDate)));
@@ -123,14 +123,14 @@ export async function deleteReceipt(id: string) {
 	const [usedResult] = await db.select({ total: sql<string>`COALESCE(SUM(cassava_used_kg::numeric), 0)` }).from(productionEntries).limit(1);
 	const totalUsed = Number(usedResult?.total || 0);
 
-	const [remainingResult] = await db.select({ total: sql<string>`COALESCE(SUM(final_weight::numeric), 0)` }).from(cassavaReceipts).where(ne(cassavaReceipts.id, id)).limit(1);
+	const [remainingResult] = await db.select({ total: sql<string>`COALESCE(SUM(final_weight::numeric), 0)` }).from(cassavaReceipts).where(and(ne(cassavaReceipts.id, id), isNull(cassavaReceipts.deletedAt))).limit(1);
 	const remainingFinal = Number(remainingResult?.total || 0);
 
 	if (remainingFinal < totalUsed) {
 		throw new Error('Tidak bisa menghapus penerimaan ini karena sudah digunakan dalam produksi');
 	}
 
-	await db.delete(cassavaReceipts).where(eq(cassavaReceipts.id, id));
+	await db.update(cassavaReceipts).set({ deletedAt: new Date() }).where(eq(cassavaReceipts.id, id));
 }
 
 export async function getSummary() {
@@ -142,6 +142,7 @@ export async function getSummary() {
 		count: sql<number>`COUNT(*)`,
 	})
 		.from(cassavaReceipts)
+		.where(isNull(cassavaReceipts.deletedAt))
 		.limit(1);
 
 	return {
