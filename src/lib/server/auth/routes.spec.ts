@@ -27,7 +27,7 @@ describe('getRouteConfig', () => {
 		expect(config).not.toBeNull();
 		expect(config!.protected).toBe(true);
 		expect(config!.roles).toContain('owner');
-		expect(config!.roles).toContain('bagian_produksi');
+		expect(config!.roles).toContain('petugas_gudang');
 	});
 
 	it('returns public config for auth API routes', () => {
