@@ -76,13 +76,22 @@ export async function updateProduct(id: string, input: UpdateProductInput, image
 		imageUrl = await uploadImage(filename, imageBuffer, mimeType) ?? undefined;
 	}
 
-	const { price, costPrice, ...restData } = data;
+	const { price, costPrice, removeImage, ...restData } = data;
+
+	if (removeImage && !imageBuffer) {
+		const existing = await db.select({ imageUrl: products.imageUrl }).from(products).where(eq(products.id, id)).limit(1);
+		if (existing[0]?.imageUrl) {
+			await deleteImage(existing[0].imageUrl).catch(() => {});
+		}
+	}
+
 	const [product] = await db.update(products)
 		.set({
 			...restData,
 			...(price !== undefined ? { price: String(price) } : {}),
 			...(costPrice !== undefined ? { costPrice: costPrice === null || costPrice === undefined ? null : String(costPrice) } : {}),
 			...(imageUrl ? { imageUrl } : {}),
+			...(removeImage ? { imageUrl: null } : {}),
 			updatedAt: new Date()
 		})
 		.where(eq(products.id, id))
@@ -92,8 +101,11 @@ export async function updateProduct(id: string, input: UpdateProductInput, image
 }
 
 export async function deleteProduct(id: string) {
-	const [product] = await db.select({ id: products.id }).from(products).where(eq(products.id, id)).limit(1);
+	const [product] = await db.select({ id: products.id, imageUrl: products.imageUrl }).from(products).where(eq(products.id, id)).limit(1);
 	if (!product) throw new Error('Produk tidak ditemukan');
+	if (product.imageUrl) {
+		await deleteImage(product.imageUrl).catch(() => {});
+	}
 	await db.update(products)
 		.set({ deletedAt: new Date(), updatedAt: new Date() })
 		.where(eq(products.id, id));

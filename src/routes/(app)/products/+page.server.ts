@@ -31,6 +31,7 @@ export const actions: Actions = {
 			code: formData.get('code')?.toString() || undefined,
 			categoryId: formData.get('categoryId')?.toString() ?? '',
 			price: Number(formData.get('price') ?? '0'),
+			costPrice: formData.get('costPrice') ? Number(formData.get('costPrice')) : undefined,
 			unit: (formData.get('unit')?.toString() ?? 'KG') as 'KG' | 'TON' | 'SAK' | 'PCS',
 			minimumStock: Number(formData.get('minimumStock') ?? '0'),
 			description: formData.get('description')?.toString() || undefined
@@ -56,10 +57,11 @@ export const actions: Actions = {
 		const imageFile = formData.get('image') as File | null;
 
 		const input: Record<string, unknown> = {};
-		for (const field of ['name', 'price', 'unit', 'minimumStock', 'description', 'categoryId']) {
+		for (const field of ['name', 'price', 'costPrice', 'unit', 'minimumStock', 'description', 'categoryId']) {
 			const val = formData.get(field)?.toString();
 			if (val) input[field] = val;
 		}
+		if (formData.get('removeImage') === '1') input.removeImage = true;
 
 		try {
 			let imageBuffer: Buffer | undefined;

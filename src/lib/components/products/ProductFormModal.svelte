@@ -3,7 +3,7 @@
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
 	import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '$lib/components/ui/dialog';
-	import { Loader2 } from '@lucide/svelte';
+	import { Loader2, ImageOff } from '@lucide/svelte';
 	import { toast } from 'svelte-sonner';
 	import { parse } from 'devalue';
 
@@ -30,6 +30,7 @@
 	let description = $state('');
 	let imagePreview = $state('');
 	let imageFile = $state<File | null>(null);
+	let imageError = $state(false);
 	let wasOpen = $state(false);
 
 	$effect(() => {
@@ -63,13 +64,20 @@
 		const file = (e.target as HTMLInputElement).files?.[0];
 		if (!file) return;
 		if (file.size > 2 * 1024 * 1024) {
-			alert('Ukuran gambar maksimal 2MB');
+			toast.error('Ukuran gambar maksimal 2MB');
 			return;
 		}
 		imageFile = file;
+		imagePreview = '';
 		const reader = new FileReader();
 		reader.onload = () => imagePreview = reader.result as string;
 		reader.readAsDataURL(file);
+	}
+
+	function removeImage() {
+		imageFile = null;
+		imagePreview = '';
+		imageError = false;
 	}
 
 	async function handleSubmit(e: Event) {
@@ -159,10 +167,22 @@
 					<Input id="image" name="image" type="file" accept="image/jpeg,image/png,image/webp" onchange={handleImageSelect} />
 				</div>
 			{#if imagePreview}
-				<div class="flex justify-center">
-					<img src={imagePreview} alt="Preview" class="h-24 w-24 rounded-lg object-cover" onerror={(e) => { (e.target as HTMLElement).style.display = 'none'; }} />
+				<div class="flex flex-col items-center gap-2 rounded-lg border bg-muted/20 p-4">
+					{#if !imageFile && product?.imageUrl}
+						<p class="text-xs text-muted-foreground">Gambar Saat Ini</p>
+					{/if}
+					<div class="relative">
+						<img src={imagePreview} alt="Preview" class="h-32 w-32 rounded-lg object-cover sm:h-40 sm:w-40" onerror={() => imageError = true} class:hidden={imageError} />
+						{#if imageError}
+							<div class="flex h-32 w-32 items-center justify-center rounded-lg bg-muted sm:h-40 sm:w-40">
+								<ImageOff size={32} class="text-muted-foreground/50" />
+							</div>
+						{/if}
+					</div>
+					<Button type="button" variant="ghost" size="sm" class="text-red-500" onclick={removeImage}>Hapus Gambar</Button>
 				</div>
 			{/if}
+			<input type="hidden" name="removeImage" value={!imageFile && !imagePreview && product?.imageUrl ? '1' : ''} />
 				<div class="grid gap-2">
 					<Label for="description">Deskripsi</Label>
 					<textarea id="description" name="description" rows="2" class="rounded-lg border bg-background px-3 py-2 text-sm" bind:value={description}></textarea>

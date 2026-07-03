@@ -22,8 +22,18 @@ function getSupabaseS3() {
 }
 
 function getPublicUrl(key: string): string {
-	const base = env.S3_ENDPOINT!.replace('/s3', '/object/public');
-	return `${base}/${env.S3_BUCKET}/${key}`;
+	const ref = env.S3_ENDPOINT?.match(/https:\/\/(.+)\.storage\.supabase\.co/)?.[1];
+	if (ref) {
+		return `https://${ref}.supabase.co/storage/v1/object/public/${env.S3_BUCKET}/${key}`;
+	}
+	if (env.S3_PUBLIC_URL) return `${env.S3_PUBLIC_URL}/${key}`;
+	return `${env.S3_ENDPOINT!.replace('/s3', '/object/public')}/${env.S3_BUCKET}/${key}`;
+}
+
+function extractKey(url: string, s3: ReturnType<typeof getSupabaseS3>): string | null {
+	if (!s3) return null;
+	const prefix = getPublicUrl('');
+	return url.startsWith(prefix) ? url.slice(prefix.length) : null;
 }
 
 export async function uploadImage(filename: string, buffer: Buffer, mimeType: string): Promise<string | null> {
@@ -69,9 +79,10 @@ export async function uploadImage(filename: string, buffer: Buffer, mimeType: st
 
 export async function deleteImage(url: string): Promise<void> {
 	try {
+		if (!url) return;
 		const s3 = getSupabaseS3();
 		if (s3) {
-			const key = url.replace(getPublicUrl(''), '');
+			const key = extractKey(url, s3);
 			if (key) {
 				await s3.client.send(new DeleteObjectCommand({ Bucket: s3.bucket, Key: key }));
 			}

@@ -18,7 +18,8 @@ export const updateProductSchema = z.object({
 	unit: z.enum(['KG', 'TON', 'SAK', 'PCS']).optional(),
 	minimumStock: z.coerce.number().int().min(0).optional(),
 	description: z.string().max(500).optional(),
-	categoryId: z.string().min(1).optional()
+	categoryId: z.string().min(1).optional(),
+	removeImage: z.boolean().optional()
 });
 
 export const productQuerySchema = z.object({
