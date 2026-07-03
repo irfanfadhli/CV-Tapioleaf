@@ -36,12 +36,12 @@
 		</CardHeader>
 		<CardContent class="space-y-4">
 			{#each data.order.items as item}
-				<div class="flex items-center justify-between rounded-lg border p-3">
-					<div>
-						<p class="font-medium">{item.productName}</p>
+				<div class="flex items-center justify-between gap-2 rounded-lg border p-3">
+					<div class="min-w-0 flex-1">
+						<p class="truncate font-medium">{item.productName}</p>
 						<p class="text-xs text-muted-foreground">{item.productCode}</p>
 					</div>
-					<div class="text-right">
+					<div class="shrink-0 text-right">
 						<p class="text-sm">{item.quantity} {item.unit} × Rp {Number(item.unitPrice).toLocaleString('id-ID')}</p>
 						<p class="font-medium">Rp {(Number(item.quantity) * Number(item.unitPrice)).toLocaleString('id-ID')}</p>
 					</div>

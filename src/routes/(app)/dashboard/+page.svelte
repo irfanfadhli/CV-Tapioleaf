@@ -104,7 +104,7 @@
 	</div>
 
 	<!-- Charts Row 1: Area Charts -->
-	<div class="grid gap-4 lg:grid-cols-2">
+	<div class="grid gap-4 md:grid-cols-2">
 		{#if loading}
 			<SkeletonWidget height="h-64" />
 			<SkeletonWidget height="h-64" />

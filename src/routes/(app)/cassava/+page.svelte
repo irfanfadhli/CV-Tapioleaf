@@ -67,13 +67,13 @@
 					<tr>
 						<th class="px-4 py-3 text-left font-medium text-muted-foreground">Tanggal</th>
 						<th class="px-4 py-3 text-left font-medium text-muted-foreground">Supplier</th>
-						<th class="px-4 py-3 text-left font-medium text-muted-foreground">Kendaraan</th>
-						<th class="px-4 py-3 text-right font-medium text-muted-foreground">Gross</th>
-						<th class="px-4 py-3 text-right font-medium text-muted-foreground">Tara</th>
-						<th class="px-4 py-3 text-right font-medium text-muted-foreground">Net</th>
-						<th class="px-4 py-3 text-right font-medium text-muted-foreground">Refraksi</th>
+						<th class="hidden lg:table-cell px-4 py-3 text-left font-medium text-muted-foreground">Kendaraan</th>
+						<th class="hidden md:table-cell px-4 py-3 text-right font-medium text-muted-foreground">Gross</th>
+						<th class="hidden md:table-cell px-4 py-3 text-right font-medium text-muted-foreground">Tara</th>
+						<th class="hidden lg:table-cell px-4 py-3 text-right font-medium text-muted-foreground">Net</th>
+						<th class="hidden md:table-cell px-4 py-3 text-right font-medium text-muted-foreground">Refraksi</th>
 						<th class="px-4 py-3 text-right font-medium text-muted-foreground">Final</th>
-						<th class="px-4 py-3 text-right font-medium text-muted-foreground">Harga/Kg</th>
+						<th class="hidden sm:table-cell px-4 py-3 text-right font-medium text-muted-foreground">Harga/Kg</th>
 						<th class="px-4 py-3 text-right font-medium text-muted-foreground">Total</th>
 						<th class="px-4 py-3 text-center font-medium text-muted-foreground">Aksi</th>
 					</tr>
@@ -83,13 +83,13 @@
 						<tr class="border-t transition-colors hover:bg-muted/30">
 							<td class="px-4 py-3 text-xs text-muted-foreground">{new Date(r.receiptDate).toLocaleDateString('id-ID')}</td>
 							<td class="px-4 py-3 font-medium">{r.supplierName}</td>
-							<td class="px-4 py-3 text-xs">{r.vehicleNumber}{#if r.driverName} ({r.driverName}){/if}</td>
-							<td class="px-4 py-3 text-right">{r.grossWeight.toLocaleString('id-ID')}</td>
-							<td class="px-4 py-3 text-right">{r.taraWeight.toLocaleString('id-ID')}</td>
-							<td class="px-4 py-3 text-right font-medium">{r.netWeight.toLocaleString('id-ID')}</td>
-							<td class="px-4 py-3 text-right text-amber-600">{r.refraction.toLocaleString('id-ID')}</td>
+							<td class="hidden lg:table-cell px-4 py-3 text-xs">{r.vehicleNumber}{#if r.driverName} ({r.driverName}){/if}</td>
+							<td class="hidden md:table-cell px-4 py-3 text-right">{r.grossWeight.toLocaleString('id-ID')}</td>
+							<td class="hidden md:table-cell px-4 py-3 text-right">{r.taraWeight.toLocaleString('id-ID')}</td>
+							<td class="hidden lg:table-cell px-4 py-3 text-right font-medium">{r.netWeight.toLocaleString('id-ID')}</td>
+							<td class="hidden md:table-cell px-4 py-3 text-right text-amber-600">{r.refraction.toLocaleString('id-ID')}</td>
 							<td class="px-4 py-3 text-right font-medium text-emerald-600">{r.finalWeight.toLocaleString('id-ID')}</td>
-							<td class="px-4 py-3 text-right">Rp {r.pricePerKg.toLocaleString('id-ID')}</td>
+							<td class="hidden sm:table-cell px-4 py-3 text-right">Rp {r.pricePerKg.toLocaleString('id-ID')}</td>
 							<td class="px-4 py-3 text-right font-semibold">Rp {r.totalCost.toLocaleString('id-ID')}</td>
 							<td class="px-4 py-3 text-center">
 								<div class="flex items-center justify-center gap-1">
@@ -133,31 +133,31 @@
 						{/each}
 					</select>
 				</div>
-				<div class="grid grid-cols-2 gap-4">
-					<div class="grid gap-2">
-						<label  class="text-sm font-medium">Tanggal</label>
-						<Input name="receiptDate" type="date" bind:value={receiptDate} />
-					</div>
-					<div class="grid gap-2">
-						<label  class="text-sm font-medium">No. Kendaraan *</label>
-						<Input name="vehicleNumber" bind:value={vehicleNumber} required placeholder="Contoh: H 1234 AB" />
-					</div>
+			<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+				<div class="grid gap-2">
+					<label class="text-sm font-medium">Tanggal</label>
+					<Input name="receiptDate" type="date" bind:value={receiptDate} />
 				</div>
 				<div class="grid gap-2">
-					<label  class="text-sm font-medium">Nama Supir</label>
-					<Input name="driverName" bind:value={driverName} placeholder="Opsional" />
+					<label class="text-sm font-medium">No. Kendaraan *</label>
+					<Input name="vehicleNumber" bind:value={vehicleNumber} required placeholder="Contoh: H 1234 AB" />
 				</div>
-				<div class="grid grid-cols-2 gap-4">
-					<div class="grid gap-2">
-						<label  class="text-sm font-medium">Gross Weight (kg) *</label>
-						<Input name="grossWeight" type="number" step="0.01" bind:value={grossWeight} required />
-					</div>
-					<div class="grid gap-2">
-						<label  class="text-sm font-medium">Tara Weight (kg) *</label>
-						<Input name="taraWeight" type="number" step="0.01" bind:value={taraWeight} required />
-					</div>
+			</div>
+			<div class="grid gap-2">
+				<label class="text-sm font-medium">Nama Supir</label>
+				<Input name="driverName" bind:value={driverName} placeholder="Opsional" />
+			</div>
+			<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+				<div class="grid gap-2">
+					<label class="text-sm font-medium">Gross Weight (kg) *</label>
+					<Input name="grossWeight" type="number" step="0.01" bind:value={grossWeight} required />
 				</div>
-				<div class="grid grid-cols-2 gap-4">
+				<div class="grid gap-2">
+					<label class="text-sm font-medium">Tara Weight (kg) *</label>
+					<Input name="taraWeight" type="number" step="0.01" bind:value={taraWeight} required />
+				</div>
+			</div>
+			<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
 					<div class="grid gap-2">
 						<label  class="text-sm font-medium">Refraksi (kg) *</label>
 						<Input name="refraction" type="number" step="0.01" bind:value={refraction} required />

@@ -43,8 +43,8 @@
 						{#if sort === 'price' && order === 'asc'}<ArrowUp size={14} />{:else if sort === 'price' && order === 'desc'}<ArrowDown size={14} />{:else}<ArrowUpDown size={14} />{/if}
 					</button>
 				</th>
-				<th class="px-4 py-3 text-right font-medium text-muted-foreground">Stok Min</th>
-				<th class="px-4 py-3 text-center font-medium text-muted-foreground">Gambar</th>
+				<th class="hidden md:table-cell px-4 py-3 text-right font-medium text-muted-foreground">Stok Min</th>
+				<th class="hidden sm:table-cell px-4 py-3 text-center font-medium text-muted-foreground">Gambar</th>
 				<th class="px-4 py-3 text-center font-medium text-muted-foreground">Aksi</th>
 			</tr>
 		</thead>
@@ -57,8 +57,8 @@
 						<span class="text-xs text-muted-foreground">{product.description || ''}</span>
 					</td>
 					<td class="px-4 py-3 text-right">Rp {Number(product.price).toLocaleString('id-ID')}</td>
-					<td class="px-4 py-3 text-right">{product.minimumStock} {product.unit}</td>
-					<td class="px-4 py-3 text-center">
+					<td class="hidden md:table-cell px-4 py-3 text-right">{product.minimumStock} {product.unit}</td>
+					<td class="hidden sm:table-cell px-4 py-3 text-center">
 						{#if product.imageUrl}
 							<img src={product.imageUrl} alt={product.name} class="mx-auto h-10 w-10 rounded object-cover" onerror={(e) => { (e.target as HTMLElement).style.display = 'none'; }} />
 						{:else}

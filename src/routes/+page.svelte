@@ -20,11 +20,16 @@
 
 	let { data } = $props();
 
-	let scrolled = $state(false);
+	let hideNav = $state(false);
+	let prevScrollY = $state(0);
 
 	$effect(() => {
-		const onScroll = () => scrolled = window.scrollY > 10;
-		onScroll();
+		const onScroll = () => {
+			const y = window.scrollY;
+			if (y > 50 && y > prevScrollY) hideNav = true;
+			else if (y < prevScrollY) hideNav = false;
+			prevScrollY = y;
+		};
 		addEventListener('scroll', onScroll, { passive: true });
 		return () => removeEventListener('scroll', onScroll);
 	});
@@ -97,7 +102,7 @@
 
 <div class="min-h-screen bg-white">
 	<!-- Navbar -->
-	<nav class="top-center fixed z-50 w-full bg-white transition-all duration-300 {scrolled ? 'backdrop-blur-sm' : ''}">
+	<nav class="top-center fixed z-50 w-full border-b bg-white/95 backdrop-blur-sm transition-transform duration-300 {hideNav ? '-translate-y-full' : 'translate-y-0'}">
 		<div class="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
 			<div class="flex items-center gap-2">
 				<img src="/img/logo.png" alt="TapioLeaf" class="h-9 w-9 rounded-lg object-cover" />
@@ -220,7 +225,7 @@
 	</section>
 
 	<!-- Products -->
-	<section id="products" class="px-4 py-12 md:py-12 md:py-16">
+	<section id="products" class="px-4 py-12 md:py-16">
 		<div class="mx-auto max-w-6xl">
 			<div class="mb-8 text-center">
 				<h2 class="mb-2 text-xl font-bold md:text-2xl">Produk Kami</h2>

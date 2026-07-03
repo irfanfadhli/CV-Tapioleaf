@@ -33,7 +33,7 @@
 	{/if}
 
 	<!-- Sidebar -->
-	<aside class="fixed inset-y-0 left-0 z-50 flex w-64 flex-col border-r bg-card px-4 py-6 transition-transform md:static md:translate-x-0" class:-translate-x-full={!sidebarOpen}>
+	<aside class="fixed inset-y-0 left-0 z-50 flex w-64 max-w-[80vw] flex-col overflow-y-auto border-r bg-card px-4 py-6 transition-transform md:static md:translate-x-0" class:-translate-x-full={!sidebarOpen}>
 		<div class="mb-6 flex items-center justify-between px-2 md:justify-start md:gap-3">
 			<div class="flex items-center gap-3">
 				<a href="/dashboard"><img src="/img/logo.png" alt="TapioLeaf" class="h-10 w-10 rounded-full object-cover" /></a>

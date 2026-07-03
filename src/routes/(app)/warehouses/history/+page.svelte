@@ -79,12 +79,12 @@
 			<table class="w-full text-sm">
 				<thead class="bg-muted/50">
 					<tr>
-						<th class="px-4 py-3 text-left font-medium text-muted-foreground">
-							<button onclick={() => toggleSort('movementDate')} class="inline-flex items-center gap-1 hover:text-foreground">
-								Tanggal
-								{#if data.sort === 'movementDate' && data.order === 'asc'}<ArrowUp size={14} />{:else if data.sort === 'movementDate' && data.order === 'desc'}<ArrowDown size={14} />{:else}<ArrowUpDown size={14} />{/if}
-							</button>
-						</th>
+								<th class="hidden sm:table-cell px-4 py-3 text-left font-medium text-muted-foreground">
+									<button onclick={() => toggleSort('movementDate')} class="inline-flex items-center gap-1 hover:text-foreground">
+										Tanggal
+										{#if data.sort === 'movementDate' && data.order === 'asc'}<ArrowUp size={14} />{:else if data.sort === 'movementDate' && data.order === 'desc'}<ArrowDown size={14} />{:else}<ArrowUpDown size={14} />{/if}
+									</button>
+								</th>
 						<th class="px-4 py-3 text-left font-medium text-muted-foreground">Produk</th>
 						<th class="px-4 py-3 text-center font-medium text-muted-foreground">Tipe</th>
 						<th class="px-4 py-3 text-right font-medium text-muted-foreground">
@@ -100,7 +100,7 @@
 				<tbody>
 					{#each data.movements as m}
 						<tr class="border-t transition-colors hover:bg-muted/30">
-							<td class="px-4 py-3 text-xs text-muted-foreground">{new Date(m.movementDate).toLocaleDateString('id-ID')}</td>
+							<td class="hidden sm:table-cell px-4 py-3 text-xs text-muted-foreground">{new Date(m.movementDate).toLocaleDateString('id-ID')}</td>
 							<td class="px-4 py-3">
 								<div class="font-medium">{m.productName}</div>
 								<div class="text-xs text-muted-foreground">{m.productCode}</div>

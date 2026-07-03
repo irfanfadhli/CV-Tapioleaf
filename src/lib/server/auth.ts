@@ -9,7 +9,7 @@ import { db } from '$lib/server/db';
 import { authLogs } from '$lib/server/db/schema/auth-logs';
 
 export const auth = betterAuth({
-	baseURL: env.ORIGIN,
+	baseURL: env.ORIGIN || 'http://localhost:5173',
 	secret: env.BETTER_AUTH_SECRET,
 	database: drizzleAdapter(db, { provider: 'pg' }),
 	emailAndPassword: { enabled: false },

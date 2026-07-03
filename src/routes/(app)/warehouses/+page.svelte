@@ -101,33 +101,33 @@ let searchQuery = $state($page.url.searchParams.get('search') || '');
 			<table class="w-full text-sm">
 				<thead class="bg-muted/50">
 					<tr>
-						<th class="px-4 py-3 text-left font-medium text-muted-foreground">
-							<button onclick={() => toggleSort('code')} class="inline-flex items-center gap-1 hover:text-foreground">
-								Kode
-								{#if data.sort === 'code' && data.order === 'asc'}<ArrowUp size={14} />{:else if data.sort === 'code' && data.order === 'desc'}<ArrowDown size={14} />{:else}<ArrowUpDown size={14} />{/if}
-							</button>
-						</th>
-						<th class="px-4 py-3 text-left font-medium text-muted-foreground">
-							<button onclick={() => toggleSort('name')} class="inline-flex items-center gap-1 hover:text-foreground">
-								Produk
-								{#if data.sort === 'name' && data.order === 'asc'}<ArrowUp size={14} />{:else if data.sort === 'name' && data.order === 'desc'}<ArrowDown size={14} />{:else}<ArrowUpDown size={14} />{/if}
-							</button>
-						</th>
-						<th class="px-4 py-3 text-right font-medium text-muted-foreground">Stok</th>
-						<th class="px-4 py-3 text-right font-medium text-muted-foreground">Harga</th>
-						<th class="px-4 py-3 text-right font-medium text-muted-foreground">Min</th>
-						<th class="px-4 py-3 text-center font-medium text-muted-foreground">Status</th>
-						<th class="px-4 py-3 text-center font-medium text-muted-foreground">Aksi</th>
+					<th class="hidden sm:table-cell px-4 py-3 text-left font-medium text-muted-foreground">
+						<button onclick={() => toggleSort('code')} class="inline-flex items-center gap-1 hover:text-foreground">
+							Kode
+							{#if data.sort === 'code' && data.order === 'asc'}<ArrowUp size={14} />{:else if data.sort === 'code' && data.order === 'desc'}<ArrowDown size={14} />{:else}<ArrowUpDown size={14} />{/if}
+						</button>
+					</th>
+					<th class="px-4 py-3 text-left font-medium text-muted-foreground">
+						<button onclick={() => toggleSort('name')} class="inline-flex items-center gap-1 hover:text-foreground">
+							Produk
+							{#if data.sort === 'name' && data.order === 'asc'}<ArrowUp size={14} />{:else if data.sort === 'name' && data.order === 'desc'}<ArrowDown size={14} />{:else}<ArrowUpDown size={14} />{/if}
+						</button>
+					</th>
+					<th class="px-4 py-3 text-right font-medium text-muted-foreground">Stok</th>
+					<th class="hidden lg:table-cell px-4 py-3 text-right font-medium text-muted-foreground">Harga</th>
+					<th class="hidden md:table-cell px-4 py-3 text-right font-medium text-muted-foreground">Min</th>
+					<th class="px-4 py-3 text-center font-medium text-muted-foreground">Status</th>
+					<th class="px-4 py-3 text-center font-medium text-muted-foreground">Aksi</th>
 					</tr>
 				</thead>
 				<tbody>
 					{#each data.items as item}
 						<tr class="border-t transition-colors hover:bg-muted/30" class:bg-red-50={item.stockStatus === 'CRITICAL'}>
-							<td class="px-4 py-3 font-mono text-xs">{item.code}</td>
+							<td class="hidden sm:table-cell px-4 py-3 font-mono text-xs">{item.code}</td>
 							<td class="px-4 py-3 font-medium">{item.name}</td>
 							<td class="px-4 py-3 text-right font-medium" class:text-red-600={item.stockStatus === 'CRITICAL'}>{item.currentStock} {item.unit}</td>
-							<td class="px-4 py-3 text-right font-medium">Rp {Number(item.price).toLocaleString('id-ID')}</td>
-							<td class="px-4 py-3 text-right text-muted-foreground">{item.minimumStock}</td>
+							<td class="hidden lg:table-cell px-4 py-3 text-right font-medium">Rp {Number(item.price).toLocaleString('id-ID')}</td>
+							<td class="hidden md:table-cell px-4 py-3 text-right text-muted-foreground">{item.minimumStock}</td>
 							<td class="px-4 py-3 text-center">
 								{#if item.stockStatus === 'CRITICAL'}
 									<span class="inline-flex items-center gap-1 rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium text-red-700"><AlertTriangle size={12} /> Kritis</span>

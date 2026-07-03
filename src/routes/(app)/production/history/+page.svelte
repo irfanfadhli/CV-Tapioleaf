@@ -63,37 +63,37 @@ let deleteTargetId = $state<string | null>(null);
 			<table class="w-full text-sm">
 				<thead class="bg-muted/50">
 					<tr>
-						<th class="px-4 py-3 text-left font-medium text-muted-foreground">
-							<button onclick={() => toggleSort('productionDate')} class="inline-flex items-center gap-1 hover:text-foreground">
-								Tanggal
-								{#if data.sort === 'productionDate' && data.order === 'asc'}<ArrowUp size={14} />{:else if data.sort === 'productionDate' && data.order === 'desc'}<ArrowDown size={14} />{:else}<ArrowUpDown size={14} />{/if}
-							</button>
-						</th>
-						<th class="px-4 py-3 text-left font-medium text-muted-foreground">Produk</th>
-						<th class="px-4 py-3 text-right font-medium text-muted-foreground">
-							<button onclick={() => toggleSort('quantityKg')} class="inline-flex items-center gap-1 hover:text-foreground">
-								Tepung
-								{#if data.sort === 'quantityKg' && data.order === 'asc'}<ArrowUp size={14} />{:else if data.sort === 'quantityKg' && data.order === 'desc'}<ArrowDown size={14} />{:else}<ArrowUpDown size={14} />{/if}
-							</button>
-						</th>
-						<th class="px-4 py-3 text-right font-medium text-muted-foreground">Singkong</th>
-						<th class="px-4 py-3 text-right font-medium text-muted-foreground">Yield</th>
-						<th class="px-4 py-3 text-center font-medium text-muted-foreground">Status</th>
-							<th class="px-4 py-3 text-left font-medium text-muted-foreground">Keterangan</th>
-							<th class="px-4 py-3 text-center font-medium text-muted-foreground">Aksi</th>
+					<th class="hidden sm:table-cell px-4 py-3 text-left font-medium text-muted-foreground">
+						<button onclick={() => toggleSort('productionDate')} class="inline-flex items-center gap-1 hover:text-foreground">
+							Tanggal
+							{#if data.sort === 'productionDate' && data.order === 'asc'}<ArrowUp size={14} />{:else if data.sort === 'productionDate' && data.order === 'desc'}<ArrowDown size={14} />{:else}<ArrowUpDown size={14} />{/if}
+						</button>
+					</th>
+					<th class="px-4 py-3 text-left font-medium text-muted-foreground">Produk</th>
+					<th class="px-4 py-3 text-right font-medium text-muted-foreground">
+						<button onclick={() => toggleSort('quantityKg')} class="inline-flex items-center gap-1 hover:text-foreground">
+							Tepung
+							{#if data.sort === 'quantityKg' && data.order === 'asc'}<ArrowUp size={14} />{:else if data.sort === 'quantityKg' && data.order === 'desc'}<ArrowDown size={14} />{:else}<ArrowUpDown size={14} />{/if}
+						</button>
+					</th>
+					<th class="hidden md:table-cell px-4 py-3 text-right font-medium text-muted-foreground">Singkong</th>
+					<th class="hidden md:table-cell px-4 py-3 text-right font-medium text-muted-foreground">Yield</th>
+					<th class="px-4 py-3 text-center font-medium text-muted-foreground">Status</th>
+					<th class="hidden lg:table-cell px-4 py-3 text-left font-medium text-muted-foreground">Keterangan</th>
+					<th class="px-4 py-3 text-center font-medium text-muted-foreground">Aksi</th>
 						</tr>
 					</thead>
 					<tbody>
 						{#each data.items as item}
 							<tr class="border-t transition-colors hover:bg-muted/30">
-								<td class="px-4 py-3 text-xs text-muted-foreground">{new Date(item.productionDate).toLocaleDateString('id-ID')}</td>
+								<td class="hidden sm:table-cell px-4 py-3 text-xs text-muted-foreground">{new Date(item.productionDate).toLocaleDateString('id-ID')}</td>
 								<td class="px-4 py-3">
 									<div class="font-medium">{item.productName}</div>
 									<div class="text-xs text-muted-foreground">{item.productCode}</div>
 								</td>
 								<td class="px-4 py-3 text-right font-medium">{item.quantityKg.toLocaleString('id-ID')}</td>
-								<td class="px-4 py-3 text-right">{item.cassavaUsedKg?.toLocaleString('id-ID') || '—'}</td>
-								<td class="px-4 py-3 text-right text-xs text-muted-foreground">{item.yieldPercentage ? `${item.yieldPercentage}%` : '—'}</td>
+								<td class="hidden md:table-cell px-4 py-3 text-right">{item.cassavaUsedKg?.toLocaleString('id-ID') || '—'}</td>
+								<td class="hidden md:table-cell px-4 py-3 text-right text-xs text-muted-foreground">{item.yieldPercentage ? `${item.yieldPercentage}%` : '—'}</td>
 								<td class="px-4 py-3 text-center">
 									{#if item.status === 'CONFIRMED'}
 										<span class="inline-flex items-center gap-1 rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700"><CheckCircle2 size={12} /> CONFIRMED</span>
@@ -101,7 +101,7 @@ let deleteTargetId = $state<string | null>(null);
 										<span class="inline-flex items-center gap-1 rounded-full bg-yellow-100 px-2 py-0.5 text-xs font-medium text-yellow-700">DRAFT</span>
 									{/if}
 								</td>
-								<td class="px-4 py-3 text-xs text-muted-foreground">{item.notes || '—'}</td>
+								<td class="hidden lg:table-cell px-4 py-3 text-xs text-muted-foreground">{item.notes || '—'}</td>
 								<td class="px-4 py-3 text-center">
 									<Button variant="ghost" size="sm" type="button" onclick={() => deleteTargetId = item.id} class="text-red-500 hover:text-red-700"><Trash2 size={14} /></Button>
 								</td>
