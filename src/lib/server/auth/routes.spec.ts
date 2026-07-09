@@ -36,11 +36,7 @@ describe('getRouteConfig', () => {
 		expect(config!.protected).toBe(false);
 	});
 
-	it('returns public config for 403 page', () => {
-		const config = getRouteConfig('/403');
-		expect(config).not.toBeNull();
-		expect(config!.protected).toBe(false);
-	});
+
 
 	it('returns protected config for categories with owner and admin roles', () => {
 		const config = getRouteConfig('/categories');

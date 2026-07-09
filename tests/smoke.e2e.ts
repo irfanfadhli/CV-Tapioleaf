@@ -29,7 +29,7 @@ test('Protected route — redirects to login', async ({ page }) => {
 	await expect(page).toHaveURL(/\/login/);
 });
 
-test('Protected route — 403 page shows access denied', async ({ page }) => {
-	await page.goto('/403');
-	await expect(page.locator('text=Akses Ditolak')).toBeVisible();
+test('Landing page — footer visible', async ({ page }) => {
+	await page.goto('/');
+	await expect(page.locator('text=CV TapioLeaf').last()).toBeVisible();
 });

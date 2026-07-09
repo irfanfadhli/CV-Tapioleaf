@@ -1,5 +1,5 @@
 import type { Handle } from '@sveltejs/kit';
-import { redirect } from '@sveltejs/kit';
+import { error, redirect } from '@sveltejs/kit';
 import { building } from '$app/environment';
 import { auth } from '$lib/server/auth';
 import { svelteKitHandler } from 'better-auth/svelte-kit';
@@ -24,7 +24,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 					throw redirect(303, `/login?redirect=${encodeURIComponent(event.url.pathname)}`);
 				}
 				if (config.roles && !config.roles.includes(event.locals.user.role)) {
-					throw redirect(303, '/403');
+					throw error(403, 'Akses Ditolak');
 				}
 			}
 		} catch (e) {

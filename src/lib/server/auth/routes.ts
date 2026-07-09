@@ -17,8 +17,7 @@ const routeMap: Record<string, RouteConfig> = {
 	'/warehouses': { protected: true, roles: ['owner', 'petugas_gudang'] },
 	'/production': { protected: true, roles: ['owner', 'bagian_produksi'] },
 	'/suppliers': { protected: true, roles: ['owner', 'petugas_gudang'] },
-	'/cassava': { protected: true, roles: ['owner', 'petugas_gudang'] },
-	'/403': { protected: false }
+	'/cassava': { protected: true, roles: ['owner', 'petugas_gudang'] }
 };
 
 export function getRouteConfig(pathname: string): RouteConfig | null {

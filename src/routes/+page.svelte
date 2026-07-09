@@ -17,6 +17,7 @@
 		ShoppingCart
 	} from '@lucide/svelte';
 	import CheckoutModal from '$lib/components/checkout/CheckoutModal.svelte';
+	import { siteConfig } from '$lib/config';
 
 	let { data } = $props();
 
@@ -97,7 +98,34 @@
 </script>
 
 <svelte:head>
-	<title>CV TapioLeaf — Tepung Tapioka Berkualitas</title>
+	<title>{siteConfig.name} — Tepung Tapioka Berkualitas</title>
+	<meta name="description" content={siteConfig.description} />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<meta charset="utf-8" />
+
+	<link rel="dns-prefetch" href="//ojbivocgryxqdykebsyy.storage.supabase.co" />
+	<link rel="preconnect" href="https://ojbivocgryxqdykebsyy.storage.supabase.co" crossorigin="anonymous" />
+
+	<meta name="keywords" content={siteConfig.keywords} />
+	<meta name="author" content={siteConfig.name} />
+
+	<meta property="og:title" content={`${siteConfig.name} — Tepung Tapioka Berkualitas`} />
+	<meta property="og:description" content={siteConfig.description} />
+	<meta property="og:type" content="website" />
+	<meta property="og:site_name" content={siteConfig.name} />
+	<meta property="og:locale" content="id_ID" />
+	<meta property="og:url" content={siteConfig.url.toString()} />
+	<meta property="og:image" content={siteConfig.ogImage.toString()} />
+
+	<meta name="robots" content="index, follow" />
+	<meta name="googlebot" content="index, follow, max-video-preview:-1, max-image-preview:large, max-snippet:-1" />
+
+	<meta name="twitter:card" content="summary_large_image" />
+	<meta name="twitter:title" content={siteConfig.name} />
+	<meta name="twitter:image" content={siteConfig.ogImage.toString()} />
+	<meta name="twitter:description" content={siteConfig.description} />
+
+	<link rel="canonical" href={siteConfig.url.toString()} />
 </svelte:head>
 
 <div class="min-h-screen bg-white">
@@ -105,7 +133,7 @@
 	<nav class="top-center fixed z-50 w-full border-b bg-white/95 backdrop-blur-sm transition-transform duration-300 {hideNav ? '-translate-y-full' : 'translate-y-0'}">
 		<div class="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
 			<div class="flex items-center gap-2">
-				<img src="/img/logo.png" alt="TapioLeaf" class="h-9 w-9 rounded-lg object-cover" />
+				<img src="/img/logo.png" alt="TapioLeaf" class="h-9 w-9 rounded-xl object-cover" />
 				<div class="text-sm font-bold">CV TapioLeaf</div>
 			</div>
 			<div class="hidden items-center gap-4 text-sm md:flex">

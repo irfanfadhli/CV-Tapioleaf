@@ -17,7 +17,7 @@
 		<div class="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
 			<div class="flex items-center gap-2">
 				<a href="/"
-					><img src="/img/logo.png" alt="TapioLeaf" class="h-8 w-8 rounded-lg object-cover" /></a
+					><img src="/img/logo.png" alt="TapioLeaf" class="h-8 w-8 rounded-xl object-cover" /></a
 				>
 				<span class="text-sm font-semibold">CV TapioLeaf</span>
 			</div>
