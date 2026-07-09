@@ -7,7 +7,7 @@ export const siteConfig = {
 	keywords:
 		'tepung tapioka, tapioka premium, cv tapioleaf, tepung singkong, pati singkong, tapioka industri, tepung tapioka pati, tapioka food grade',
 	url: new URL(ORIGIN),
-	ogImage: new URL('/img/logo.png', ORIGIN),
-	googleVerification: '',
+	ogImage: new URL('/img/og.png', ORIGIN),
+	googleVerification: 'OihcPITN_69JSx4bq4ntPc7LIuXFpUxgFvgC_U-vOPg',
 	yandexVerification: '',
 };
