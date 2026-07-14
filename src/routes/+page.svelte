@@ -109,7 +109,7 @@
 	<meta name="keywords" content={siteConfig.keywords} />
 	<meta name="author" content={siteConfig.name} />
 
-	<meta property="og:title" content={`${siteConfig.name} — Tepung Tapioka Berkualitas`} />
+	<meta property="og:title" content={`${siteConfig.name} - Tepung Tapioka Berkualitas`} />
 	<meta property="og:description" content={siteConfig.description} />
 	<meta property="og:type" content="website" />
 	<meta property="og:site_name" content={siteConfig.name} />
