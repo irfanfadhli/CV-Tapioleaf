@@ -125,6 +125,8 @@
 	<meta name="twitter:image" content={siteConfig.ogImage.toString()} />
 	<meta name="twitter:description" content={siteConfig.description} />
 
+	<meta name="google-site-verification" content={siteConfig.googleVerification.toString()} />
+
 	<link rel="canonical" href={siteConfig.url.toString()} />
 </svelte:head>
 

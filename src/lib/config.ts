@@ -8,6 +8,6 @@ export const siteConfig = {
 		'CV TapioLeaf, tepung tapioka, jual tepung tapioka, produsen tepung tapioka, tepung tapioka Pati',
 	url: new URL(ORIGIN),
 	ogImage: new URL('/img/og.png', ORIGIN),
-	googleVerification: 'OihcPITN_69JSx4bq4ntPc7LIuXFpUxgFvgC_U-vOPg',
+	googleVerification: 'ruX52EXN3iKpnKfeenf_eH3_71YYKVLUb8nG6PSSaoE',
 	yandexVerification: '',
 };
