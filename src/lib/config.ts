@@ -5,7 +5,7 @@ export const siteConfig = {
 	description:
 		'Produsen tepung tapioka berkualitas tinggi. Mengolah singkong pilihan menjadi tepung tapioka premium untuk kebutuhan industri dan rumah tangga.',
 	keywords:
-		'cv tapioleaf, tepung tapioka, jual tepung tapioka, produsen tepung tapioka, tepung tapioka Pati',
+		'CV TapioLeaf, tepung tapioka, jual tepung tapioka, produsen tepung tapioka, tepung tapioka Pati',
 	url: new URL(ORIGIN),
 	ogImage: new URL('/img/og.png', ORIGIN),
 	googleVerification: 'OihcPITN_69JSx4bq4ntPc7LIuXFpUxgFvgC_U-vOPg',
