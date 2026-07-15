@@ -3,6 +3,7 @@ import { db } from '$lib/server/db';
 import { products } from '$lib/server/db/schema/product';
 import { stockMovements } from '$lib/server/db/schema/stock';
 import { sql, eq, isNull, asc, or, ilike, and, type SQL } from 'drizzle-orm';
+import { optimizeImageUrl } from '$lib/utils';
 
 export const load: PageServerLoad = async (event) => {
 	const search = event.url.searchParams.get('search') || '';
@@ -41,7 +42,7 @@ export const load: PageServerLoad = async (event) => {
 	const total = Number(countResult.count);
 
 	return {
-		items: items.map(i => ({ ...i, currentStock: Number(i.currentStock) })),
+		items: items.map(i => ({ ...i, imageUrl: optimizeImageUrl(i.imageUrl), currentStock: Number(i.currentStock) })),
 		pagination: { total, page, limit, totalPages: Math.ceil(total / limit) },
 		search
 	};

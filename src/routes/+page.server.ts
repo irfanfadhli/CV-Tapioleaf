@@ -3,6 +3,7 @@ import { db } from '$lib/server/db';
 import { products } from '$lib/server/db/schema/product';
 import { stockMovements } from '$lib/server/db/schema/stock';
 import { sql, eq, isNull, asc, and } from 'drizzle-orm';
+import { optimizeImageUrl } from '$lib/utils';
 
 export const load: PageServerLoad = async (event) => {
 	const items = await db.select({
@@ -23,7 +24,7 @@ export const load: PageServerLoad = async (event) => {
 		.limit(50);
 
 	return {
-		items: items.map(i => ({ ...i, currentStock: Number(i.currentStock) })),
+		items: items.map(i => ({ ...i, imageUrl: optimizeImageUrl(i.imageUrl), currentStock: Number(i.currentStock) })),
 		user: event.locals.user ? { name: event.locals.user.name, email: event.locals.user.email, role: event.locals.user.role } : null
 	};
 };

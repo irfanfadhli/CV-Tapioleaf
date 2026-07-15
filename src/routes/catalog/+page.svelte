@@ -98,10 +98,10 @@
 						<a
 							href="?page={i + 1}&search={data.search}"
 							class="inline-flex h-9 w-9 items-center justify-center rounded-lg text-sm transition-colors"
-							class:bg-emerald-600={data.pagination.page === i + 1}
+							class:bg-emerald-700={data.pagination.page === i + 1}
 							class:text-white={data.pagination.page === i + 1}
+							class:text-emerald-700={data.pagination.page !== i + 1}
 							class:hover:bg-emerald-50={data.pagination.page !== i + 1}
-							class:text-emerald-700={data.pagination.page === i + 1}
 						>{i + 1}</a>
 					{/each}
 				</div>

@@ -249,7 +249,7 @@
 			<div class="flex flex-col items-center gap-3 sm:flex-row sm:justify-center sm:gap-4">
 				<a
 					href="#products"
-					class="w-full sm:w-auto rounded-xl bg-emerald-600 px-8 py-3 font-semibold text-white shadow-lg transition-all hover:bg-emerald-700 active:scale-95"
+					class="w-full sm:w-auto rounded-xl bg-emerald-700 px-8 py-3 font-semibold text-white shadow-lg transition-all hover:bg-emerald-800 active:scale-95"
 					>Lihat Produk</a
 				>
 				<a
@@ -334,7 +334,7 @@
 							</div>
 							<button
 								onclick={() => openCheckout(item)}
-								class="mt-2 block w-full rounded-lg bg-emerald-600 py-1.5 text-center text-xs font-medium text-white transition-colors hover:bg-emerald-700"
+								class="mt-2 block w-full rounded-lg bg-emerald-700 py-1.5 text-center text-xs font-medium text-white transition-colors hover:bg-emerald-800"
 							>
 								<ShoppingCart size={14} class="mr-1 inline" /> Pesan Sekarang
 							</button>
