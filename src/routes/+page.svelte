@@ -100,8 +100,6 @@
 <svelte:head>
 	<title>{siteConfig.name} — Tepung Tapioka Berkualitas</title>
 	<meta name="description" content={siteConfig.description} />
-	<meta name="viewport" content="width=device-width, initial-scale=1" />
-	<meta charset="utf-8" />
 	<link rel="preload" as="image" href="/img/cassava.jpg" fetchpriority="high" />
 
 	<link rel="dns-prefetch" href="//ojbivocgryxqdykebsyy.storage.supabase.co" />
@@ -133,10 +131,10 @@
 
 <div class="min-h-screen bg-white">
 	<!-- Navbar -->
-	<nav class="top-center fixed z-50 w-full border-b bg-white/95 backdrop-blur-sm transition-transform duration-300 {hideNav ? '-translate-y-full' : 'translate-y-0'}">
+	<nav aria-label="Navigasi utama" class="top-center fixed z-50 w-full border-b bg-white/95 backdrop-blur-sm transition-transform duration-300 {hideNav ? '-translate-y-full' : 'translate-y-0'}">
 		<div class="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
 			<div class="flex items-center gap-2">
-				<img src="/img/logo.png" alt="TapioLeaf" class="h-9 w-9 rounded-xl object-cover" />
+				<img src="/img/logo.png" alt="TapioLeaf" class="h-9 w-9 rounded-xl object-cover" width="36" height="36" />
 				<div class="text-sm font-bold">CV TapioLeaf</div>
 			</div>
 			<div class="hidden items-center gap-4 text-sm md:flex">
@@ -225,15 +223,23 @@
 
 	<!-- Hero -->
 	<section
-		class="relative flex min-h-[calc(100vh-4rem)] flex-col items-center justify-center bg-cover bg-center px-4 pt-16 text-center"
-		style="background-image: url('/img/cassava.jpg')"
+		class="relative flex min-h-[calc(100vh-4rem)] flex-col items-center justify-center overflow-hidden px-4 pt-16 text-center"
 	>
-		<div class="absolute inset-0 bg-black/60 backdrop-blur-md"></div>
+		<img
+			src="/img/cassava.jpg"
+			alt="Latar belakang singkong"
+			class="absolute inset-0 h-full w-full object-cover"
+			width="1920"
+			height="1080"
+			fetchpriority="high"
+			decoding="async"
+		/>
+		<div class="absolute inset-0 bg-black/60"></div>
 		<div class="relative z-10 mx-auto max-w-6xl px-4 py-12 md:py-20">
 			<div
 				class="mx-auto mb-6 flex h-20 w-20 md:h-24 md:w-24 items-center justify-center overflow-hidden rounded-2xl bg-white/20"
 			>
-				<img src="/img/logo.png" alt="CV TapioLeaf" class="h-full w-full object-cover" />
+				<img src="/img/logo.png" alt="CV TapioLeaf" class="h-full w-full object-cover" width="96" height="96" />
 			</div>
 			<h1 class="mb-3 text-3xl font-bold text-white md:text-5xl">CV TapioLeaf</h1>
 			<p class="mx-auto mb-8 max-w-2xl text-base text-gray-200 md:text-lg">
@@ -255,6 +261,7 @@
 		</div>
 	</section>
 
+	<main>
 	<!-- Products -->
 	<section id="products" class="px-4 py-12 md:py-16">
 		<div class="mx-auto max-w-6xl">
@@ -266,10 +273,11 @@
 			</div>
 
 			<div class="relative mx-auto mb-8 max-w-md">
-				<Search size={18} class="absolute top-1/2 left-3 -translate-y-1/2 text-muted-foreground" />
+				<Search size={18} class="absolute top-1/2 left-3 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
 				<input
-					type="text"
+					type="search"
 					placeholder="Cari produk..."
+					aria-label="Cari produk"
 					class="w-full rounded-full border bg-gray-50 py-2.5 pr-4 pl-10 text-sm outline-none focus:ring-2 focus:ring-emerald-500"
 					bind:value={searchQuery}
 					oninput={handleSearch}
@@ -293,6 +301,10 @@
 										src={item.imageUrl}
 										alt={item.name}
 										class="h-36 w-full object-cover sm:h-40 md:h-48"
+										loading="lazy"
+										decoding="async"
+										width="400"
+										height="192"
 										onerror={(e) => {
 											(e.target as HTMLElement).style.display = 'none';
 										}}
@@ -381,32 +393,32 @@
 					<table class="w-full text-sm">
 						<tbody>
 							<tr class="border-b"
-								><td class="py-2 text-muted-foreground">Nama</td><td class="py-2 font-medium"
+								><th scope="row" class="py-2 text-left font-normal text-muted-foreground">Nama</th><td class="py-2 font-medium"
 									>CV TapioLeaf</td
 								></tr
 							>
 							<tr class="border-b"
-								><td class="py-2 text-muted-foreground">Berdiri</td><td class="py-2 font-medium"
+								><th scope="row" class="py-2 text-left font-normal text-muted-foreground">Berdiri</th><td class="py-2 font-medium"
 									>2002</td
 								></tr
 							>
 							<tr class="border-b"
-								><td class="py-2 text-muted-foreground">Bidang</td><td class="py-2 font-medium"
+								><th scope="row" class="py-2 text-left font-normal text-muted-foreground">Bidang</th><td class="py-2 font-medium"
 									>Pengolahan dan Produksi Tepung Tapioka</td
 								></tr
 							>
 							<tr class="border-b"
-								><td class="py-2 text-muted-foreground">Kapasitas</td><td class="py-2 font-medium"
+								><th scope="row" class="py-2 text-left font-normal text-muted-foreground">Kapasitas</th><td class="py-2 font-medium"
 									>4.000 kg/hari</td
 								></tr
 							>
-							<tr
-								><td class="py-2 text-muted-foreground">Produk Utama</td><td
+							<tr class="border-b"
+								><th scope="row" class="py-2 text-left font-normal text-muted-foreground">Produk Utama</th><td
 									class="py-2 font-medium">Tepung Tapioka</td
 								></tr
 							>
 							<tr
-								><td class="py-2 text-muted-foreground">Wilayah Distribusi</td><td
+								><th scope="row" class="py-2 text-left font-normal text-muted-foreground">Wilayah Distribusi</th><td
 									class="py-2 font-medium">Melalui pengepul untuk pasar lokal dan nasional</td
 								></tr
 							>
@@ -615,7 +627,6 @@
 			<iframe
 				width="100%"
 				height="300"
-				frameborder="0"
 				style="border:0; display: block;"
 				src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d31706.63490499471!2d111.0122342743164!3d-6.605931600000001!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e712b006decfbef%3A0xd7021e3f2a13a76b!2sCV%20Tapioleaf!5e0!3m2!1sid!2sid!4v1781956255160!5m2!1sid!2sid"
 				allowfullscreen
@@ -626,11 +637,12 @@
 		</div>
 	</section>
 
+	</main>
 	<!-- Footer -->
 	<footer class="border-t bg-gray-50 px-4 py-8 text-center text-sm text-muted-foreground">
 		<p class="mb-2">&copy; 2026 CV TapioLeaf. All rights reserved.</p>
 		<div class="flex items-center justify-center gap-1 text-xs">
-			<Clock size={12} /> Sen—Sab, 07:00 — 16:00 WIB
+			<Clock size={12} aria-hidden="true" /> Sen—Sab, 07:00 — 16:00 WIB
 		</div>
 	</footer>
 </div>
