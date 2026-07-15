@@ -131,7 +131,7 @@
 									<Button variant="ghost" size="sm" onclick={() => openEdit(m)}>
 										<Pencil size={14} />
 									</Button>
-									<Button variant="ghost" size="sm" onclick={() => deleteId = m.id}>
+									<Button variant="ghost" size="sm" onclick={() => deleteId = m.id} aria-label="Hapus">
 										<Trash2 size={14} class="text-destructive" />
 									</Button>
 								</div>

@@ -101,7 +101,7 @@
 									</td>
 									<td class="hidden lg:table-cell px-4 py-3 text-xs text-muted-foreground">{item.notes || '—'}</td>
 									<td class="px-4 py-3 text-center">
-										<Button variant="ghost" size="sm" type="button" onclick={() => deleteTargetId = item.id} class="text-red-500 hover:text-red-700"><Trash2 size={14} /></Button>
+										<Button variant="ghost" size="sm" type="button" onclick={() => deleteTargetId = item.id} class="text-red-500 hover:text-red-700" aria-label="Hapus"><Trash2 size={14} /></Button>
 									</td>
 								</tr>
 							{:else}

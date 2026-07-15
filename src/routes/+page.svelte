@@ -102,6 +102,7 @@
 	<meta name="description" content={siteConfig.description} />
 	<meta name="viewport" content="width=device-width, initial-scale=1" />
 	<meta charset="utf-8" />
+	<link rel="preload" as="image" href="/img/cassava.jpg" fetchpriority="high" />
 
 	<link rel="dns-prefetch" href="//ojbivocgryxqdykebsyy.storage.supabase.co" />
 	<link rel="preconnect" href="https://ojbivocgryxqdykebsyy.storage.supabase.co" crossorigin="anonymous" />

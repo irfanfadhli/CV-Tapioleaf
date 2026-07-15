@@ -94,7 +94,7 @@
 							<td class="px-4 py-3 text-center">
 								<div class="flex items-center justify-center gap-1">
 									<Button variant="ghost" size="sm" onclick={() => editTarget = r}><Pencil size={14} /></Button>
-									<Button variant="ghost" size="sm" type="button" onclick={() => deleteTargetId = r.id} class="text-red-500 hover:text-red-700"><Trash2 size={14} /></Button>
+									<Button variant="ghost" size="sm" type="button" onclick={() => deleteTargetId = r.id} class="text-red-500 hover:text-red-700" aria-label="Hapus"><Trash2 size={14} /></Button>
 								</div>
 							</td>
 						</tr>

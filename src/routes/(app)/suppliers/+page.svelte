@@ -35,7 +35,7 @@
 								{/if}
 							</div>
 						</div>
-						<Button variant="ghost" size="sm" type="button" onclick={() => deleteTargetId = s.id} class="text-red-500 hover:text-red-700"><Trash2 size={16} /></Button>
+						<Button variant="ghost" size="sm" type="button" onclick={() => deleteTargetId = s.id} class="text-red-500 hover:text-red-700" aria-label="Hapus supplier"><Trash2 size={16} /></Button>
 					</div>
 				</div>
 			{/each}
