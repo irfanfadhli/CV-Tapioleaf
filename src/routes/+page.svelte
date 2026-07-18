@@ -82,7 +82,7 @@
 		class="mt-4 flex items-center gap-6 rounded-full border border-white/10 bg-background/70 px-5 py-2 shadow-[0_8px_32px_rgba(0,0,0,0.12)] backdrop-blur-2xl transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] md:px-6"
 	>
 		<a href="/" class="flex items-center gap-2" aria-label="Beranda">
-			<img src="/img/logo.png" alt="TapioLeaf" class="h-7 w-7 rounded-lg object-cover" width="28" height="28" />
+			<picture><source srcset="/img/logo.webp" type="image/webp" /><img src="/img/logo.png" alt="TapioLeaf" class="h-7 w-7 rounded-lg object-cover" width="28" height="28" /></picture>
 			<span class="text-sm font-bold tracking-tight">TapioLeaf</span>
 		</a>
 		<div class="hidden items-center gap-5 text-sm md:flex">
@@ -134,12 +134,12 @@
 				<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
 			</button>
 			<div class="flex flex-col items-center gap-8 text-lg">
-				<a href="#products" onclick={() => (menuOpen = false)} class="transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] translate-y-0 opacity-100 hover:text-primary">Produk</a>
-				<a href="#about" onclick={() => (menuOpen = false)} class="transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] translate-y-0 opacity-100 hover:text-primary">Tentang</a>
-				<a href="#contact" onclick={() => (menuOpen = false)} class="transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] translate-y-0 opacity-100 hover:text-primary">Kontak</a>
+				<a href="#products" onclick={() => (menuOpen = false)} class="transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] translate-y-0 opacity-100 hover:text-foreground">Produk</a>
+				<a href="#about" onclick={() => (menuOpen = false)} class="transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] translate-y-0 opacity-100 hover:text-foreground">Tentang</a>
+				<a href="#contact" onclick={() => (menuOpen = false)} class="transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] translate-y-0 opacity-100 hover:text-foreground">Kontak</a>
 				{#if data.user}
-					<a href="/orders" onclick={() => (menuOpen = false)} class="transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] translate-y-0 opacity-100 hover:text-primary">Pesanan</a>
-					<a href="/account" onclick={() => (menuOpen = false)} class="transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] translate-y-0 opacity-100 hover:text-primary">Dashboard</a>
+					<a href="/orders" onclick={() => (menuOpen = false)} class="transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] translate-y-0 opacity-100 hover:text-foreground">Pesanan</a>
+					<a href="/account" onclick={() => (menuOpen = false)} class="transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] translate-y-0 opacity-100 hover:text-foreground">Dashboard</a>
 					<form method="post" action="/api/sign-out">
 						<button type="submit" onclick={() => (menuOpen = false)} class="cursor-pointer rounded-full bg-destructive/10 px-6 py-2 text-sm font-medium text-destructive hover:bg-destructive/20">Keluar</button>
 					</form>
@@ -155,7 +155,7 @@
 <section class="relative flex min-h-[100dvh] flex-col overflow-hidden">
 	<div class="relative z-10 mx-auto flex w-full max-w-7xl flex-1 flex-col items-center px-6 pb-8 pt-28 md:flex-row md:px-10 md:py-8">
 		<div class="flex w-full flex-col justify-center md:w-1/2 md:pr-12">
-			<span class="mb-4 w-fit rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-[10px] font-medium uppercase tracking-[0.2em] text-primary">Produsen Tepung Tapioka</span>
+			<span class="mb-4 w-fit rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-[10px] font-medium uppercase tracking-[0.2em] text-foreground">Produsen Tepung Tapioka</span>
 			<h1 class="mb-4 text-4xl font-bold leading-[1.08] tracking-tight md:text-6xl lg:text-7xl">
 				Tepung Tapioka<br />
 				<span class="text-primary">Premium</span>
@@ -185,15 +185,19 @@
 			<div class="relative w-full overflow-hidden rounded-[2rem] shadow-2xl">
 				<div class="p-1.5">
 					<div class="overflow-hidden rounded-[calc(2rem-0.375rem)]">
-						<img
-							src="/img/cassava.jpg"
-							alt="Singkong segar pilihan petani lokal"
-							class="h-[320px] w-full object-cover transition-transform duration-1000 ease-[cubic-bezier(0.32,0.72,0,1)] hover:scale-105 md:h-[460px] lg:h-[520px]"
-							width="800"
-							height="520"
-							fetchpriority="high"
-							decoding="async"
-						/>
+						<picture>
+							<source srcset="/img/cassava.avif" type="image/avif" />
+							<source srcset="/img/cassava.webp" type="image/webp" />
+							<img
+								src="/img/cassava.jpg"
+								alt="Singkong segar pilihan petani lokal"
+								class="h-[320px] w-full object-cover transition-transform duration-1000 ease-[cubic-bezier(0.32,0.72,0,1)] hover:scale-105 md:h-[460px] lg:h-[520px]"
+								width="800"
+								height="520"
+								fetchpriority="high"
+								decoding="async"
+							/>
+						</picture>
 						<div class="absolute inset-0 rounded-[calc(2rem-0.375rem)] shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)]"></div>
 					</div>
 				</div>
@@ -207,7 +211,7 @@
 	<section id="products" class="px-6 py-24 md:px-10 md:py-32">
 		<div class="mx-auto max-w-7xl">
 			<div class="mb-12 text-center">
-				<span class="mx-auto mb-4 block w-fit rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-[10px] font-medium uppercase tracking-[0.2em] text-primary">Katalog</span>
+				<span class="mx-auto mb-4 block w-fit rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-[10px] font-medium uppercase tracking-[0.2em] text-foreground">Katalog</span>
 				<h2 class="mb-4 text-3xl font-bold tracking-tight md:text-4xl">Produk Kami</h2>
 				<p class="mx-auto max-w-md text-muted-foreground">Tersedia berbagai varian tepung tapioka dan produk turunan untuk kebutuhan Anda</p>
 			</div>
@@ -292,7 +296,7 @@
 	<section id="about" class="bg-muted/30 px-6 py-24 md:px-10 md:py-32">
 		<div class="mx-auto max-w-7xl">
 			<div class="mb-4 text-center">
-				<span class="mx-auto mb-4 block w-fit rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-[10px] font-medium uppercase tracking-[0.2em] text-primary">Tentang</span>
+				<span class="mx-auto mb-4 block w-fit rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-[10px] font-medium uppercase tracking-[0.2em] text-foreground">Tentang</span>
 				<h2 class="mb-4 text-3xl font-bold tracking-tight md:text-4xl">CV TapioLeaf</h2>
 			</div>
 			<div class="grid items-start gap-12 md:grid-cols-2">
@@ -367,7 +371,7 @@
 	<section class="px-6 py-24 md:px-10 md:py-32">
 		<div class="mx-auto max-w-7xl">
 			<div class="mb-16 text-center">
-				<span class="mx-auto mb-4 block w-fit rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-[10px] font-medium uppercase tracking-[0.2em] text-primary">Arah</span>
+				<span class="mx-auto mb-4 block w-fit rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-[10px] font-medium uppercase tracking-[0.2em] text-foreground">Arah</span>
 				<h2 class="mb-4 text-3xl font-bold tracking-tight md:text-4xl">Visi & Misi</h2>
 			</div>
 			<div class="mx-auto mb-16 max-w-3xl reveal">
@@ -418,7 +422,7 @@
 	<section class="bg-muted/30 px-6 py-24 md:px-10 md:py-32">
 		<div class="mx-auto max-w-7xl">
 			<div class="mb-16 text-center">
-				<span class="mx-auto mb-4 block w-fit rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-[10px] font-medium uppercase tracking-[0.2em] text-primary">Proses</span>
+				<span class="mx-auto mb-4 block w-fit rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-[10px] font-medium uppercase tracking-[0.2em] text-foreground">Proses</span>
 				<h2 class="mb-4 text-3xl font-bold tracking-tight md:text-4xl">Proses Produksi</h2>
 				<p class="mx-auto max-w-md text-muted-foreground">Dari singkong segar hingga tepung tapioka siap pakai</p>
 			</div>
@@ -450,7 +454,7 @@
 	<section class="px-6 py-24 md:px-10 md:py-32">
 		<div class="mx-auto max-w-7xl">
 			<div class="mb-16 text-center">
-				<span class="mx-auto mb-4 block w-fit rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-[10px] font-medium uppercase tracking-[0.2em] text-primary">Komitmen</span>
+				<span class="mx-auto mb-4 block w-fit rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-[10px] font-medium uppercase tracking-[0.2em] text-foreground">Komitmen</span>
 				<h2 class="mb-4 text-3xl font-bold tracking-tight md:text-4xl">Nilai Kami</h2>
 			</div>
 			<div class="grid gap-6 md:grid-cols-3">
@@ -495,7 +499,7 @@
 	<section id="contact" class="bg-muted/30 px-6 py-24 md:px-10 md:py-32">
 		<div class="mx-auto max-w-7xl">
 			<div class="mb-16 text-center">
-				<span class="mx-auto mb-4 block w-fit rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-[10px] font-medium uppercase tracking-[0.2em] text-primary">Kontak</span>
+				<span class="mx-auto mb-4 block w-fit rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-[10px] font-medium uppercase tracking-[0.2em] text-foreground">Kontak</span>
 				<h2 class="mb-4 text-3xl font-bold tracking-tight md:text-4xl">Hubungi Kami</h2>
 				<p class="mx-auto max-w-md text-muted-foreground">Silakan hubungi kami untuk pemesanan atau pertanyaan lebih lanjut</p>
 			</div>
@@ -558,7 +562,7 @@
 <footer class="border-t px-6 py-10 text-center text-sm text-muted-foreground">
 	<div class="mx-auto max-w-7xl">
 		<div class="mb-6 flex items-center justify-center gap-2">
-			<img src="/img/logo.png" alt="TapioLeaf" class="h-6 w-6 rounded-md object-cover" width="24" height="24" />
+			<picture><source srcset="/img/logo.webp" type="image/webp" /><img src="/img/logo.png" alt="TapioLeaf" class="h-6 w-6 rounded-md object-cover" width="24" height="24" /></picture>
 			<span class="text-sm font-bold tracking-tight">{siteConfig.name}</span>
 		</div>
 		<p class="mb-2">&copy; 2026 CV TapioLeaf. All rights reserved.</p>

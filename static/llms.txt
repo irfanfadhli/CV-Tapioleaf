@@ -1,0 +1,17 @@
+# CV TapioLeaf — Tepung Tapioka Premium
+
+> Produsen tepung tapioka berkualitas tinggi dari Pati, Jawa Tengah, Indonesia. Berdiri sejak 2002.
+
+## Sections
+
+- [Produk Kami](https://tapioleaf.my.id/#products): Katalog tepung tapioka untuk industri dan rumah tangga
+- [Tentang Kami](https://tapioleaf.my.id/#about): Profil perusahaan CV TapioLeaf
+- [Visi & Misi](https://tapioleaf.my.id/#vision): Arah dan tujuan perusahaan
+- [Proses Produksi](https://tapioleaf.my.id/#process): Tahapan produksi dari singkong hingga tepung
+- [Hubungi Kami](https://tapioleaf.my.id/#contact): Alamat, telepon, dan email
+
+## Contact
+
+- Address: Desa Waturoyo, Kec. Margoyoso, Kabupaten Pati, Jawa Tengah
+- Phone: +62 821-3794-9528
+- Email: info@tapioleaf.com
