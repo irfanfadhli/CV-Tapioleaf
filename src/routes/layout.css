@@ -178,5 +178,24 @@
 	}
 	html {
 		@apply font-sans;
+		scroll-behavior: smooth;
 	}
+}
+
+@layer utilities {
+	.reveal {
+		opacity: 0;
+		transform: translateY(1.5rem) blur(4px);
+		transition: opacity 0.8s cubic-bezier(0.32, 0.72, 0, 1),
+					transform 0.8s cubic-bezier(0.32, 0.72, 0, 1);
+	}
+	.reveal.visible {
+		opacity: 1;
+		transform: translateY(0) blur(0);
+	}
+	.reveal-delay-1 { transition-delay: 0.08s; }
+	.reveal-delay-2 { transition-delay: 0.16s; }
+	.reveal-delay-3 { transition-delay: 0.24s; }
+	.reveal-delay-4 { transition-delay: 0.32s; }
+	.reveal-delay-5 { transition-delay: 0.40s; }
 }
