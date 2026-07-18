@@ -96,14 +96,14 @@ let deleteTargetId = $state<string | null>(null);
 								<td class="hidden md:table-cell px-4 py-3 text-right text-xs text-muted-foreground">{item.yieldPercentage ? `${item.yieldPercentage}%` : '—'}</td>
 								<td class="px-4 py-3 text-center">
 									{#if item.status === 'CONFIRMED'}
-										<span class="inline-flex items-center gap-1 rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700"><CheckCircle2 size={12} /> CONFIRMED</span>
+										<span class="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary"><CheckCircle2 size={12} /> CONFIRMED</span>
 									{:else}
-										<span class="inline-flex items-center gap-1 rounded-full bg-yellow-100 px-2 py-0.5 text-xs font-medium text-yellow-700">DRAFT</span>
+										<span class="inline-flex items-center gap-1 rounded-full bg-warning/20 px-2 py-0.5 text-xs font-medium text-warning">DRAFT</span>
 									{/if}
 								</td>
 								<td class="hidden lg:table-cell px-4 py-3 text-xs text-muted-foreground">{item.notes || '—'}</td>
 								<td class="px-4 py-3 text-center">
-									<Button variant="ghost" size="sm" type="button" onclick={() => deleteTargetId = item.id} class="text-red-500 hover:text-red-700" aria-label="Hapus"><Trash2 size={14} /></Button>
+									<Button variant="ghost" size="sm" type="button" onclick={() => deleteTargetId = item.id} class="text-destructive hover:text-destructive" aria-label="Hapus"><Trash2 size={14} /></Button>
 								</td>
 							</tr>
 						{:else}

@@ -13,16 +13,16 @@
 
 <div class="space-y-6">
 	<div class="flex items-center gap-3">
-		<Building2 size={24} class="text-emerald-600" />
+		<Building2 size={24} class="text-primary" />
 		<h1 class="text-xl font-bold md:text-2xl">Daftar Supplier</h1>
 	</div>
 
 	{#if data.suppliers.length === 0}
-		<div class="rounded-xl border bg-white p-8 text-center text-sm text-muted-foreground">Belum ada supplier</div>
+		<div class="rounded-xl border bg-card p-8 text-center text-sm text-muted-foreground">Belum ada supplier</div>
 	{:else}
 		<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
 			{#each data.suppliers as s}
-				<div class="relative rounded-xl border bg-white p-5 shadow-sm">
+				<div class="relative rounded-xl border bg-card p-5 shadow-sm">
 					<div class="flex items-start justify-between">
 						<div>
 							<h3 class="font-semibold">{s.name}</h3>
@@ -35,7 +35,7 @@
 								{/if}
 							</div>
 						</div>
-						<Button variant="ghost" size="sm" type="button" onclick={() => deleteTargetId = s.id} class="text-red-500 hover:text-red-700" aria-label="Hapus supplier"><Trash2 size={16} /></Button>
+						<Button variant="ghost" size="sm" type="button" onclick={() => deleteTargetId = s.id} class="text-destructive hover:text-destructive" aria-label="Hapus supplier"><Trash2 size={16} /></Button>
 					</div>
 				</div>
 			{/each}

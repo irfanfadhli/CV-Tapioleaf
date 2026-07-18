@@ -18,6 +18,7 @@
 	} from '@lucide/svelte';
 	import CheckoutModal from '$lib/components/checkout/CheckoutModal.svelte';
 	import { siteConfig } from '$lib/config';
+	import Button from '@/components/ui/button/button.svelte';
 
 	let { data } = $props();
 
@@ -129,36 +130,37 @@
 	<link rel="canonical" href={siteConfig.url.toString()} />
 </svelte:head>
 
-<div class="min-h-screen bg-white">
+<div class="min-h-screen bg-background">
 	<!-- Navbar -->
-	<nav aria-label="Navigasi utama" class="top-center fixed z-50 w-full border-b bg-white/95 backdrop-blur-sm transition-transform duration-300 {hideNav ? '-translate-y-full' : 'translate-y-0'}">
+	<nav aria-label="Navigasi utama" class="top-center fixed z-50 w-full border-b bg-card/95 backdrop-blur-sm transition-transform duration-300 {hideNav ? '-translate-y-full' : 'translate-y-0'}">
 		<div class="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
 			<div class="flex items-center gap-2">
 				<img src="/img/logo.png" alt="TapioLeaf" class="h-9 w-9 rounded-xl object-cover" width="36" height="36" />
 				<div class="text-sm font-bold">CV TapioLeaf</div>
 			</div>
 			<div class="hidden items-center gap-4 text-sm md:flex">
-				<a href="#products" class="text-muted-foreground hover:text-emerald-600">Produk</a>
-				<a href="#about" class="text-muted-foreground hover:text-emerald-600">Tentang</a>
-				<a href="#contact" class="text-muted-foreground hover:text-emerald-600">Kontak</a>
+				<a href="#products" class="text-muted-foreground hover:text-primary">Produk</a>
+				<a href="#about" class="text-muted-foreground hover:text-primary">Tentang</a>
+				<a href="#contact" class="text-muted-foreground hover:text-primary">Kontak</a>
 				{#if data.user}
 					{#if data.user.role === 'pembeli_umkm'}
-						<a href="/orders" class="text-muted-foreground hover:text-emerald-600">Pesanan</a>
+						<a href="/orders" class="text-muted-foreground hover:text-primary">Pesanan</a>
 					{/if}
-					<a href="/account" class="text-muted-foreground hover:text-emerald-600">Dashboard</a>
+					<a href="/account" class="text-muted-foreground hover:text-primary">Dashboard</a>
 					<form method="post" action="/api/sign-out" class="inline">
 						<button
 							type="submit"
-							class="cursor-pointer rounded-lg bg-red-50 px-4 py-1.5 text-sm font-medium text-red-600 hover:bg-red-100"
+							class="cursor-pointer rounded-lg bg-destructive/10 px-4 py-1.5 text-sm font-medium text-destructive hover:bg-destructive/20"
 							>Logout</button
 						>
 					</form>
 				{:else}
-					<a
-						href="/login"
-						class="rounded-lg bg-emerald-50 px-4 py-1.5 text-sm font-medium text-gray-900 hover:bg-emerald-400"
-						>Masuk</a
-					>
+				<Button
+					variant="default"
+					href="/login"
+					onclick={() => (menuOpen = false)}
+					>Masuk</Button
+				>
 				{/if}
 			</div>
 			<button
@@ -170,41 +172,41 @@
 			</button>
 		</div>
 		{#if menuOpen}
-			<div class="border-t bg-white px-4 py-4 md:hidden">
+			<div class="border-t bg-card px-4 py-4 md:hidden">
 				<div class="flex flex-col gap-3 text-sm">
 					<a
 						href="#products"
 						onclick={() => (menuOpen = false)}
-						class="rounded-lg px-3 py-2 hover:bg-gray-50">Produk</a
+						class="rounded-lg px-3 py-2 hover:bg-muted/50">Produk</a
 					>
 					<a
 						href="#about"
 						onclick={() => (menuOpen = false)}
-						class="rounded-lg px-3 py-2 hover:bg-gray-50">Tentang</a
+						class="rounded-lg px-3 py-2 hover:bg-muted/50">Tentang</a
 					>
 					<a
 						href="#contact"
 						onclick={() => (menuOpen = false)}
-						class="rounded-lg px-3 py-2 hover:bg-gray-50">Kontak</a
+						class="rounded-lg px-3 py-2 hover:bg-muted/50">Kontak</a
 					>
 					{#if data.user}
 						{#if data.user.role === 'pembeli_umkm'}
 						<a
 							href="/orders"
 							onclick={() => (menuOpen = false)}
-							class="rounded-lg px-3 py-2 hover:bg-gray-50">Pesanan</a
+							class="rounded-lg px-3 py-2 hover:bg-muted/50">Pesanan</a
 						>
 						{/if}
 						<a
 							href="/account"
 							onclick={() => (menuOpen = false)}
-							class="rounded-lg px-3 py-2 hover:bg-gray-50">Dashboard</a
+							class="rounded-lg px-3 py-2 hover:bg-muted/50">Dashboard</a
 						>
 						<form method="post" action="/api/sign-out">
 							<button
 								type="submit"
 								onclick={() => (menuOpen = false)}
-								class="w-full cursor-pointer rounded-lg bg-red-50 px-3 py-2 text-center font-medium text-red-600 hover:bg-red-100"
+								class="w-full cursor-pointer rounded-lg bg-destructive/10 px-3 py-2 text-center font-medium text-destructive hover:bg-destructive/20"
 								>Keluar</button
 							>
 						</form>
@@ -212,7 +214,7 @@
 						<a
 							href="/login"
 							onclick={() => (menuOpen = false)}
-							class="rounded-lg bg-emerald-50 px-3 py-2 text-center font-medium text-gray-900 hover:bg-emerald-400"
+							class="rounded-lg px-3 py-2 text-center font-medium text-foreground"
 							>Masuk</a
 						>
 					{/if}
@@ -234,27 +236,27 @@
 			fetchpriority="high"
 			decoding="async"
 		/>
-		<div class="absolute inset-0 bg-black/60"></div>
+		<div class="absolute inset-0 bg-foreground/80 backdrop-blur-sm"></div>
 		<div class="relative z-10 mx-auto max-w-6xl px-4 py-12 md:py-20">
 			<div
-				class="mx-auto mb-6 flex h-20 w-20 md:h-24 md:w-24 items-center justify-center overflow-hidden rounded-2xl bg-white/20"
+				class="mx-auto mb-6 flex h-20 w-20 md:h-24 md:w-24 items-center justify-center overflow-hidden rounded-2xl bg-card/20"
 			>
 				<img src="/img/logo.png" alt="CV TapioLeaf" class="h-full w-full object-cover" width="96" height="96" />
 			</div>
-			<h1 class="mb-3 text-3xl font-bold text-white md:text-5xl">CV TapioLeaf</h1>
-			<p class="mx-auto mb-8 max-w-2xl text-base text-gray-200 md:text-lg">
+			<h1 class="mb-3 text-3xl font-bold text-primary-foreground md:text-5xl">CV TapioLeaf</h1>
+			<p class="mx-auto mb-8 max-w-2xl text-base text-muted-foreground md:text-lg">
 				Produsen tepung tapioka berkualitas tinggi. Mengolah singkong pilihan menjadi tepung tapioka
 				premium untuk kebutuhan industri dan rumah tangga.
 			</p>
 			<div class="flex flex-col items-center gap-3 sm:flex-row sm:justify-center sm:gap-4">
 				<a
 					href="#products"
-					class="w-full sm:w-auto rounded-xl bg-emerald-700 px-8 py-3 font-semibold text-white shadow-lg transition-all hover:bg-emerald-800 active:scale-95"
-					>Lihat Produk</a
+				class="w-full sm:w-auto rounded-xl bg-primary px-8 py-3 font-semibold text-primary-foreground shadow-lg transition-all hover:bg-primary/90 active:scale-95"
+				>Lihat Produk</a
 				>
 				<a
 					href="#about"
-					class="w-full sm:w-auto rounded-xl border-2 border-white px-8 py-3 font-semibold text-white transition-all hover:bg-white/10 active:scale-95"
+					class="w-full sm:w-auto rounded-xl border-2 border-primary-foreground px-8 py-3 font-semibold text-primary-foreground transition-all hover:bg-card/10 active:scale-95"
 					>Tentang Kami</a
 				>
 			</div>
@@ -278,7 +280,7 @@
 					type="search"
 					placeholder="Cari produk..."
 					aria-label="Cari produk"
-					class="w-full rounded-full border bg-gray-50 py-2.5 pr-4 pl-10 text-sm outline-none focus:ring-2 focus:ring-emerald-500"
+					class="w-full rounded-full border bg-muted/50 py-2.5 pr-4 pl-10 text-sm outline-none focus:ring-2 focus:ring-ring"
 					bind:value={searchQuery}
 					oninput={handleSearch}
 				/>
@@ -293,10 +295,10 @@
 				<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
 					{#each filtered as item}
 						<div
-							class="group rounded-xl border bg-white p-4 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md active:scale-[0.98]"
+							class="group rounded-xl border bg-card p-4 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md active:scale-[0.98]"
 						>
 							{#if item.imageUrl}
-								<div class="-mx-4 -mt-4 mb-3 overflow-hidden rounded-t-xl bg-gray-50">
+								<div class="-mx-4 -mt-4 mb-3 overflow-hidden rounded-t-xl bg-muted/50">
 									<img
 										src={item.imageUrl}
 										alt={item.name}
@@ -313,10 +315,10 @@
 							{/if}
 							<div class="mb-2 flex items-start gap-3">
 								<div
-									class="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-emerald-50"
+									class="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-primary/5"
 								>
 									{#if !item.imageUrl}
-										<span class="text-sm font-bold text-emerald-700">{item.name.charAt(0)}</span>
+										<span class="text-sm font-bold text-primary">{item.name.charAt(0)}</span>
 									{/if}
 								</div>
 								<div class="min-w-0 flex-1">
@@ -327,19 +329,19 @@
 								</div>
 							</div>
 							<div class="flex items-center justify-between">
-								<span class="text-sm font-bold text-emerald-700"
-									>{formatPrice(item.price, item.unit)}</span
+<span class="text-sm font-bold text-primary"
+								>{formatPrice(item.price, item.unit)}</span
 								>
 								<span class="text-xs text-muted-foreground">{formatStock(item.currentStock, item.unit)} {item.unit}</span>
 							</div>
 							<button
 								onclick={() => openCheckout(item)}
-								class="mt-2 block w-full rounded-lg bg-emerald-700 py-1.5 text-center text-xs font-medium text-white transition-colors hover:bg-emerald-800"
+								class="mt-2 block w-full rounded-lg bg-primary py-1.5 text-center text-xs font-medium text-primary-foreground transition-colors hover:bg-primary/90"
 							>
 								<ShoppingCart size={14} class="mr-1 inline" /> Pesan Sekarang
 							</button>
 							{#if (item.unit === 'SAK' || item.unit === 'PCS' ? Math.floor(item.currentStock) : Math.round(item.currentStock)) < 10}
-								<div class="mt-1 flex items-center gap-1 text-xs text-red-600">
+								<div class="mt-1 flex items-center gap-1 text-xs text-destructive">
 									<AlertTriangle size={12} /> Stok terbatas
 								</div>
 							{/if}
@@ -351,13 +353,13 @@
 	</section>
 
 	<!-- About -->
-	<section id="about" class="bg-gray-50 px-4 py-12 md:py-16">
+	<section id="about" class="bg-muted/50 px-4 py-12 md:py-16">
 		<div class="mx-auto max-w-4xl">
 			<h2 class="mb-6 text-center text-xl font-bold md:mb-8 md:text-2xl">Tentang CV TapioLeaf</h2>
 			<div class="grid gap-6 md:grid-cols-2 md:gap-8">
 				<div class="space-y-4">
 					<div class="flex items-start gap-3">
-						<Shield size={20} class="mt-0.5 shrink-0 text-emerald-600" />
+						<Shield size={20} class="mt-0.5 shrink-0 text-primary" />
 						<div>
 							<h3 class="font-semibold">Kualitas Terjamin</h3>
 							<p class="text-sm text-muted-foreground">
@@ -367,7 +369,7 @@
 						</div>
 					</div>
 					<div class="flex items-start gap-3">
-						<Factory size={20} class="mt-0.5 shrink-0 text-emerald-600" />
+						<Factory size={20} class="mt-0.5 shrink-0 text-primary" />
 						<div>
 							<h3 class="font-semibold">Kapasitas Produksi Besar</h3>
 							<p class="text-sm text-muted-foreground">
@@ -377,7 +379,7 @@
 						</div>
 					</div>
 					<div class="flex items-start gap-3">
-						<Wheat size={20} class="mt-0.5 shrink-0 text-emerald-600" />
+						<Wheat size={20} class="mt-0.5 shrink-0 text-primary" />
 						<div>
 							<h3 class="font-semibold">Bahan Baku Lokal</h3>
 							<p class="text-sm text-muted-foreground">
@@ -387,7 +389,7 @@
 						</div>
 					</div>
 				</div>
-				<div class="rounded-xl border bg-white p-6 shadow-sm">
+				<div class="rounded-xl border bg-card p-6 shadow-sm">
 					<h3 class="mb-4 font-semibold">Biodata Perusahaan</h3>
 					<div class="overflow-x-auto">
 					<table class="w-full text-sm">
@@ -431,12 +433,12 @@
 	</section>
 
 	<!-- Visi & Misi -->
-	<section id="vision" class="border-t bg-white px-4 py-12 md:py-16">
+	<section id="vision" class="border-t bg-card px-4 py-12 md:py-16">
 		<div class="mx-auto max-w-4xl">
 			<div class="text-center">
 				<h2 class="mb-8 text-2xl font-bold">Visi & Misi</h2>
-				<div class="mx-auto mb-8 max-w-2xl rounded-xl border bg-emerald-50 p-6">
-					<h3 class="mb-2 text-lg font-semibold text-emerald-800">Visi</h3>
+				<div class="mx-auto mb-8 max-w-2xl rounded-xl border bg-primary/5 p-6">
+					<h3 class="mb-2 text-lg font-semibold text-primary">Visi</h3>
 					<p class="text-muted-foreground">
 						Menjadi produsen tepung tapioka terkemuka yang mendukung ketahanan pangan nasional dan
 						memberdayakan petani singkong lokal.
@@ -447,7 +449,7 @@
 			<div class="grid gap-6 md:grid-cols-3">
 				<div class="rounded-xl border p-5 text-left shadow-sm">
 					<div
-						class="mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-100 text-sm font-bold text-emerald-700"
+						class="mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-sm font-bold text-primary"
 					>
 						1
 					</div>
@@ -459,7 +461,7 @@
 				</div>
 				<div class="rounded-xl border p-5 text-left shadow-sm">
 					<div
-						class="mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-100 text-sm font-bold text-emerald-700"
+						class="mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-sm font-bold text-primary"
 					>
 						2
 					</div>
@@ -471,7 +473,7 @@
 				</div>
 				<div class="rounded-xl border p-5 text-left shadow-sm">
 					<div
-						class="mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-100 text-sm font-bold text-emerald-700"
+						class="mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-sm font-bold text-primary"
 					>
 						3
 					</div>
@@ -486,13 +488,13 @@
 	</section>
 
 	<!-- Proses Produksi -->
-	<section id="process" class="bg-gray-50 px-4 py-12 md:py-16">
+	<section id="process" class="bg-muted/50 px-4 py-12 md:py-16">
 		<div class="mx-auto max-w-4xl">
 			<h2 class="mb-6 text-center text-xl font-bold md:mb-8 md:text-2xl">Proses Produksi</h2>
 			<div class="grid gap-4 md:grid-cols-2 md:gap-6">
-				<div class="rounded-xl border bg-white p-5 shadow-sm">
+				<div class="rounded-xl border bg-card p-5 shadow-sm">
 					<div
-						class="mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-orange-100 text-sm font-bold text-orange-700"
+						class="mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-warning/20 text-sm font-bold text-warning"
 					>
 						1
 					</div>
@@ -502,9 +504,9 @@
 						memenuhi standar kadar air dan ukuran yang diproses.
 					</p>
 				</div>
-				<div class="rounded-xl border bg-white p-5 shadow-sm">
+				<div class="rounded-xl border bg-card p-5 shadow-sm">
 					<div
-						class="mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-orange-100 text-sm font-bold text-orange-700"
+						class="mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-warning/20 text-sm font-bold text-warning"
 					>
 						2
 					</div>
@@ -514,9 +516,9 @@
 						ini menggunakan air bersih yang mengalir.
 					</p>
 				</div>
-				<div class="rounded-xl border bg-white p-5 shadow-sm">
+				<div class="rounded-xl border bg-card p-5 shadow-sm">
 					<div
-						class="mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-orange-100 text-sm font-bold text-orange-700"
+						class="mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-warning/20 text-sm font-bold text-warning"
 					>
 						3
 					</div>
@@ -526,9 +528,9 @@
 						ditampung dalam bak pengendapan.
 					</p>
 				</div>
-				<div class="rounded-xl border bg-white p-5 shadow-sm">
+				<div class="rounded-xl border bg-card p-5 shadow-sm">
 					<div
-						class="mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-orange-100 text-sm font-bold text-orange-700"
+						class="mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-warning/20 text-sm font-bold text-warning"
 					>
 						4
 					</div>
@@ -538,9 +540,9 @@
 						kemudian digiling hingga menjadi tepung tapioka halus.
 					</p>
 				</div>
-				<div class="rounded-xl border bg-white p-5 shadow-sm">
+				<div class="rounded-xl border bg-card p-5 shadow-sm">
 					<div
-						class="mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-orange-100 text-sm font-bold text-orange-700"
+						class="mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-warning/20 text-sm font-bold text-warning"
 					>
 						5
 					</div>
@@ -555,42 +557,42 @@
 	</section>
 
 	<!-- Komitmen -->
-	<section class="bg-white px-4 py-16 text-shadow-black">
+	<section class="bg-card px-4 py-16 text-shadow-black">
 		<div class="mx-auto max-w-4xl text-center">
 			<h2 class="mb-6 text-xl font-bold md:mb-8 md:text-2xl">Komitmen Kami</h2>
 			<div class="grid gap-4 md:grid-cols-3 md:gap-6">
-				<div class="rounded-xl bg-white/10 p-6 backdrop-blur-sm">
+				<div class="rounded-xl bg-card/10 p-6 backdrop-blur-sm">
 					<div
-						class="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-emerald-300"
+						class="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-primary/40"
 					>
 						<Shield size={22} />
 					</div>
 					<h3 class="mb-2 font-semibold">Kualitas</h3>
-					<p class="text-sm text-gray-700">
+					<p class="text-sm text-muted-foreground">
 						Setiap batch produk melewati kontrol kualitas ketat untuk memastikan konsistensi dan
 						keamanan pangan.
 					</p>
 				</div>
-				<div class="rounded-xl bg-white/10 p-6 backdrop-blur-sm">
+				<div class="rounded-xl bg-card/10 p-6 backdrop-blur-sm">
 					<div
-						class="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-emerald-300"
+						class="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-primary/40"
 					>
 						<Factory size={22} />
 					</div>
 					<h3 class="mb-2 font-semibold">Produksi Tepat Waktu</h3>
-					<p class="text-sm text-gray-700">
+					<p class="text-sm text-muted-foreground">
 						Komitmen untuk memenuhi target produksi harian 4.000 kg dan mengirim pesanan tepat waktu
 						kepada pelanggan.
 					</p>
 				</div>
-				<div class="rounded-xl bg-white/10 p-6 backdrop-blur-sm">
+				<div class="rounded-xl bg-card/10 p-6 backdrop-blur-sm">
 					<div
-						class="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-emerald-300"
+						class="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-primary/40"
 					>
 						<Wheat size={22} />
 					</div>
 					<h3 class="mb-2 font-semibold">Keberlanjutan</h3>
-					<p class="text-sm text-gray-700">
+					<p class="text-sm text-muted-foreground">
 						Berkomitmen pada praktik bisnis berkelanjutan yang mendukung petani lokal dan
 						kelestarian lingkungan.
 					</p>
@@ -604,20 +606,20 @@
 		<div class="mx-auto max-w-4xl">
 			<h2 class="mb-6 text-center text-xl font-bold md:mb-8 md:text-2xl">Hubungi Kami</h2>
 			<div class="grid gap-4 md:grid-cols-3 md:gap-6">
-				<div class="rounded-xl border bg-white p-5 text-center shadow-sm">
-					<MapPin size={24} class="mx-auto mb-3 text-emerald-600" />
+				<div class="rounded-xl border bg-card p-5 text-center shadow-sm">
+					<MapPin size={24} class="mx-auto mb-3 text-primary" />
 					<h3 class="mb-1 font-semibold">Alamat</h3>
 					<p class="text-sm text-muted-foreground">
 						Desa Waturoyo<br />Kec. Margoyoso <br />Kabupaten Pati<br />Jawa Tengah, Indonesia
 					</p>
 				</div>
-				<div class="rounded-xl border bg-white p-5 text-center shadow-sm">
-					<Phone size={24} class="mx-auto mb-3 text-emerald-600" />
+				<div class="rounded-xl border bg-card p-5 text-center shadow-sm">
+					<Phone size={24} class="mx-auto mb-3 text-primary" />
 					<h3 class="mb-1 font-semibold">Telepon</h3>
 					<p class="text-sm text-muted-foreground"><br />+62 821-3794-9528</p>
 				</div>
-				<div class="rounded-xl border bg-white p-5 text-center shadow-sm">
-					<Mail size={24} class="mx-auto mb-3 text-emerald-600" />
+				<div class="rounded-xl border bg-card p-5 text-center shadow-sm">
+					<Mail size={24} class="mx-auto mb-3 text-primary" />
 					<h3 class="mb-1 font-semibold">Email</h3>
 					<p class="text-sm text-muted-foreground">info@tapioleaf.com<br />sales@tapioleaf.com</p>
 				</div>
@@ -639,7 +641,7 @@
 
 	</main>
 	<!-- Footer -->
-	<footer class="border-t bg-gray-50 px-4 py-8 text-center text-sm text-muted-foreground">
+	<footer class="border-t bg-muted/50 px-4 py-8 text-center text-sm text-muted-foreground">
 		<p class="mb-2">&copy; 2026 CV TapioLeaf. All rights reserved.</p>
 		<div class="flex items-center justify-center gap-1 text-xs">
 			<Clock size={12} aria-hidden="true" /> Sen—Sab, 07:00 — 16:00 WIB

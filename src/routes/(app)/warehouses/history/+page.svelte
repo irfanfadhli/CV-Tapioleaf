@@ -106,23 +106,15 @@
 								<div class="text-xs text-muted-foreground">{m.productCode}</div>
 							</td>
 							<td class="px-4 py-3 text-center">
-								<span class="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium"
-									class:bg-blue-100={m.movementType === 'PURCHASE_IN'}
-									class:bg-green-100={m.movementType === 'MANUAL_IN'}
-									class:bg-orange-100={m.movementType === 'MANUAL_OUT'}
-									class:bg-purple-100={m.movementType === 'ADJUSTMENT'}
-									class:text-blue-700={m.movementType === 'PURCHASE_IN'}
-									class:text-green-700={m.movementType === 'MANUAL_IN'}
-									class:text-orange-700={m.movementType === 'MANUAL_OUT'}
-									class:text-purple-700={m.movementType === 'ADJUSTMENT'}
-								>
+							<span class="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium {m.movementType === 'PURCHASE_IN' ? 'bg-info/20 text-info' : m.movementType === 'MANUAL_IN' ? 'bg-primary/10 text-primary' : m.movementType === 'MANUAL_OUT' ? 'bg-warning/20 text-warning' : m.movementType === 'ADJUSTMENT' ? 'bg-info/20 text-info' : ''}"
+							>
 									{m.movementType === 'PURCHASE_IN' ? 'Pembelian' :
 									m.movementType === 'MANUAL_IN' ? 'Stok Masuk' :
 									m.movementType === 'MANUAL_OUT' ? 'Stok Keluar' :
 									m.movementType === 'ADJUSTMENT' ? 'Penyesuaian' : m.movementType}
 								</span>
 							</td>
-							<td class="px-4 py-3 text-right font-medium" class:text-green-600={m.quantityChange > 0} class:text-red-600={m.quantityChange < 0}>
+							<td class="px-4 py-3 text-right font-medium" class:text-primary={m.quantityChange > 0} class:text-destructive={m.quantityChange < 0}>
 								{m.quantityChange > 0 ? '+' : ''}{m.quantityChange}
 							</td>
 							<td class="px-4 py-3 text-xs text-muted-foreground max-w-xs truncate">{m.reason || m.note || '—'}</td>

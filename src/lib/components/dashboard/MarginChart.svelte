@@ -9,7 +9,7 @@
 	let maxMargin = $derived(Math.max(...data.map(d => Math.abs(d.margin ?? 0)), 1));
 </script>
 
-<div class="rounded-xl border bg-white p-5 shadow-sm">
+<div class="rounded-xl border bg-card p-5 shadow-sm">
 	<h3 class="mb-3 text-sm font-semibold text-muted-foreground">📊 Margin Per Produk</h3>
 	{#if loading}
 		<SkeletonWidget height="h-64" />
@@ -20,7 +20,7 @@
 			{#each data as d}
 				<div class="flex items-center gap-2">
 					<div class="w-10 shrink-0 text-right">
-						<span class="text-xs font-bold {d.margin !== null && d.margin >= 20 ? 'text-green-600' : d.margin !== null && d.margin >= 0 ? 'text-yellow-600' : 'text-red-600'}">
+						<span class="text-xs font-bold {d.margin !== null && d.margin >= 20 ? 'text-primary' : d.margin !== null && d.margin >= 0 ? 'text-warning' : 'text-destructive'}">
 							{d.margin !== null ? `${d.margin}%` : 'N/A'}
 						</span>
 					</div>
@@ -28,10 +28,10 @@
 						<div class="flex items-baseline justify-between">
 							<span class="truncate text-sm font-medium">{d.name}</span>
 						</div>
-						<div class="relative h-5 w-full overflow-hidden rounded-md bg-gray-100">
+						<div class="relative h-5 w-full overflow-hidden rounded-md bg-muted">
 							<div
 								class="h-full rounded-md transition-all duration-500"
-								style="width: {Math.max(Math.abs(d.margin ?? 0) / maxMargin * 100, 2)}%; background: {d.margin !== null && d.margin >= 20 ? '#059669' : d.margin !== null && d.margin >= 0 ? '#d97706' : '#dc2626'};"
+								style="width: {Math.max(Math.abs(d.margin ?? 0) / maxMargin * 100, 2)}%; background: {d.margin !== null && d.margin >= 20 ? 'var(--primary)' : d.margin !== null && d.margin >= 0 ? 'var(--warning)' : 'var(--destructive)'};"
 							></div>
 						</div>
 						<div class="flex justify-between text-xs text-muted-foreground">

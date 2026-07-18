@@ -63,15 +63,15 @@ let searchQuery = $state($page.url.searchParams.get('search') || '');
 <div class="space-y-6">
 	<!-- Stock Summary -->
 	<div class="grid gap-4 sm:grid-cols-2">
-		<div class="rounded-xl border bg-emerald-50 p-4 shadow-sm">
-			<p class="text-xs font-medium text-emerald-700">Stok Singkong (Bahan Baku)</p>
-			<p class="text-2xl font-bold text-emerald-800">{Math.max(0, data.cassavaStock).toLocaleString('id-ID')} kg</p>
-			<p class="text-xs text-emerald-600">Dari penerimaan singkong</p>
+		<div class="rounded-xl border bg-primary/5 p-4 shadow-sm">
+			<p class="text-xs font-medium text-primary">Stok Singkong (Bahan Baku)</p>
+			<p class="text-2xl font-bold text-primary">{Math.max(0, data.cassavaStock).toLocaleString('id-ID')} kg</p>
+			<p class="text-xs text-primary">Dari penerimaan singkong</p>
 		</div>
-		<div class="rounded-xl border bg-blue-50 p-4 shadow-sm">
-			<p class="text-xs font-medium text-blue-700">Stok Produk Jadi</p>
-			<p class="text-2xl font-bold text-blue-800">{data.items.length} SKU</p>
-			<p class="text-xs text-blue-600">{data.items.filter((i: any) => i.stockStatus === 'CRITICAL').length} kritis</p>
+		<div class="rounded-xl border bg-info/10 p-4 shadow-sm">
+			<p class="text-xs font-medium text-info">Stok Produk Jadi</p>
+			<p class="text-2xl font-bold text-info">{data.items.length} SKU</p>
+			<p class="text-xs text-info">{data.items.filter((i: any) => i.stockStatus === 'CRITICAL').length} kritis</p>
 		</div>
 	</div>
 
@@ -122,22 +122,22 @@ let searchQuery = $state($page.url.searchParams.get('search') || '');
 				</thead>
 				<tbody>
 					{#each data.items as item}
-						<tr class="border-t transition-colors hover:bg-muted/30" class:bg-red-50={item.stockStatus === 'CRITICAL'}>
+						<tr class="border-t transition-colors hover:bg-muted/30 {item.stockStatus === 'CRITICAL' ? 'bg-destructive/10' : ''}">
 							<td class="hidden sm:table-cell px-4 py-3 font-mono text-xs">{item.code}</td>
 							<td class="px-4 py-3 font-medium">{item.name}</td>
-							<td class="px-4 py-3 text-right font-medium" class:text-red-600={item.stockStatus === 'CRITICAL'}>{item.currentStock} {item.unit}</td>
+							<td class="px-4 py-3 text-right font-medium" class:text-destructive={item.stockStatus === 'CRITICAL'}>{item.currentStock} {item.unit}</td>
 							<td class="hidden lg:table-cell px-4 py-3 text-right font-medium">Rp {Number(item.price).toLocaleString('id-ID')}</td>
 							<td class="hidden md:table-cell px-4 py-3 text-right text-muted-foreground">{item.minimumStock}</td>
 							<td class="px-4 py-3 text-center">
 								{#if item.stockStatus === 'CRITICAL'}
-									<span class="inline-flex items-center gap-1 rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium text-red-700"><AlertTriangle size={12} /> Kritis</span>
+									<span class="inline-flex items-center gap-1 rounded-full bg-destructive/10 px-2 py-0.5 text-xs font-medium text-destructive"><AlertTriangle size={12} /> Kritis</span>
 								{:else}
-									<span class="inline-flex items-center gap-1 rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700">Normal</span>
+									<span class="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">Normal</span>
 								{/if}
 							</td>
 							<td class="px-4 py-3">
 								<div class="flex items-center justify-center gap-1">
-									<Button variant="ghost" size="sm" type="button" onclick={() => deleteTargetId = item.id} class="text-red-500 hover:text-red-700" aria-label="Hapus"><Trash2 size={14} /></Button>
+									<Button variant="ghost" size="sm" type="button" onclick={() => deleteTargetId = item.id} class="text-destructive hover:text-destructive" aria-label="Hapus"><Trash2 size={14} /></Button>
 								</div>
 							</td>
 						</tr>

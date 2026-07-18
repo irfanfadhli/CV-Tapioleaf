@@ -16,18 +16,18 @@
 	};
 
 	const statusColors: Record<string, string> = {
-		PENDING: 'text-yellow-600 bg-yellow-50',
-		PAID: 'text-green-600 bg-green-50',
-		PROCESSING: 'text-blue-600 bg-blue-50',
-		SHIPPED: 'text-purple-600 bg-purple-50',
-		COMPLETED: 'text-emerald-600 bg-emerald-50',
-		CANCELLED: 'text-red-600 bg-red-50'
+		PENDING: 'text-warning bg-warning/10',
+		PAID: 'text-primary bg-primary/10',
+		PROCESSING: 'text-info bg-info/10',
+		SHIPPED: 'text-info bg-info/20',
+		COMPLETED: 'text-primary bg-primary/10',
+		CANCELLED: 'text-destructive bg-destructive/10'
 	};
 </script>
 
 <div class="mb-6 flex items-center gap-3">
 	<BackButton fallbackHref="/account" />
-	<ShoppingBag size={24} class="text-emerald-600" />
+	<ShoppingBag size={24} class="text-primary" />
 	<h1 class="text-2xl font-bold">Pesanan Saya</h1>
 </div>
 
@@ -43,14 +43,14 @@
 {:else}
 	<div class="space-y-3">
 		{#each data.orders as order}
-			<a href="/orders/{order.id}" class="block rounded-xl border bg-white p-4 shadow-sm transition-colors hover:bg-gray-50">
+			<a href="/orders/{order.id}" class="block rounded-xl border bg-card p-4 shadow-sm transition-colors hover:bg-muted/50">
 				<div class="flex items-center justify-between">
 					<div>
 						<p class="text-xs text-muted-foreground">Rp {Number(order.totalAmount).toLocaleString('id-ID')}</p>
 						<p class="text-sm text-muted-foreground">{new Date(order.createdAt).toLocaleDateString('id-ID')}</p>
 					</div>
 					<div class="flex items-center gap-2">
-						<span class="rounded-full px-3 py-1 text-xs font-medium {statusColors[order.status] || 'bg-gray-50 text-gray-600'}">{statusLabels[order.status] || order.status}</span>
+						<span class="rounded-full px-3 py-1 text-xs font-medium {statusColors[order.status] || 'bg-muted/50 text-muted-foreground'}">{statusLabels[order.status] || order.status}</span>
 						<ChevronRight size={16} class="text-muted-foreground" />
 					</div>
 				</div>

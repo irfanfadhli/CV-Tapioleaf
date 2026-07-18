@@ -68,7 +68,7 @@
 		</DialogHeader>
 		<form onsubmit={handleSubmit} class="grid gap-4 py-4">
 			{#if errorMessage}
-				<div class="rounded-lg border border-red-300 bg-red-50 p-3 text-sm text-red-700 whitespace-pre-wrap">{errorMessage}</div>
+				<div class="rounded-lg border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive whitespace-pre-wrap">{errorMessage}</div>
 			{/if}
 			<div class="grid gap-2">
 				<label for="chk-qty" class="text-sm font-medium">Jumlah ({product?.unit}) *</label>

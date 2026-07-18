@@ -8,10 +8,10 @@
 	];
 </script>
 
-<div class="inline-flex overflow-hidden rounded-lg border bg-white">
+<div class="inline-flex overflow-hidden rounded-lg border bg-card">
 	{#each periods as p}
 		<button
-			class="px-4 py-2 text-sm font-medium transition-colors {active === p.value ? 'bg-emerald-600 text-white' : 'bg-white text-muted-foreground hover:bg-gray-50'}"
+			class="px-4 py-2 text-sm font-medium transition-colors {active === p.value ? 'bg-primary text-primary-foreground' : 'bg-card text-muted-foreground hover:bg-muted/50'}"
 			onclick={() => onChange(p.value)}
 		>{p.label}</button>
 	{/each}

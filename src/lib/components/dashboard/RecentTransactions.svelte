@@ -7,8 +7,8 @@
 	} = $props();
 
 	function statusBadge(status: string): string {
-		const map: Record<string, string> = { PAID: 'bg-green-100 text-green-700', PENDING: 'bg-yellow-100 text-yellow-700', CANCELLED: 'bg-red-100 text-red-700' };
-		return map[status] || 'bg-gray-100 text-gray-700';
+		const map: Record<string, string> = { PAID: 'bg-primary/10 text-primary', PENDING: 'bg-warning/20 text-warning', CANCELLED: 'bg-destructive/10 text-destructive' };
+		return map[status] || 'bg-muted text-muted-foreground';
 	}
 
 	function statusLabel(status: string): string {
@@ -17,12 +17,12 @@
 	}
 </script>
 
-<div class="rounded-xl border bg-white p-5 shadow-sm">
+<div class="rounded-xl border bg-card p-5 shadow-sm">
 	<h3 class="mb-3 text-sm font-semibold text-muted-foreground">🕐 Transaksi Terbaru</h3>
 	{#if loading}
 		<div class="animate-pulse space-y-3">
 			{#each [1,2,3,4,5] as _}
-				<div class="h-8 w-full rounded bg-gray-200"></div>
+				<div class="h-8 w-full rounded bg-muted"></div>
 			{/each}
 		</div>
 	{:else if transactions.length === 0}
@@ -30,7 +30,7 @@
 	{:else}
 		<div class="space-y-2">
 			{#each transactions as t}
-				<button onclick={() => goto(`/orders/${t.id}`)} class="flex w-full items-center justify-between rounded-lg p-2 text-left transition-colors hover:bg-gray-50">
+				<button onclick={() => goto(`/orders/${t.id}`)} class="flex w-full items-center justify-between rounded-lg p-2 text-left transition-colors hover:bg-muted/50">
 					<div class="min-w-0 flex-1">
 						<p class="truncate text-sm font-medium">{t.customerName || 'Anonim'}</p>
 						<p class="text-xs text-muted-foreground">#{t.id.slice(0, 8).toUpperCase()} · {t.createdAt ? new Date(t.createdAt).toLocaleString('id-ID') : '-'}</p>

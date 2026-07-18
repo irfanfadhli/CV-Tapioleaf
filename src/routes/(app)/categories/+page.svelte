@@ -79,7 +79,7 @@
 <div class="space-y-6">
 	<div class="flex flex-wrap items-center gap-2">
 		<div class="flex items-center gap-3">
-			<Tags size={24} class="text-emerald-600" />
+			<Tags size={24} class="text-primary" />
 			<h1 class="text-xl font-bold md:text-2xl">Kategori Produk</h1>
 		</div>
 		<Button onclick={openCreate} size="sm" class="md:default"><Plus size={16} class="mr-1" /> Tambah Kategori</Button>
@@ -140,7 +140,7 @@
 							<td class="px-4 py-3 font-medium">{cat.name}</td>
 							<td class="px-4 py-3 text-center">
 								{#if cat.isActive}
-									<span class="text-xs font-medium text-green-600">Aktif</span>
+									<span class="text-xs font-medium text-primary">Aktif</span>
 								{:else}
 									<span class="text-xs font-medium text-muted-foreground">Nonaktif</span>
 								{/if}
@@ -151,7 +151,7 @@
 										<input type="hidden" name="id" value={cat.id} />
 										<Button variant="ghost" size="sm" type="submit">
 											{#if cat.isActive}
-												<ToggleRight size={14} class="text-green-600" />
+												<ToggleRight size={14} class="text-primary" />
 											{:else}
 												<ToggleLeft size={14} class="text-muted-foreground" />
 											{/if}

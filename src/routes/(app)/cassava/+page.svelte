@@ -32,7 +32,7 @@
 <div class="space-y-6">
 	<div class="flex flex-wrap items-center gap-2">
 		<div class="flex items-center gap-3">
-			<Wheat size={24} class="text-emerald-600" />
+			<Wheat size={24} class="text-primary" />
 			<h1 class="text-xl font-bold md:text-2xl">Penerimaan Singkong</h1>
 		</div>
 		<Button onclick={() => showSupplierModal = true} variant="outline" size="sm" class="md:default"><Plus size={16} class="mr-1" /> Supplier</Button>
@@ -41,19 +41,19 @@
 
 	<!-- Summary -->
 	<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-		<div class="rounded-xl border bg-white p-4 shadow-sm">
+		<div class="rounded-xl border bg-card p-4 shadow-sm">
 			<p class="text-xs font-medium text-muted-foreground">Total Gross</p>
 			<p class="text-xl font-bold">{data.summary.totalGross.toLocaleString('id-ID')} kg</p>
 		</div>
-		<div class="rounded-xl border bg-white p-4 shadow-sm">
+		<div class="rounded-xl border bg-card p-4 shadow-sm">
 			<p class="text-xs font-medium text-muted-foreground">Total Refraksi</p>
-			<p class="text-xl font-bold text-amber-600">{data.summary.totalRefraction.toLocaleString('id-ID')} kg</p>
+			<p class="text-xl font-bold text-warning">{data.summary.totalRefraction.toLocaleString('id-ID')} kg</p>
 		</div>
-		<div class="rounded-xl border bg-white p-4 shadow-sm">
+		<div class="rounded-xl border bg-card p-4 shadow-sm">
 			<p class="text-xs font-medium text-muted-foreground">Total Final</p>
-			<p class="text-xl font-bold text-emerald-600">{data.summary.totalFinal.toLocaleString('id-ID')} kg</p>
+			<p class="text-xl font-bold text-primary">{data.summary.totalFinal.toLocaleString('id-ID')} kg</p>
 		</div>
-		<div class="rounded-xl border bg-white p-4 shadow-sm">
+		<div class="rounded-xl border bg-card p-4 shadow-sm">
 			<p class="text-xs font-medium text-muted-foreground">Total Biaya</p>
 			<p class="text-xl font-bold">Rp {data.summary.totalCost.toLocaleString('id-ID')}</p>
 		</div>
@@ -87,14 +87,14 @@
 							<td class="hidden md:table-cell px-4 py-3 text-right">{r.grossWeight.toLocaleString('id-ID')}</td>
 							<td class="hidden md:table-cell px-4 py-3 text-right">{r.taraWeight.toLocaleString('id-ID')}</td>
 							<td class="hidden lg:table-cell px-4 py-3 text-right font-medium">{r.netWeight.toLocaleString('id-ID')}</td>
-							<td class="hidden md:table-cell px-4 py-3 text-right text-amber-600">{r.refraction.toLocaleString('id-ID')}</td>
-							<td class="px-4 py-3 text-right font-medium text-emerald-600">{r.finalWeight.toLocaleString('id-ID')}</td>
+							<td class="hidden md:table-cell px-4 py-3 text-right text-warning">{r.refraction.toLocaleString('id-ID')}</td>
+							<td class="px-4 py-3 text-right font-medium text-primary">{r.finalWeight.toLocaleString('id-ID')}</td>
 							<td class="hidden sm:table-cell px-4 py-3 text-right">Rp {r.pricePerKg.toLocaleString('id-ID')}</td>
 							<td class="px-4 py-3 text-right font-semibold">Rp {r.totalCost.toLocaleString('id-ID')}</td>
 							<td class="px-4 py-3 text-center">
 								<div class="flex items-center justify-center gap-1">
 									<Button variant="ghost" size="sm" onclick={() => editTarget = r}><Pencil size={14} /></Button>
-									<Button variant="ghost" size="sm" type="button" onclick={() => deleteTargetId = r.id} class="text-red-500 hover:text-red-700" aria-label="Hapus"><Trash2 size={14} /></Button>
+									<Button variant="ghost" size="sm" type="button" onclick={() => deleteTargetId = r.id} class="text-destructive hover:text-destructive" aria-label="Hapus"><Trash2 size={14} /></Button>
 								</div>
 							</td>
 						</tr>
@@ -124,7 +124,7 @@
 				<div class="grid gap-2">
 					<label for="cs-supplier" class="text-sm font-medium">Supplier *</label>
 					{#if data.suppliers.length === 0}
-						<div class="rounded-lg border border-yellow-300 bg-yellow-50 p-3 text-sm text-yellow-800">Belum ada supplier. Tambah supplier dulu.</div>
+						<div class="rounded-lg border border-warning/40 bg-warning/10 p-3 text-sm text-warning">Belum ada supplier. Tambah supplier dulu.</div>
 					{/if}
 					<select id="cs-supplier" name="supplierId" class="rounded-lg border bg-background px-3 py-2 text-sm" required disabled={data.suppliers.length === 0}>
 						<option value="">{data.suppliers.length === 0 ? 'Tidak ada supplier' : 'Pilih supplier'}</option>
@@ -173,10 +173,10 @@
 				</div>
 
 				<!-- Live Calculation -->
-				<div class="rounded-lg border bg-emerald-50 p-4 text-sm space-y-1">
+				<div class="rounded-lg border bg-primary/5 p-4 text-sm space-y-1">
 					<p>Net Weight: <strong>{netWeight.toFixed(2)} kg</strong> (gross - tara)</p>
 					<p>Final Weight: <strong>{finalWeight.toFixed(2)} kg</strong> (net - refraksi)</p>
-					<p class="text-lg font-bold text-emerald-700">Total Biaya: Rp {totalCost.toLocaleString('id-ID')}</p>
+					<p class="text-lg font-bold text-primary">Total Biaya: Rp {totalCost.toLocaleString('id-ID')}</p>
 				</div>
 			</div>
 			<DialogFooter><Button type="submit">Simpan</Button></DialogFooter>

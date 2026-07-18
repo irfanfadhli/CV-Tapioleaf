@@ -6,11 +6,11 @@
 		loading?: boolean;
 	} = $props();
 
-	const colors = ['#059669', '#10b981', '#34d399', '#6ee7b7', '#a7f3d0'];
+	const colors = ['var(--primary)', 'var(--info)', 'var(--warning)', 'var(--destructive)', 'var(--accent)'];
 	let total = $derived(data.reduce((s, d) => s + d.total, 0));
 </script>
 
-<div class="rounded-xl border bg-white p-5 shadow-sm">
+<div class="rounded-xl border bg-card p-5 shadow-sm">
 	<h3 class="mb-3 text-sm font-semibold text-muted-foreground">🍩 Penjualan Per Kategori</h3>
 	{#if loading}
 		<SkeletonWidget height="h-48" />
@@ -26,7 +26,7 @@
 							<span class="text-sm font-medium">{d.category}</span>
 							<span class="text-sm font-semibold">Rp {d.total.toLocaleString('id-ID')}</span>
 						</div>
-						<div class="mt-1 h-2 w-full overflow-hidden rounded-full bg-gray-100">
+						<div class="mt-1 h-2 w-full overflow-hidden rounded-full bg-muted">
 							<div class="h-full rounded-full transition-all" style="width: {total > 0 ? (d.total / total) * 100 : 0}%; background: {colors[i % colors.length]}"></div>
 						</div>
 						<span class="text-xs text-muted-foreground">{total > 0 ? ((d.total / total) * 100).toFixed(1) : 0}%</span>

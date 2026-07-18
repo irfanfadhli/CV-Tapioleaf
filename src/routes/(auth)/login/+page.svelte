@@ -20,7 +20,7 @@
 
 <Card class="w-full max-w-md">
 	<CardHeader class="text-center">
-		<div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center overflow-hidden rounded-full bg-emerald-600"><img src="/img/logo.png" alt="TapioLeaf" class="h-full w-full object-cover" /></div>
+		<div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center overflow-hidden rounded-full bg-primary"><img src="/img/logo.png" alt="TapioLeaf" class="h-full w-full object-cover" /></div>
 		<CardTitle class="text-xl">CV TapioLeaf</CardTitle>
 		<CardDescription>Masuk untuk mulai berbelanja</CardDescription>
 	</CardHeader>

@@ -9,7 +9,7 @@
 	let max = $derived(Math.max(...data.map(d => d.total), 1));
 </script>
 
-<div class="rounded-xl border bg-white p-5 shadow-sm">
+<div class="rounded-xl border bg-card p-5 shadow-sm">
 	<h3 class="mb-3 text-sm font-semibold text-muted-foreground">📊 Tren Penjualan 7 Hari</h3>
 	{#if loading}
 		<SkeletonWidget height="h-48" />
@@ -21,7 +21,7 @@
 				<div class="flex flex-1 flex-col items-center justify-end gap-1">
 					<span class="text-xs text-muted-foreground">Rp {(d.total / 1000).toFixed(0)}k</span>
 					<div
-						class="w-full rounded-t bg-emerald-500 transition-all hover:bg-emerald-600"
+						class="w-full rounded-t bg-primary transition-all hover:bg-primary/90"
 						style="height: {(d.total / max) * 160}px; min-height: 4px;"
 						title="{d.date}: Rp {d.total.toLocaleString('id-ID')} ({d.count} transaksi)"
 					></div>

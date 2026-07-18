@@ -74,7 +74,7 @@
 								<input type="hidden" name="id" value={product.id} />
 								<Button variant="ghost" size="sm" type="submit">
 									{#if product.isActive}
-										<ToggleRight size={14} class="text-green-600" />
+										<ToggleRight size={14} class="text-primary" />
 									{:else}
 										<ToggleLeft size={14} class="text-muted-foreground" />
 									{/if}

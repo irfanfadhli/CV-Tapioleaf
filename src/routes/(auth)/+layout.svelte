@@ -9,7 +9,7 @@
 <svelte:head><link rel="icon" href={logo} /></svelte:head>
 <Toaster position="bottom-right" richColors />
 <div
-	class="flex min-h-screen items-center justify-center bg-gradient-to-br from-green-50 to-emerald-100 p-4"
+	class="flex min-h-screen items-center justify-center bg-gradient-to-br from-primary/5 to-primary/10 p-4"
 >
 	{@render children()}
 </div>

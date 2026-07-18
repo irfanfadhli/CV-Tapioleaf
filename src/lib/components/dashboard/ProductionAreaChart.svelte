@@ -14,7 +14,7 @@
 	let targetY = $derived(100 - (targetKg / maxVal) * 100);
 </script>
 
-<div class="rounded-xl border bg-white p-5 shadow-sm">
+<div class="rounded-xl border bg-card p-5 shadow-sm">
 	<h3 class="mb-3 text-sm font-semibold text-muted-foreground">🏭 Tren Produksi</h3>
 	{#if loading}
 		<SkeletonWidget height="h-48" />
@@ -25,16 +25,16 @@
 			<svg viewBox="0 0 100 100" class="h-full w-full" preserveAspectRatio="none">
 		<defs>
 				<linearGradient id="prodGrad" x1="0" y1="0" x2="0" y2="1">
-					<stop offset="0%" stop-color="#2563eb" stop-opacity="0.2" />
-					<stop offset="100%" stop-color="#2563eb" stop-opacity="0.02" />
+					<stop offset="0%" stop-color="var(--info)" stop-opacity="0.2" />
+					<stop offset="100%" stop-color="var(--info)" stop-opacity="0.02" />
 				</linearGradient>
 			</defs>
 			{#if targetKg > 0}
-				<line x1="0" y1={targetY} x2="100" y2={targetY} stroke="#f87171" stroke-width="1.5" stroke-dasharray="4,3" />
-				<text x="100" y={Math.max(targetY, -4)} fill="#f87171" font-size="6" text-anchor="end" dominant-baseline="auto">{targetKg}kg</text>
+				<line x1="0" y1={targetY} x2="100" y2={targetY} stroke="var(--destructive)" stroke-width="1.5" stroke-dasharray="4,3" />
+				<text x="100" y={Math.max(targetY, -4)} fill="var(--destructive)" font-size="6" text-anchor="end" dominant-baseline="auto">{targetKg}kg</text>
 			{/if}
 				<polyline fill="url(#prodGrad)" stroke="none" points={areaPoints} />
-				<polyline fill="none" stroke="#2563eb" stroke-width="2" points={points} vector-effect="non-scaling-stroke" />
+				<polyline fill="none" stroke="var(--info)" stroke-width="2" points={points} vector-effect="non-scaling-stroke" />
 			</svg>
 			<div class="absolute inset-x-0 bottom-0 flex justify-between px-1">
 				{#each data as d}

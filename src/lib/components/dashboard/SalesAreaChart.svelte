@@ -1,7 +1,7 @@
 <script lang="ts">
 	import SkeletonWidget from './SkeletonWidget.svelte';
 
-	let { data = [] as Array<{ date: string; total: number }>, loading = false, color = '#059669', label = 'Penjualan' }: {
+	let { data = [] as Array<{ date: string; total: number }>, loading = false, 	color = 'var(--primary)', label = 'Penjualan' }: {
 		data?: Array<{ date: string; total: number }>;
 		loading?: boolean;
 		color?: string;
@@ -13,7 +13,7 @@
 	let areaPoints = $derived(`0,100 ${points} 100,100`);
 </script>
 
-<div class="rounded-xl border bg-white p-5 shadow-sm">
+<div class="rounded-xl border bg-card p-5 shadow-sm">
 	<h3 class="mb-3 text-sm font-semibold text-muted-foreground">📈 {label}</h3>
 	{#if loading}
 		<SkeletonWidget height="h-48" />

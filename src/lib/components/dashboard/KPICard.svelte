@@ -20,12 +20,12 @@
 	} = $props();
 </script>
 
-<div class="rounded-xl border bg-white p-5 shadow-sm transition-all hover:shadow-md {alert ? 'border-red-300 bg-red-50' : ''}">
+<div class="rounded-xl border bg-card p-5 shadow-sm transition-all hover:shadow-md {alert ? 'border-destructive/30 bg-destructive/10' : ''}">
 	{#if loading}
 		<div class="animate-pulse space-y-3">
-			<div class="h-4 w-20 rounded bg-gray-200"></div>
-			<div class="h-8 w-32 rounded bg-gray-200"></div>
-			<div class="h-3 w-24 rounded bg-gray-200"></div>
+			<div class="h-4 w-20 rounded bg-muted"></div>
+			<div class="h-8 w-32 rounded bg-muted"></div>
+			<div class="h-3 w-24 rounded bg-muted"></div>
 		</div>
 	{:else}
 		<div class="flex items-start justify-between">
@@ -36,7 +36,7 @@
 		<div class="mt-1 flex items-center gap-2">
 			{#if subtitle}<p class="text-xs text-muted-foreground">{subtitle}</p>{/if}
 			{#if change !== null}
-				<span class="inline-flex items-center gap-0.5 text-xs font-medium {change >= 0 ? 'text-green-600' : 'text-red-600'}">
+				<span class="inline-flex items-center gap-0.5 text-xs font-medium {change >= 0 ? 'text-primary' : 'text-destructive'}">
 					{change >= 0 ? '↑' : '↓'} {Math.abs(change).toFixed(1)}%
 					{#if compareLabel}<span class="text-muted-foreground/60">{compareLabel}</span>{/if}
 				</span>

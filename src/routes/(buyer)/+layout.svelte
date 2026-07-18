@@ -12,8 +12,8 @@
 </script>
 
 <Toaster position="bottom-right" richColors />
-<div class="min-h-screen bg-gray-50">
-	<header class="border-b bg-white">
+<div class="min-h-screen bg-background">
+	<header class="border-b bg-card">
 		<div class="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
 			<div class="flex items-center gap-2">
 				<a href="/"

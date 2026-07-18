@@ -23,20 +23,20 @@
 <div class="space-y-6">
 	<div class="flex flex-wrap items-center gap-2">
 		<div class="flex items-center gap-3">
-			<Factory size={24} class="text-emerald-600" />
+			<Factory size={24} class="text-primary" />
 			<h1 class="text-xl font-bold md:text-2xl">Produksi Harian</h1>
 		</div>
 		<Button onclick={() => showModal = true} size="sm" class="md:default"><Plus size={16} class="mr-1" /> Tambah Produksi</Button>
 	</div>
 
 	<!-- Cassava Stock -->
-	<div class="rounded-xl border bg-emerald-50 p-4 shadow-sm">
+	<div class="rounded-xl border bg-primary/5 p-4 shadow-sm">
 		<div class="flex items-center justify-between">
 			<div>
-				<p class="text-xs font-medium text-emerald-700">Stok Singkong Tersedia</p>
-				<p class="text-2xl font-bold text-emerald-800">{Math.max(0, data.cassavaStock).toLocaleString('id-ID')} kg</p>
+				<p class="text-xs font-medium text-primary">Stok Singkong Tersedia</p>
+				<p class="text-2xl font-bold text-primary">{Math.max(0, data.cassavaStock).toLocaleString('id-ID')} kg</p>
 			</div>
-			<p class="text-xs text-emerald-600">Bahan baku untuk produksi</p>
+			<p class="text-xs text-primary">Bahan baku untuk produksi</p>
 		</div>
 	</div>
 
@@ -94,14 +94,14 @@
 									<td class="hidden md:table-cell px-4 py-3 text-right text-xs text-muted-foreground">{item.yieldPercentage ? `${item.yieldPercentage}%` : '—'}</td>
 									<td class="px-4 py-3 text-center">
 										{#if item.status === 'CONFIRMED'}
-											<span class="inline-flex items-center gap-1 rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700"><CheckCircle2 size={12} /> CONFIRMED</span>
+											<span class="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary"><CheckCircle2 size={12} /> CONFIRMED</span>
 										{:else}
-											<span class="inline-flex items-center gap-1 rounded-full bg-yellow-100 px-2 py-0.5 text-xs font-medium text-yellow-700">DRAFT</span>
+											<span class="inline-flex items-center gap-1 rounded-full bg-warning/20 px-2 py-0.5 text-xs font-medium text-warning">DRAFT</span>
 										{/if}
 									</td>
 									<td class="hidden lg:table-cell px-4 py-3 text-xs text-muted-foreground">{item.notes || '—'}</td>
 									<td class="px-4 py-3 text-center">
-										<Button variant="ghost" size="sm" type="button" onclick={() => deleteTargetId = item.id} class="text-red-500 hover:text-red-700" aria-label="Hapus"><Trash2 size={14} /></Button>
+										<Button variant="ghost" size="sm" type="button" onclick={() => deleteTargetId = item.id} class="text-destructive hover:text-destructive" aria-label="Hapus"><Trash2 size={14} /></Button>
 									</td>
 								</tr>
 							{:else}
@@ -141,10 +141,10 @@
 					<label for="prod-quantityKg" class="text-sm font-medium">Quantity (kg) *</label>
 					<Input id="prod-quantityKg" name="quantityKg" type="number" step="0.1" required placeholder="Contoh: 2500" />
 				</div>
-				<div class="rounded-lg border bg-emerald-50 p-3 text-sm">
-					<p class="font-medium text-emerald-800">Stok Singkong: {Math.max(0, data.cassavaStock).toLocaleString('id-ID')} kg</p>
+				<div class="rounded-lg border bg-primary/5 p-3 text-sm">
+					<p class="font-medium text-primary">Stok Singkong: {Math.max(0, data.cassavaStock).toLocaleString('id-ID')} kg</p>
 					{#if Math.max(0, data.cassavaStock) <= 0}
-						<p class="mt-1 flex items-center gap-1 text-xs text-red-600"><AlertTriangle size={12} /> Stok singkong habis!</p>
+						<p class="mt-1 flex items-center gap-1 text-xs text-destructive"><AlertTriangle size={12} /> Stok singkong habis!</p>
 					{/if}
 				</div>
 				{#if Math.max(0, data.cassavaStock) > 0}
@@ -159,9 +159,9 @@
 					<p class="text-xs text-muted-foreground">Persentase tepung yang dihasilkan dari singkong</p>
 				</div>
 				{#if flourResult > 0}
-				<div class="rounded-lg border bg-blue-50 p-3 text-sm">
-					<p class="font-medium text-blue-800">Hasil Tepung: {flourResult.toLocaleString('id-ID')} kg</p>
-					<p class="text-xs text-blue-600">Hasil tepung tapioka dari singkong yang diproses</p>
+				<div class="rounded-lg border bg-info/10 p-3 text-sm">
+					<p class="font-medium text-info">Hasil Tepung: {flourResult.toLocaleString('id-ID')} kg</p>
+					<p class="text-xs text-info">Hasil tepung tapioka dari singkong yang diproses</p>
 				</div>
 				{/if}
 				<div class="grid gap-2">

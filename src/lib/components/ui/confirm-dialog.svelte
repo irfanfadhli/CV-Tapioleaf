@@ -36,8 +36,8 @@
 	<Dialog.Content showCloseButton={false}>
 		<div class="flex flex-col items-center gap-4 text-center">
 			{#if variant === 'danger'}
-				<div class="flex h-12 w-12 items-center justify-center rounded-full bg-red-100">
-					<TriangleAlert size={24} class="text-red-600" />
+				<div class="flex h-12 w-12 items-center justify-center rounded-full bg-destructive/10">
+					<TriangleAlert size={24} class="text-destructive" />
 				</div>
 			{/if}
 			<div>

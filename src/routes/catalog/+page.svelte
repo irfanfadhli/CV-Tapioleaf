@@ -31,8 +31,8 @@
 	<title>Katalog Produk — CV TapioLeaf</title>
 </svelte:head>
 
-<div class="min-h-screen bg-gradient-to-b from-gray-50 to-white">
-	<header class="border-b bg-white/80 backdrop-blur-sm sticky top-0 z-10">
+<div class="min-h-screen bg-gradient-to-b from-muted/50 to-card">
+	<header class="border-b bg-card/80 backdrop-blur-sm sticky top-0 z-10">
 		<div class="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
 			<div class="flex items-center gap-2">
 				<img src="/img/logo.png" alt="TapioLeaf" class="h-9 w-9 rounded-full object-cover" />
@@ -58,7 +58,7 @@
 			<input
 				type="text"
 				placeholder="Cari produk..."
-				class="w-full rounded-full border bg-white py-2.5 pl-10 pr-4 text-sm shadow-sm outline-none focus:ring-2 focus:ring-emerald-500"
+				class="w-full rounded-full border bg-card py-2.5 pl-10 pr-4 text-sm shadow-sm outline-none focus:ring-2 focus:ring-ring"
 				bind:value={searchQuery}
 				oninput={handleSearch}
 			/>
@@ -73,19 +73,19 @@
 		{:else}
 			<div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
 				{#each data.items as item}
-					<div class="group rounded-xl border bg-white p-5 shadow-sm transition-all hover:shadow-md hover:-translate-y-0.5 active:scale-[0.98]">
+					<div class="group rounded-xl border bg-card p-5 shadow-sm transition-all hover:shadow-md hover:-translate-y-0.5 active:scale-[0.98]">
 						<div class="mb-3 flex items-start justify-between">
-							<div class="flex h-12 w-12 items-center justify-center rounded-lg bg-emerald-50 text-lg font-bold text-emerald-700">
+							<div class="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/5 text-lg font-bold text-primary">
 								{item.name.charAt(0)}
 							</div>
 							{#if item.currentStock < 10}
-								<span class="inline-flex items-center gap-1 rounded-full bg-red-50 px-2 py-0.5 text-xs font-medium text-red-600"><AlertTriangle size={10} /> Stok terbatas</span>
+								<span class="inline-flex items-center gap-1 rounded-full bg-destructive/10 px-2 py-0.5 text-xs font-medium text-destructive"><AlertTriangle size={10} /> Stok terbatas</span>
 							{/if}
 						</div>
 						<h3 class="mb-1 font-semibold">{item.name}</h3>
 						<p class="mb-3 line-clamp-2 text-sm text-muted-foreground">{item.description || 'Produk berkualitas tinggi dari CV TapioLeaf'}</p>
 						<div class="flex items-center justify-between">
-							<span class="text-lg font-bold text-emerald-700">{formatPrice(item.price, item.unit)}</span>
+							<span class="text-lg font-bold text-primary">{formatPrice(item.price, item.unit)}</span>
 							<span class="text-xs text-muted-foreground">Stok: {item.currentStock} {item.unit}</span>
 						</div>
 					</div>
@@ -97,11 +97,7 @@
 					{#each Array(data.pagination.totalPages) as _, i}
 						<a
 							href="?page={i + 1}&search={data.search}"
-							class="inline-flex h-9 w-9 items-center justify-center rounded-lg text-sm transition-colors"
-							class:bg-emerald-700={data.pagination.page === i + 1}
-							class:text-white={data.pagination.page === i + 1}
-							class:text-emerald-700={data.pagination.page !== i + 1}
-							class:hover:bg-emerald-50={data.pagination.page !== i + 1}
+							class="inline-flex h-9 w-9 items-center justify-center rounded-lg text-sm transition-colors {data.pagination.page === i + 1 ? 'bg-primary text-primary-foreground' : 'text-primary hover:bg-primary/5'}"
 						>{i + 1}</a>
 					{/each}
 				</div>
@@ -109,7 +105,7 @@
 		{/if}
 	</main>
 
-	<footer class="border-t bg-white py-6 text-center text-sm text-muted-foreground">
+	<footer class="border-t bg-card py-6 text-center text-sm text-muted-foreground">
 		<p>&copy; 2026 CV TapioLeaf. All rights reserved.</p>
 	</footer>
 </div>

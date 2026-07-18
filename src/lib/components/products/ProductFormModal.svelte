@@ -179,7 +179,7 @@
 							</div>
 						{/if}
 					</div>
-					<Button type="button" variant="ghost" size="sm" class="text-red-500" onclick={removeImage}>Hapus Gambar</Button>
+					<Button type="button" variant="ghost" size="sm" class="text-destructive" onclick={removeImage}>Hapus Gambar</Button>
 				</div>
 			{/if}
 			<input type="hidden" name="removeImage" value={!imageFile && !imagePreview && product?.imageUrl ? '1' : ''} />

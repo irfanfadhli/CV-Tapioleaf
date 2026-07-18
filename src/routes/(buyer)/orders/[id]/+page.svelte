@@ -7,15 +7,15 @@
 	let { data } = $props();
 
 	const statusConfig: Record<string, { label: string; icon: any; color: string }> = {
-		PENDING: { label: 'Menunggu Pembayaran', icon: Clock, color: 'text-yellow-600' },
-		PAID: { label: 'Lunas', icon: CheckCircle2, color: 'text-green-600' },
-		PROCESSING: { label: 'Diproses', icon: Clock, color: 'text-blue-600' },
-		SHIPPED: { label: 'Dikirim', icon: CheckCircle2, color: 'text-purple-600' },
-		COMPLETED: { label: 'Selesai', icon: CheckCircle2, color: 'text-emerald-600' },
-		CANCELLED: { label: 'Dibatalkan', icon: XCircle, color: 'text-red-600' }
+		PENDING: { label: 'Menunggu Pembayaran', icon: Clock, color: 'text-warning' },
+		PAID: { label: 'Lunas', icon: CheckCircle2, color: 'text-primary' },
+		PROCESSING: { label: 'Diproses', icon: Clock, color: 'text-info' },
+		SHIPPED: { label: 'Dikirim', icon: CheckCircle2, color: 'text-info' },
+		COMPLETED: { label: 'Selesai', icon: CheckCircle2, color: 'text-primary' },
+		CANCELLED: { label: 'Dibatalkan', icon: XCircle, color: 'text-destructive' }
 	};
 
-	const cfg = statusConfig[data.order.status] || { label: data.order.status, icon: Clock, color: 'text-gray-600' };
+	const cfg = statusConfig[data.order.status] || { label: data.order.status, icon: Clock, color: 'text-muted-foreground' };
 </script>
 
 <div class="mx-auto max-w-2xl px-4 py-8">
@@ -59,7 +59,7 @@
 				</a>
 			{/if}
 
-			<div class="rounded-lg bg-gray-50 p-3 text-sm">
+			<div class="rounded-lg bg-muted/50 p-3 text-sm">
 				<p class="font-medium">Data Pembeli</p>
 				<p class="text-muted-foreground">{data.order.customerName}</p>
 				<p class="text-muted-foreground">{data.order.customerPhone}</p>

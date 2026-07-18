@@ -6,7 +6,7 @@
 		loading?: boolean;
 	} = $props();
 
-	const colors = ['#059669', '#f59e0b'];
+	const colors = ['var(--primary)', 'var(--warning)'];
 	const r = 38, circ = 2 * Math.PI * r;
 	let total = $derived(data.reduce((s, d) => s + d.revenue, 0) || 1);
 	let segs = $derived((() => {
@@ -20,7 +20,7 @@
 	})());
 </script>
 
-<div class="rounded-xl border bg-white p-5 shadow-sm">
+<div class="rounded-xl border bg-card p-5 shadow-sm">
 	<h3 class="mb-3 text-sm font-semibold text-muted-foreground">🍩 Margin Per Produk</h3>
 	{#if loading}
 		<SkeletonWidget height="h-64" />
@@ -36,7 +36,7 @@
 							stroke-dashoffset={-segs[i].offset}
 						/>
 					{/each}
-					<text x="50" y="50" text-anchor="middle" dominant-baseline="middle" fill="#374151" font-size="9" font-weight="bold" transform="rotate(90, 50, 50)">{data.length} produk</text>
+					<text x="50" y="50" text-anchor="middle" dominant-baseline="middle" fill="currentColor" font-size="9" font-weight="bold" transform="rotate(90, 50, 50)">{data.length} produk</text>
 				</svg>
 			</div>
 			<div class="flex-1 space-y-1.5 self-center">
@@ -45,7 +45,7 @@
 						<div class="h-3 w-3 shrink-0 rounded-full" style="background: {colors[i % colors.length]}"></div>
 						<span class="truncate min-w-0 flex-1">{d.name}</span>
 						<span class="shrink-0 text-xs text-muted-foreground">{(d.revenue / total * 100).toFixed(1)}%</span>
-						<span class="w-14 shrink-0 text-right text-xs font-medium {d.margin !== null && d.margin >= 20 ? 'text-green-600' : d.margin !== null && d.margin >= 0 ? 'text-yellow-600' : 'text-red-600'}">{d.margin !== null ? `${d.margin}%` : 'N/A'}</span>
+						<span class="w-14 shrink-0 text-right text-xs font-medium {d.margin !== null && d.margin >= 20 ? 'text-primary' : d.margin !== null && d.margin >= 0 ? 'text-warning' : 'text-destructive'}">{d.margin !== null ? `${d.margin}%` : 'N/A'}</span>
 					</div>
 				{/each}
 			</div>

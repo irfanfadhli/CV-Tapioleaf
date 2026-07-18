@@ -29,7 +29,7 @@
 <div class="flex min-h-screen bg-background">
 	<!-- Mobile overlay -->
 	{#if sidebarOpen}
-		<button class="fixed inset-0 z-40 bg-black/50 md:hidden" onclick={closeSidebar} aria-label="Tutup menu"></button>
+		<button class="fixed inset-0 z-40 bg-foreground/80 backdrop-blur-sm md:hidden" onclick={closeSidebar} aria-label="Tutup menu"></button>
 	{/if}
 
 	<!-- Sidebar -->
