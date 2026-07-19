@@ -109,7 +109,7 @@
 <svelte:head>
 	<title>{siteConfig.name} — Tepung Tapioka Premium</title>
 	<meta name="description" content={siteConfig.description} />
-	<link rel="preload" as="image" href="/img/cassava.avif" type="image/avif" />
+	<link rel="preload" as="image" href="/img/cassava.avif" type="image/avif" fetchpriority="high" />
 	<link rel="dns-prefetch" href="//ojbivocgryxqdykebsyy.storage.supabase.co" />
 	<link rel="preconnect" href="https://ojbivocgryxqdykebsyy.storage.supabase.co" crossorigin="anonymous" />
 	<meta name="keywords" content={siteConfig.keywords} />
