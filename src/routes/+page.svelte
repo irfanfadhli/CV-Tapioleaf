@@ -4,19 +4,23 @@
 	import CheckoutModal from '$lib/components/checkout/CheckoutModal.svelte';
 	import { siteConfig } from '$lib/config';
 	import { toast } from 'svelte-sonner';
+	import {
+		DropdownMenu,
+		DropdownMenuContent,
+		DropdownMenuItem,
+		DropdownMenuSeparator,
+		DropdownMenuTrigger
+	} from '$lib/components/ui/dropdown-menu';
+	import { Menu } from '@lucide/svelte';
 
 	let { data } = $props();
 
-	let menuOpen = $state(false);
 	let checkoutProduct = $state<{
 		id: string; name: string; code: string; price: string; unit: string; description: string | null;
 	} | null>(null);
 
 	let activeCategory = $state('Semua');
 	let addedIds = $state<Set<string>>(new Set());
-	let prevScrollY = 0;
-	let navHidden = $state(false);
-	let scrollThreshold = 60;
 
 	let filteredItems = $derived(
 		activeCategory === 'Semua'
@@ -58,6 +62,8 @@
 	}
 
 	let observer: IntersectionObserver | undefined;
+	let prevScrollY = 0;
+	let navHidden = $state(false);
 
 	$effect(() => {
 		observer = new IntersectionObserver(
@@ -73,36 +79,19 @@
 	});
 
 	$effect(() => {
-		if (menuOpen) {
-			document.body.style.overflow = 'hidden';
-		} else {
-			document.body.style.overflow = '';
-		}
-		return () => { document.body.style.overflow = ''; };
-	});
-
-	$effect(() => {
 		function onScroll() {
 			const y = window.scrollY;
 			if (y < 10) {
 				navHidden = false;
-			} else if (!menuOpen && y > prevScrollY + scrollThreshold) {
+			} else if (y > prevScrollY + 40) {
 				navHidden = true;
-			} else if (y < prevScrollY - scrollThreshold) {
+			} else if (y < prevScrollY - 40) {
 				navHidden = false;
 			}
 			prevScrollY = y;
 		}
 		window.addEventListener('scroll', onScroll, { passive: true });
 		return () => window.removeEventListener('scroll', onScroll);
-	});
-
-	$effect(() => {
-		if (menuOpen) {
-			document.body.style.overflow = 'hidden';
-		} else {
-			document.body.style.overflow = '';
-		}
 	});
 </script>
 
@@ -131,17 +120,12 @@
 	<link rel="canonical" href={siteConfig.url.toString()} />
 </svelte:head>
 
-<!-- Fluid Island Nav -->
-<nav
-	class="fixed inset-x-0 top-0 z-50 flex justify-center transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] {navHidden ? '-translate-y-full' : 'translate-y-0'}"
-	aria-label="Navigasi utama"
->
-	<div
-		class="mt-4 flex items-center gap-6 rounded-full border border-white/10 bg-background/70 px-5 py-2 shadow-[0_8px_32px_rgba(0,0,0,0.12)] backdrop-blur-2xl transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] md:px-6"
-	>
+<!-- Nav -->
+<nav class="sticky top-0 z-50 border-b bg-background/90 backdrop-blur-md transition-transform duration-300 {navHidden ? '-translate-y-full' : 'translate-y-0'}" aria-label="Navigasi utama">
+	<div class="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
 		<a href="/" class="flex items-center gap-2" aria-label="TapioLeaf - Beranda">
-			<picture><source srcset="/img/logo.webp" type="image/webp" /><img src="/img/logo.png" alt="TapioLeaf" class="h-7 w-7 rounded-lg object-cover" width="28" height="28" decoding="async" /></picture>
-			<span class="text-sm font-bold tracking-tight">TapioLeaf</span>
+			<picture><source srcset="/img/logo.webp" type="image/webp" /><img src="/img/logo.png" alt="TapioLeaf" class="h-8 w-8 rounded-lg object-cover" width="32" height="32" decoding="async" /></picture>
+			<span class="text-sm font-semibold">CV TapioLeaf</span>
 		</a>
 		<div class="hidden items-center gap-5 text-sm md:flex">
 			<a href="#products" class="text-muted-foreground transition-colors duration-300 hover:text-foreground">Produk</a>
@@ -159,66 +143,40 @@
 				<Button variant="default" href="/login" class="!rounded-full !px-4 !py-1.5 !text-xs">Masuk</Button>
 			{/if}
 		</div>
-		<button
-			onclick={() => (menuOpen = !menuOpen)}
-			class="group relative flex h-8 w-8 items-center justify-center md:hidden"
-			aria-label="Toggle menu"
-			aria-expanded={menuOpen}
-		>
-			<div class="flex flex-col items-center gap-[6px]">
-				<span
-					class="block h-0.5 w-5 bg-foreground transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] {menuOpen ? 'translate-y-[6.5px] rotate-45' : ''}"
-				></span>
-				<span
-					class="block h-0.5 w-5 bg-foreground transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] {menuOpen ? 'opacity-0' : ''}"
-				></span>
-				<span
-					class="block h-0.5 w-5 bg-foreground transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] {menuOpen ? '-translate-y-[6.5px] -rotate-45' : ''}"
-				></span>
-			</div>
-		</button>
+		<DropdownMenu>
+			<DropdownMenuTrigger class="md:hidden">
+				<Button variant="ghost" size="icon">
+    				<Menu size={18} />
+    				<span class="sr-only">Menu</span>
+				</Button>
+			</DropdownMenuTrigger>
+			<DropdownMenuContent align="end">
+				<DropdownMenuItem><a href="#products" class="flex w-full items-center gap-2">Produk</a></DropdownMenuItem>
+				<DropdownMenuItem><a href="#about" class="flex w-full items-center gap-2">Tentang</a></DropdownMenuItem>
+				<DropdownMenuItem><a href="#contact" class="flex w-full items-center gap-2">Kontak</a></DropdownMenuItem>
+				<DropdownMenuSeparator />
+				{#if data.user}
+					{#if data.user.role === 'pembeli_umkm'}
+						<DropdownMenuItem><a href="/orders" class="flex w-full items-center gap-2">Pesanan</a></DropdownMenuItem>
+					{/if}
+					<DropdownMenuItem><a href="/account" class="flex w-full items-center gap-2">Dashboard</a></DropdownMenuItem>
+					<DropdownMenuSeparator />
+					<DropdownMenuItem>
+						<form method="post" action="/api/sign-out">
+							<button type="submit" class="flex w-full items-center gap-2 cursor-pointer">Keluar</button>
+						</form>
+					</DropdownMenuItem>
+				{:else}
+					<DropdownMenuItem><a href="/login" class="flex w-full items-center gap-2">Masuk</a></DropdownMenuItem>
+				{/if}
+			</DropdownMenuContent>
+		</DropdownMenu>
 	</div>
 </nav>
 
-{#if menuOpen}
-	<div
-		class="fixed inset-0 z-[100] flex flex-col bg-background transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]"
-		role="dialog"
-		aria-modal="true"
-	>
-		<div class="flex items-center justify-between border-b px-5 py-4">
-			<a href="/" class="flex items-center gap-2" onclick={() => (menuOpen = false)} aria-label="Beranda">
-				<picture><source srcset="/img/logo.webp" type="image/webp" /><img src="/img/logo.png" alt="TapioLeaf" class="h-7 w-7 rounded-lg object-cover" width="28" height="28" decoding="async" /></picture>
-				<span class="text-sm font-bold tracking-tight">TapioLeaf</span>
-			</a>
-			<button
-				onclick={() => (menuOpen = false)}
-				class="flex h-10 w-10 items-center justify-center rounded-full bg-muted/50 transition-all duration-300 hover:bg-muted active:scale-95"
-				aria-label="Tutup menu"
-			>
-				<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
-			</button>
-		</div>
-		<div class="flex flex-1 flex-col items-center justify-center gap-8 text-lg">
-			<a href="#products" onclick={() => (menuOpen = false)} class="hover:text-foreground">Produk</a>
-			<a href="#about" onclick={() => (menuOpen = false)} class="hover:text-foreground">Tentang</a>
-			<a href="#contact" onclick={() => (menuOpen = false)} class="hover:text-foreground">Kontak</a>
-			{#if data.user}
-				<a href="/orders" onclick={() => (menuOpen = false)} class="hover:text-foreground">Pesanan</a>
-				<a href="/account" onclick={() => (menuOpen = false)} class="hover:text-foreground">Dashboard</a>
-				<form method="post" action="/api/sign-out">
-					<button type="submit" onclick={() => (menuOpen = false)} class="cursor-pointer rounded-full bg-destructive/10 px-6 py-2 text-sm font-medium text-destructive hover:bg-destructive/20">Keluar</button>
-				</form>
-			{:else}
-				<Button variant="default" href="/login" onclick={() => (menuOpen = false)} class="!rounded-full">Masuk</Button>
-			{/if}
-		</div>
-	</div>
-{/if}
-
 <!-- Hero: Editorial Split -->
 <section class="relative flex min-h-[100dvh] flex-col overflow-hidden">
-	<div class="relative z-10 mx-auto flex w-full max-w-7xl flex-1 flex-col items-center px-4 pb-8 pt-28 md:flex-row md:px-10 md:py-8">
+	<div class="relative z-10 mx-auto flex w-full max-w-7xl flex-1 flex-col items-center px-4 pb-8 pt-16 md:flex-row md:px-10 md:py-8">
 		<div class="flex w-full flex-col justify-center md:order-none md:w-1/2 md:pr-12 order-last">
 			<span class="mb-4 w-fit rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-[10px] font-medium uppercase tracking-[0.2em] text-foreground">Produsen Tepung Tapioka</span>
 			<h1 class="mb-4 text-4xl font-bold leading-[1.08] tracking-tight md:text-6xl lg:text-7xl">

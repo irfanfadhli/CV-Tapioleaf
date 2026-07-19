@@ -1,13 +1,20 @@
 <script lang="ts">
 	import { Button } from '$lib/components/ui/button';
-	import { LogOut, ShoppingBag, Package } from '@lucide/svelte';
+	import { LogOut, ShoppingBag, Package, Menu } from '@lucide/svelte';
 	import { Toaster } from 'svelte-sonner';
+	import {
+		DropdownMenu,
+		DropdownMenuContent,
+		DropdownMenuItem,
+		DropdownMenuSeparator,
+		DropdownMenuTrigger
+	} from '$lib/components/ui/dropdown-menu';
 
 	let { children } = $props();
 
 	function handleLogout() {
 		fetch('/api/sign-out', { method: 'POST' }).catch(() => {});
-		window.location.href = '/';
+		window.location.href = '/login';
 	}
 </script>
 
@@ -22,17 +29,37 @@
 				<span class="text-sm font-semibold">CV TapioLeaf</span>
 			</div>
 			<div class="flex items-center gap-2">
-				<a href="/#products"
+				<a href="/#products" class="hidden sm:inline-block"
 					><Button variant="outline" size="sm"><Package size={14} class="mr-1" /> Katalog</Button
 					></a
 				>
-				<a href="/orders"
+				<a href="/orders" class="hidden sm:inline-block"
 					><Button variant="outline" size="sm"><ShoppingBag size={14} class="mr-1" /> Pesanan</Button
 					></a
 				>
-				<Button variant="outline" size="sm" onclick={handleLogout}
+				<Button variant="outline" size="sm" class="hidden sm:inline-flex" onclick={handleLogout}
 					><LogOut size={14} class="mr-1" /> Keluar</Button
 				>
+				<DropdownMenu>
+					<DropdownMenuTrigger class="sm:hidden">
+						<Button variant="ghost" size="icon">
+							<Menu size={18} />
+							<span class="sr-only">Menu</span>
+						</Button>
+					</DropdownMenuTrigger>
+					<DropdownMenuContent align="end">
+						<DropdownMenuItem>
+							<a href="/#products" class="flex w-full items-center gap-2"><Package size={14} /> Katalog</a>
+						</DropdownMenuItem>
+						<DropdownMenuItem>
+							<a href="/orders" class="flex w-full items-center gap-2"><ShoppingBag size={14} /> Pesanan</a>
+						</DropdownMenuItem>
+						<DropdownMenuSeparator />
+						<DropdownMenuItem onclick={handleLogout}>
+							<LogOut size={14} /> Keluar
+						</DropdownMenuItem>
+					</DropdownMenuContent>
+				</DropdownMenu>
 			</div>
 		</div>
 	</header>

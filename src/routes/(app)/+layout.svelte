@@ -86,7 +86,10 @@
 	<main class="min-w-0 flex-1">
 		<!-- Mobile header -->
 		<div class="sticky top-0 z-30 flex items-center gap-3 border-b bg-background px-4 py-3 md:hidden">
-			<button onclick={() => sidebarOpen = true}><Menu size={22} /></button>
+			<Button variant="ghost" size="icon" onclick={() => sidebarOpen = true}>
+				<Menu size={18} />
+				<span class="sr-only">Menu</span>
+			</Button>
 			<a href="/dashboard" class="flex items-center gap-2">
 				<img src="/img/logo.png" alt="TapioLeaf" class="h-7 w-7 rounded-full object-cover" />
 				<span class="text-sm font-semibold">CV TapioLeaf</span>
