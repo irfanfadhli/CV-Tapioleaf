@@ -3,7 +3,6 @@
 	import Button from '@/components/ui/button/button.svelte';
 	import CheckoutModal from '$lib/components/checkout/CheckoutModal.svelte';
 	import { siteConfig } from '$lib/config';
-	import { ShoppingCart, Check } from '@lucide/svelte';
 	import { toast } from 'svelte-sonner';
 
 	let { data } = $props();
@@ -110,7 +109,7 @@
 <svelte:head>
 	<title>{siteConfig.name} — Tepung Tapioka Premium</title>
 	<meta name="description" content={siteConfig.description} />
-	<link rel="preload" as="image" href="/img/cassava.jpg" fetchpriority="high" />
+	<link rel="preload" as="image" href="/img/cassava.avif" type="image/avif" />
 	<link rel="dns-prefetch" href="//ojbivocgryxqdykebsyy.storage.supabase.co" />
 	<link rel="preconnect" href="https://ojbivocgryxqdykebsyy.storage.supabase.co" crossorigin="anonymous" />
 	<meta name="keywords" content={siteConfig.keywords} />
@@ -140,7 +139,7 @@
 	<div
 		class="mt-4 flex items-center gap-6 rounded-full border border-white/10 bg-background/70 px-5 py-2 shadow-[0_8px_32px_rgba(0,0,0,0.12)] backdrop-blur-2xl transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] md:px-6"
 	>
-		<a href="/" class="flex items-center gap-2" aria-label="Beranda">
+		<a href="/" class="flex items-center gap-2" aria-label="TapioLeaf - Beranda">
 			<picture><source srcset="/img/logo.webp" type="image/webp" /><img src="/img/logo.png" alt="TapioLeaf" class="h-7 w-7 rounded-lg object-cover" width="28" height="28" decoding="async" /></picture>
 			<span class="text-sm font-bold tracking-tight">TapioLeaf</span>
 		</a>
@@ -230,10 +229,10 @@
 				Mengolah singkong pilihan petani lokal menjadi tepung tapioka berkualitas tinggi. Siap melayani kebutuhan industri dan rumah tangga Anda.
 			</p>
 			<div class="flex flex-col gap-3 sm:flex-row">
-				<a
-					href="#products"
-					class="group relative inline-flex min-h-[44px] items-center justify-center gap-2 rounded-full bg-primary px-7 py-3.5 text-sm font-semibold text-primary-foreground shadow-xl shadow-primary/20 transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] hover:shadow-2xl hover:shadow-primary/30 active:scale-[0.97]"
-				>
+			<a
+				href="#products"
+				class="group relative inline-flex min-h-[44px] items-center justify-center gap-2 rounded-full bg-primary px-7 py-3.5 text-sm font-bold text-primary-foreground shadow-xl shadow-primary/20 transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] hover:shadow-2xl hover:shadow-primary/30 active:scale-[0.97]"
+			>
 					Lihat Produk
 					<span class="flex h-7 w-7 items-center justify-center rounded-full bg-white/15 transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] group-hover:translate-x-0.5 group-hover:-translate-y-[1px] group-hover:scale-105">
 						<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
@@ -342,10 +341,10 @@
 							<div class="p-2.5">
 								<h3 class="line-clamp-2 text-xs font-medium leading-snug text-gray-800 min-h-[2rem]">{item.name}</h3>
 								{#if item.description}
-									<p class="mt-0.5 text-[10px] text-gray-400 line-clamp-1">{item.description}</p>
+									<p class="mt-0.5 text-[10px] text-muted-foreground line-clamp-1">{item.description}</p>
 								{/if}
 								<p class="mt-1.5 text-sm font-bold text-primary">{formatPrice(item.price, item.unit)}</p>
-								<p class="mt-0.5 text-[10px] text-gray-400">{formatStock(item.currentStock, item.unit)} {item.unit} tersedia</p>
+								<p class="mt-0.5 text-[10px] text-muted-foreground">{formatStock(item.currentStock, item.unit)} {item.unit} tersedia</p>
 								<button
 									onclick={(e) => { e.stopPropagation(); openCheckout(item); }}
 									class="group/btn mt-2 inline-flex w-full items-center justify-center gap-2 rounded-full bg-primary py-2 text-xs font-semibold text-primary-foreground transition-colors hover:bg-primary/90 active:scale-[0.97]"
