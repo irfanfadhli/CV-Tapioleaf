@@ -112,8 +112,8 @@
 </script>
 
 <Dialog {open} onOpenChange={(o) => { if (!o) handleClose(); }}>
-	<DialogContent class="sm:max-w-lg !p-0 sm:!p-6 overflow-hidden">
-		<div class="flex max-h-[90dvh] flex-col">
+	<DialogContent class="!p-0 sm:!p-6 w-full max-w-[calc(100%-2rem)] sm:max-w-lg overflow-hidden">
+		<div class="flex max-h-[90dvh] overflow-hidden flex-col">
 			<DialogHeader class="px-4 pt-4 pb-0 sm:px-0 sm:pt-0">
 				<DialogTitle>{product ? 'Edit Produk' : 'Tambah Produk'}</DialogTitle>
 				<DialogDescription>Isi data produk {product ? 'yang akan diperbarui' : 'baru'}</DialogDescription>

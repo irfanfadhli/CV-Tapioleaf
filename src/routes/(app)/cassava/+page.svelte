@@ -109,146 +109,149 @@
 
 <!-- Add Receipt Modal -->
 <Dialog open={showModal} onOpenChange={(o) => { if (!o) showModal = false; }}>
-	<DialogContent class="sm:max-w-lg">
-		<DialogHeader>
-			<DialogTitle>Tambah Penerimaan Singkong</DialogTitle>
-			<DialogDescription>Catat penerimaan singkong dari supplier</DialogDescription>
-		</DialogHeader>
-		<form method="post" action="?/create" use:enhance={() => {
-			return async ({ result, update }) => {
-				if (result.type === 'success') { await update(); toast.success('Penerimaan dicatat'); showModal = false; }
-				else if (result.type === 'failure') { await update(); const msg = (result.data as any)?.message; if (msg) toast.error(msg); }
-			};
-		}}>
-			<div class="grid gap-4 py-4">
-				<div class="grid gap-2">
-					<label for="cs-supplier" class="text-sm font-medium">Supplier *</label>
-					{#if data.suppliers.length === 0}
-						<div class="rounded-lg border border-warning/40 bg-warning/10 p-3 text-sm text-warning">Belum ada supplier. Tambah supplier dulu.</div>
-					{/if}
-					<select id="cs-supplier" name="supplierId" class="rounded-lg border bg-background px-3 py-2 text-sm" required disabled={data.suppliers.length === 0}>
-						<option value="">{data.suppliers.length === 0 ? 'Tidak ada supplier' : 'Pilih supplier'}</option>
-						{#each data.suppliers as s}
-							<option value={s.id}>{s.name}</option>
-						{/each}
-					</select>
-				</div>
-			<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-				<div class="grid gap-2">
-					<label class="text-sm font-medium">Tanggal</label>
-					<Input name="receiptDate" type="date" bind:value={receiptDate} />
-				</div>
-				<div class="grid gap-2">
-					<label class="text-sm font-medium">No. Kendaraan *</label>
-					<Input name="vehicleNumber" bind:value={vehicleNumber} required placeholder="Contoh: H 1234 AB" />
-				</div>
-			</div>
-			<div class="grid gap-2">
-				<label class="text-sm font-medium">Nama Supir</label>
-				<Input name="driverName" bind:value={driverName} placeholder="Opsional" />
-			</div>
-			<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-				<div class="grid gap-2">
-					<label class="text-sm font-medium">Gross Weight (kg) *</label>
-					<Input name="grossWeight" type="number" step="0.01" bind:value={grossWeight} required />
-				</div>
-				<div class="grid gap-2">
-					<label class="text-sm font-medium">Tara Weight (kg) *</label>
-					<Input name="taraWeight" type="number" step="0.01" bind:value={taraWeight} required />
-				</div>
-			</div>
-			<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+	<DialogContent class="!p-0 sm:!p-6 w-full max-w-[calc(100%-2rem)] sm:max-w-lg overflow-hidden">
+		<div class="flex max-h-[90dvh] overflow-hidden flex-col">
+			<DialogHeader class="px-4 pt-4 pb-0 sm:px-0 sm:pt-0">
+				<DialogTitle>Tambah Penerimaan Singkong</DialogTitle>
+				<DialogDescription>Catat penerimaan singkong dari supplier</DialogDescription>
+			</DialogHeader>
+			<form method="post" action="?/create" use:enhance={() => {
+				return async ({ result, update }) => {
+					if (result.type === 'success') { await update(); toast.success('Penerimaan dicatat'); showModal = false; }
+					else if (result.type === 'failure') { await update(); const msg = (result.data as any)?.message; if (msg) toast.error(msg); }
+				};
+			}} class="flex min-h-0 flex-1 flex-col">
+				<div class="flex-1 space-y-4 overflow-y-auto px-4 py-4 sm:px-0">
 					<div class="grid gap-2">
-						<label  class="text-sm font-medium">Refraksi (kg) *</label>
-						<Input name="refraction" type="number" step="0.01" bind:value={refraction} required />
+						<label for="cs-supplier" class="text-sm font-medium">Supplier *</label>
+						{#if data.suppliers.length === 0}
+							<div class="rounded-lg border border-warning/40 bg-warning/10 p-3 text-sm text-warning">Belum ada supplier. Tambah supplier dulu.</div>
+						{/if}
+						<select id="cs-supplier" name="supplierId" class="h-11 rounded-lg border bg-background px-3 text-[16px]" required disabled={data.suppliers.length === 0}>
+							<option value="">{data.suppliers.length === 0 ? 'Tidak ada supplier' : 'Pilih supplier'}</option>
+							{#each data.suppliers as s}
+								<option value={s.id}>{s.name}</option>
+							{/each}
+						</select>
+					</div>
+					<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+						<div class="grid gap-2">
+							<label class="text-sm font-medium">Tanggal</label>
+							<Input name="receiptDate" type="date" bind:value={receiptDate} class="text-[16px]" />
+						</div>
+						<div class="grid gap-2">
+							<label class="text-sm font-medium">No. Kendaraan *</label>
+							<Input name="vehicleNumber" bind:value={vehicleNumber} required placeholder="Contoh: H 1234 AB" class="text-[16px]" />
+						</div>
 					</div>
 					<div class="grid gap-2">
-						<label  class="text-sm font-medium">Harga/Kg (Rp) *</label>
-						<Input name="pricePerKg" type="number" step="50" bind:value={pricePerKg} required />
+						<label class="text-sm font-medium">Nama Supir</label>
+						<Input name="driverName" bind:value={driverName} placeholder="Opsional" class="text-[16px]" />
+					</div>
+					<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+						<div class="grid gap-2">
+							<label class="text-sm font-medium">Gross Weight (kg) *</label>
+							<Input name="grossWeight" type="number" step="0.01" bind:value={grossWeight} required class="text-[16px]" inputmode="decimal" />
+						</div>
+						<div class="grid gap-2">
+							<label class="text-sm font-medium">Tara Weight (kg) *</label>
+							<Input name="taraWeight" type="number" step="0.01" bind:value={taraWeight} required class="text-[16px]" inputmode="decimal" />
+						</div>
+					</div>
+					<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+						<div class="grid gap-2">
+							<label class="text-sm font-medium">Refraksi (kg) *</label>
+							<Input name="refraction" type="number" step="0.01" bind:value={refraction} required class="text-[16px]" inputmode="decimal" />
+						</div>
+						<div class="grid gap-2">
+							<label class="text-sm font-medium">Harga/Kg (Rp) *</label>
+							<Input name="pricePerKg" type="number" step="50" bind:value={pricePerKg} required class="text-[16px]" inputmode="decimal" />
+						</div>
+					</div>
+					<div class="grid gap-2">
+						<label class="text-sm font-medium">Keterangan</label>
+						<textarea name="notes" class="h-11 rounded-lg border bg-background px-3 py-2.5 text-[16px]" rows="2" bind:value={notes}></textarea>
+					</div>
+					<!-- Live Calculation -->
+					<div class="rounded-lg border bg-primary/5 p-4 text-sm space-y-1">
+						<p>Net Weight: <strong>{netWeight.toFixed(2)} kg</strong> (gross - tara)</p>
+						<p>Final Weight: <strong>{finalWeight.toFixed(2)} kg</strong> (net - refraksi)</p>
+						<p class="text-lg font-bold text-primary">Total Biaya: Rp {totalCost.toLocaleString('id-ID')}</p>
 					</div>
 				</div>
-				<div class="grid gap-2">
-					<label  class="text-sm font-medium">Keterangan</label>
-					<textarea name="notes" class="rounded-lg border bg-background px-3 py-2 text-sm" rows="2" bind:value={notes}></textarea>
-				</div>
-
-				<!-- Live Calculation -->
-				<div class="rounded-lg border bg-primary/5 p-4 text-sm space-y-1">
-					<p>Net Weight: <strong>{netWeight.toFixed(2)} kg</strong> (gross - tara)</p>
-					<p>Final Weight: <strong>{finalWeight.toFixed(2)} kg</strong> (net - refraksi)</p>
-					<p class="text-lg font-bold text-primary">Total Biaya: Rp {totalCost.toLocaleString('id-ID')}</p>
-				</div>
-			</div>
-			<DialogFooter><Button type="submit">Simpan</Button></DialogFooter>
-		</form>
+				<div class="sticky bottom-0 flex justify-end gap-3 border-t bg-popover px-4 py-4 sm:px-0 sm:pb-0 sm:pt-4"><Button type="button" variant="outline" onclick={() => showModal = false}>Batal</Button><Button type="submit">Simpan</Button></div>
+			</form>
+		</div>
 	</DialogContent>
 </Dialog>
 
 <!-- Edit Receipt Modal -->
 <Dialog open={editTarget !== null} onOpenChange={(o) => { if (!o) editTarget = null; }}>
-	<DialogContent class="sm:max-w-lg">
-		<DialogHeader>
-			<DialogTitle>Edit Penerimaan Singkong</DialogTitle>
-			<DialogDescription>Perbarui data penerimaan</DialogDescription>
-		</DialogHeader>
-		<form method="post" action="?/update" use:enhance={() => {
-			return async ({ result, update }) => {
-				if (result.type === 'success') { await update(); toast.success('Penerimaan diperbarui'); editTarget = null; }
-				else if (result.type === 'failure') { await update(); const msg = (result.data as any)?.message; if (msg) toast.error(msg); }
-			};
-		}}>
-			<input type="hidden" name="id" value={editTarget?.id || ''} />
-			<div class="grid gap-4 py-4">
-				<div class="grid gap-2">
-					<label for="ed-supplier" class="text-sm font-medium">Supplier *</label>
-					<select id="ed-supplier" name="supplierId" class="rounded-lg border bg-background px-3 py-2 text-sm" required>
-						<option value="">Pilih supplier</option>
-						{#each data.suppliers as s}
-							<option value={s.id} selected={s.id === editTarget?.supplierId}>{s.name}</option>
-						{/each}
-					</select>
-				</div>
-				<div class="grid grid-cols-2 gap-4">
+	<DialogContent class="!p-0 sm:!p-6 w-full max-w-[calc(100%-2rem)] sm:max-w-lg overflow-hidden">
+		<div class="flex max-h-[90dvh] overflow-hidden flex-col">
+			<DialogHeader class="px-4 pt-4 pb-0 sm:px-0 sm:pt-0">
+				<DialogTitle>Edit Penerimaan Singkong</DialogTitle>
+				<DialogDescription>Perbarui data penerimaan</DialogDescription>
+			</DialogHeader>
+			<form method="post" action="?/update" use:enhance={() => {
+				return async ({ result, update }) => {
+					if (result.type === 'success') { await update(); toast.success('Penerimaan diperbarui'); editTarget = null; }
+					else if (result.type === 'failure') { await update(); const msg = (result.data as any)?.message; if (msg) toast.error(msg); }
+				};
+			}} class="flex min-h-0 flex-1 flex-col">
+				<input type="hidden" name="id" value={editTarget?.id || ''} />
+				<div class="flex-1 space-y-4 overflow-y-auto px-4 py-4 sm:px-0">
 					<div class="grid gap-2">
-						<label for="ed-date" class="text-sm font-medium">Tanggal</label>
-						<Input id="ed-date" name="receiptDate" type="date" value={editTarget?.receiptDate ? new Date(editTarget.receiptDate).toISOString().slice(0, 10) : ''} />
+						<label for="ed-supplier" class="text-sm font-medium">Supplier *</label>
+						<select id="ed-supplier" name="supplierId" class="h-11 rounded-lg border bg-background px-3 text-[16px]" required>
+							<option value="">Pilih supplier</option>
+							{#each data.suppliers as s}
+								<option value={s.id} selected={s.id === editTarget?.supplierId}>{s.name}</option>
+							{/each}
+						</select>
+					</div>
+					<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+						<div class="grid gap-2">
+							<label for="ed-date" class="text-sm font-medium">Tanggal</label>
+							<Input id="ed-date" name="receiptDate" type="date" value={editTarget?.receiptDate ? new Date(editTarget.receiptDate).toISOString().slice(0, 10) : ''} class="text-[16px]" />
+						</div>
+						<div class="grid gap-2">
+							<label for="ed-vehicle" class="text-sm font-medium">No. Kendaraan *</label>
+							<Input id="ed-vehicle" name="vehicleNumber" value={editTarget?.vehicleNumber || ''} required class="text-[16px]" />
+						</div>
 					</div>
 					<div class="grid gap-2">
-						<label for="ed-vehicle" class="text-sm font-medium">No. Kendaraan *</label>
-						<Input id="ed-vehicle" name="vehicleNumber" value={editTarget?.vehicleNumber || ''} required />
+						<label for="ed-driver" class="text-sm font-medium">Nama Supir</label>
+						<Input id="ed-driver" name="driverName" value={editTarget?.driverName || ''} class="text-[16px]" />
 					</div>
-				</div>
-				<div class="grid gap-2">
-					<label for="ed-driver" class="text-sm font-medium">Nama Supir</label>
-					<Input id="ed-driver" name="driverName" value={editTarget?.driverName || ''} />
-				</div>
-				<div class="grid grid-cols-2 gap-4">
+					<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+						<div class="grid gap-2">
+							<label for="ed-gross" class="text-sm font-medium">Gross Weight (kg) *</label>
+							<Input id="ed-gross" name="grossWeight" type="number" step="0.01" value={editTarget?.grossWeight || 0} required class="text-[16px]" inputmode="decimal" />
+						</div>
+						<div class="grid gap-2">
+							<label for="ed-tara" class="text-sm font-medium">Tara Weight (kg) *</label>
+							<Input id="ed-tara" name="taraWeight" type="number" step="0.01" value={editTarget?.taraWeight || 0} required class="text-[16px]" inputmode="decimal" />
+						</div>
+					</div>
+					<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+						<div class="grid gap-2">
+							<label for="ed-refr" class="text-sm font-medium">Refraksi (kg) *</label>
+							<Input id="ed-refr" name="refraction" type="number" step="0.01" value={editTarget?.refraction || 0} required class="text-[16px]" inputmode="decimal" />
+						</div>
+						<div class="grid gap-2">
+							<label for="ed-price" class="text-sm font-medium">Harga/Kg (Rp) *</label>
+							<Input id="ed-price" name="pricePerKg" type="number" step="50" value={editTarget?.pricePerKg || 0} required class="text-[16px]" inputmode="decimal" />
+						</div>
+					</div>
 					<div class="grid gap-2">
-						<label for="ed-gross" class="text-sm font-medium">Gross Weight (kg) *</label>
-						<Input id="ed-gross" name="grossWeight" type="number" step="0.01" value={editTarget?.grossWeight || 0} required />
-					</div>
-					<div class="grid gap-2">
-						<label for="ed-tara" class="text-sm font-medium">Tara Weight (kg) *</label>
-						<Input id="ed-tara" name="taraWeight" type="number" step="0.01" value={editTarget?.taraWeight || 0} required />
+						<label for="ed-notes" class="text-sm font-medium">Keterangan</label>
+						<textarea id="ed-notes" name="notes" class="h-11 rounded-lg border bg-background px-3 py-2.5 text-[16px]" rows="2">{editTarget?.notes || ''}</textarea>
 					</div>
 				</div>
-				<div class="grid grid-cols-2 gap-4">
-					<div class="grid gap-2">
-						<label for="ed-refr" class="text-sm font-medium">Refraksi (kg) *</label>
-						<Input id="ed-refr" name="refraction" type="number" step="0.01" value={editTarget?.refraction || 0} required />
-					</div>
-					<div class="grid gap-2">
-						<label for="ed-price" class="text-sm font-medium">Harga/Kg (Rp) *</label>
-						<Input id="ed-price" name="pricePerKg" type="number" step="50" value={editTarget?.pricePerKg || 0} required />
-					</div>
-				</div>
-				<div class="grid gap-2">
-					<label for="ed-notes" class="text-sm font-medium">Keterangan</label>
-					<textarea id="ed-notes" name="notes" class="rounded-lg border bg-background px-3 py-2 text-sm" rows="2">{editTarget?.notes || ''}</textarea>
-				</div>
-			</div>
-			<DialogFooter><Button type="submit">Simpan</Button></DialogFooter>
-		</form>
+				<div class="sticky bottom-0 flex justify-end gap-3 border-t bg-popover px-4 py-4 sm:px-0 sm:pb-0 sm:pt-4"><Button type="button" variant="outline" onclick={() => editTarget = null}>Batal</Button><Button type="submit">Simpan</Button></div>
+			</form>
+		</div>
 	</DialogContent>
 </Dialog>
 

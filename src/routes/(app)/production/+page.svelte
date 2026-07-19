@@ -116,65 +116,70 @@
 </div>
 
 <Dialog open={showModal} onOpenChange={(o) => { if (!o) showModal = false; }}>
-	<DialogContent class="sm:max-w-sm">
-		<DialogHeader>
-			<DialogTitle>Tambah Produksi</DialogTitle>
-			<DialogDescription>Catat hasil produksi harian</DialogDescription>
-		</DialogHeader>
-		<form method="post" action="?/create" use:enhance={() => {
-			return async ({ result, update }) => {
-				if (result.type === 'success') { update(); toast.success('Produksi berhasil dicatat'); showModal = false; }
-				else if (result.type === 'failure') { update(); const msg = (result.data as any)?.message; if (msg) toast.error(msg); }
-			};
-		}}>
-			<div class="grid gap-4 py-4">
-				<div class="grid gap-2">
-					<label for="prod-productId" class="text-sm font-medium">Produk *</label>
-					<select id="prod-productId" name="productId" class="rounded-lg border bg-background px-3 py-2 text-sm" required>
-						<option value="">Pilih produk</option>
-						{#each data.products as p}
-							<option value={p.id}>{p.code} — {p.name}</option>
-						{/each}
-					</select>
-				</div>
-				<div class="grid gap-2">
-					<label for="prod-quantityKg" class="text-sm font-medium">Quantity (kg) *</label>
-					<Input id="prod-quantityKg" name="quantityKg" type="number" step="0.1" required placeholder="Contoh: 2500" />
-				</div>
-				<div class="rounded-lg border bg-primary/5 p-3 text-sm">
-					<p class="font-medium text-primary">Stok Singkong: {Math.max(0, data.cassavaStock).toLocaleString('id-ID')} kg</p>
-					{#if Math.max(0, data.cassavaStock) <= 0}
-						<p class="mt-1 flex items-center gap-1 text-xs text-destructive"><AlertTriangle size={12} /> Stok singkong habis!</p>
+	<DialogContent class="!p-0 sm:!p-6 w-full max-w-[calc(100%-2rem)] sm:max-w-lg overflow-hidden">
+		<div class="flex max-h-[90dvh] overflow-hidden flex-col">
+			<DialogHeader class="px-4 pt-4 pb-0 sm:px-0 sm:pt-0">
+				<DialogTitle>Tambah Produksi</DialogTitle>
+				<DialogDescription>Catat hasil produksi harian</DialogDescription>
+			</DialogHeader>
+			<form method="post" action="?/create" use:enhance={() => {
+				return async ({ result, update }) => {
+					if (result.type === 'success') { update(); toast.success('Produksi berhasil dicatat'); showModal = false; }
+					else if (result.type === 'failure') { update(); const msg = (result.data as any)?.message; if (msg) toast.error(msg); }
+				};
+			}} class="flex min-h-0 flex-1 flex-col">
+				<div class="flex-1 space-y-4 overflow-y-auto px-4 py-4 sm:px-0">
+					<div class="grid gap-2">
+						<label for="prod-productId" class="text-sm font-medium">Produk *</label>
+						<select id="prod-productId" name="productId" class="h-11 rounded-lg border bg-background px-3 text-[16px]" required>
+							<option value="">Pilih produk</option>
+							{#each data.products as p}
+								<option value={p.id}>{p.code} — {p.name}</option>
+							{/each}
+						</select>
+					</div>
+					<div class="grid gap-2">
+						<label for="prod-quantityKg" class="text-sm font-medium">Quantity (kg) *</label>
+						<Input id="prod-quantityKg" name="quantityKg" type="number" step="0.1" required placeholder="Contoh: 2500" class="text-[16px]" inputmode="decimal" />
+					</div>
+					<div class="rounded-lg border bg-primary/5 p-3 text-sm">
+						<p class="font-medium text-primary">Stok Singkong: {Math.max(0, data.cassavaStock).toLocaleString('id-ID')} kg</p>
+						{#if Math.max(0, data.cassavaStock) <= 0}
+							<p class="mt-1 flex items-center gap-1 text-xs text-destructive"><AlertTriangle size={12} /> Stok singkong habis!</p>
+						{/if}
+					</div>
+					{#if Math.max(0, data.cassavaStock) > 0}
+					<div class="grid gap-2">
+						<label for="prod-cassava" class="text-sm font-medium">Singkong Digunakan (kg) *</label>
+						<Input id="prod-cassava" name="cassavaUsedKg" type="number" step="0.1" required placeholder="Berapa kg singkong diproses?" bind:value={cassavaInput} class="text-[16px]" inputmode="decimal" />
+					</div>
 					{/if}
+					<div class="grid gap-2">
+						<label for="prod-yield" class="text-sm font-medium">Yield (%)</label>
+						<Input id="prod-yield" name="yieldPercentage" type="number" step="0.1" placeholder="Contoh: 25" bind:value={yieldInput} class="text-[16px]" inputmode="decimal" />
+						<p class="text-xs text-muted-foreground">Persentase tepung yang dihasilkan dari singkong</p>
+					</div>
+					{#if flourResult > 0}
+					<div class="rounded-lg border bg-info/10 p-3 text-sm">
+						<p class="font-medium text-info">Hasil Tepung: {flourResult.toLocaleString('id-ID')} kg</p>
+						<p class="text-xs text-info">Hasil tepung tapioka dari singkong yang diproses</p>
+					</div>
+					{/if}
+					<div class="grid gap-2">
+						<label for="prod-productionDate" class="text-sm font-medium">Tanggal</label>
+						<Input id="prod-productionDate" name="productionDate" type="date" bind:value={productionDate} class="text-[16px]" />
+					</div>
+					<div class="grid gap-2">
+						<label for="prod-notes" class="text-sm font-medium">Keterangan</label>
+						<textarea id="prod-notes" name="notes" class="h-11 rounded-lg border bg-background px-3 py-2.5 text-[16px]" rows="2"></textarea>
+					</div>
 				</div>
-				{#if Math.max(0, data.cassavaStock) > 0}
-				<div class="grid gap-2">
-					<label for="prod-cassava" class="text-sm font-medium">Singkong Digunakan (kg) *</label>
-					<Input id="prod-cassava" name="cassavaUsedKg" type="number" step="0.1" required placeholder="Berapa kg singkong diproses?" bind:value={cassavaInput} />
+				<div class="sticky bottom-0 flex justify-end gap-3 border-t bg-popover px-4 py-4 sm:px-0 sm:pb-0 sm:pt-4">
+					<Button type="button" variant="outline" onclick={() => showModal = false}>Batal</Button>
+					<Button type="submit">Simpan</Button>
 				</div>
-				{/if}
-				<div class="grid gap-2">
-					<label for="prod-yield" class="text-sm font-medium">Yield (%)</label>
-					<Input id="prod-yield" name="yieldPercentage" type="number" step="0.1" placeholder="Contoh: 25" bind:value={yieldInput} />
-					<p class="text-xs text-muted-foreground">Persentase tepung yang dihasilkan dari singkong</p>
-				</div>
-				{#if flourResult > 0}
-				<div class="rounded-lg border bg-info/10 p-3 text-sm">
-					<p class="font-medium text-info">Hasil Tepung: {flourResult.toLocaleString('id-ID')} kg</p>
-					<p class="text-xs text-info">Hasil tepung tapioka dari singkong yang diproses</p>
-				</div>
-				{/if}
-				<div class="grid gap-2">
-					<label for="prod-productionDate" class="text-sm font-medium">Tanggal</label>
-					<Input id="prod-productionDate" name="productionDate" type="date" bind:value={productionDate} />
-				</div>
-				<div class="grid gap-2">
-					<label for="prod-notes" class="text-sm font-medium">Keterangan</label>
-					<textarea id="prod-notes" name="notes" class="rounded-lg border bg-background px-3 py-2 text-sm" rows="2"></textarea>
-				</div>
-			</div>
-			<DialogFooter><Button type="submit">Simpan</Button></DialogFooter>
-		</form>
+			</form>
+		</div>
 	</DialogContent>
 </Dialog>
 

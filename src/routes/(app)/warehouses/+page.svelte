@@ -159,52 +159,56 @@ let searchQuery = $state($page.url.searchParams.get('search') || '');
 </div>
 
 <Dialog open={showModal} onOpenChange={(o) => { if (!o) showModal = false; }}>
-	<DialogContent class="sm:max-w-md">
-		<DialogHeader>
-			<DialogTitle>
-				{modalType === 'in' ? 'Stok Masuk' : 'Stok Keluar'}
-			</DialogTitle>
-			<DialogDescription>Catat pergerakan stok</DialogDescription>
-		</DialogHeader>
-		<form method="post" action="?/create" use:enhance={() => {
-		return async ({ result, update }) => {
-			update();
-			if (result.type === 'success') {
-				toast.success('Pergerakan stok berhasil dicatat');
-				showModal = false;
-			} else if (result.type === 'failure') {
-				const msg = (result.data as Record<string, unknown>)?.message as string | undefined;
-				if (msg) toast.error(msg);
-			}
-		};
-	}}>
-			<input type="hidden" name="movementType" value={modalType === 'in' ? 'MANUAL_IN' : modalType === 'out' ? 'MANUAL_OUT' : 'ADJUSTMENT'} />
-			<div class="grid gap-4 py-4">
-				<div class="grid gap-2">
-					<label for="productId" class="text-sm font-medium">Produk *</label>
-					<select id="productId" name="productId" class="rounded-lg border bg-background px-3 py-2 text-sm" required>
-						<option value="">Pilih produk</option>
-						{#each data.products as p}
-							<option value={p.id}>{p.code} — {p.name}</option>
-						{/each}
-					</select>
+	<DialogContent class="!p-0 sm:!p-6 w-full max-w-[calc(100%-2rem)] sm:max-w-lg overflow-hidden">
+		<div class="flex max-h-[90dvh] overflow-hidden flex-col">
+			<DialogHeader class="px-4 pt-4 pb-0 sm:px-0 sm:pt-0">
+				<DialogTitle>
+					{modalType === 'in' ? 'Stok Masuk' : 'Stok Keluar'}
+				</DialogTitle>
+				<DialogDescription>Catat pergerakan stok</DialogDescription>
+			</DialogHeader>
+			<form method="post" action="?/create" use:enhance={() => {
+			return async ({ result, update }) => {
+				update();
+				if (result.type === 'success') {
+					toast.success('Pergerakan stok berhasil dicatat');
+					showModal = false;
+				} else if (result.type === 'failure') {
+					const msg = (result.data as Record<string, unknown>)?.message as string | undefined;
+					if (msg) toast.error(msg);
+				}
+			};
+		}} class="flex min-h-0 flex-1 flex-col">
+				<input type="hidden" name="movementType" value={modalType === 'in' ? 'MANUAL_IN' : modalType === 'out' ? 'MANUAL_OUT' : 'ADJUSTMENT'} />
+				<div class="flex-1 space-y-4 overflow-y-auto px-4 py-4 sm:px-0">
+					<div class="grid gap-2">
+						<label for="productId" class="text-sm font-medium">Produk *</label>
+						<select id="productId" name="productId" class="h-11 rounded-lg border bg-background px-3 text-[16px]" required>
+							<option value="">Pilih produk</option>
+							{#each data.products as p}
+								<option value={p.id}>{p.code} — {p.name}</option>
+							{/each}
+						</select>
+					</div>
+					<div class="grid gap-2">
+						<label for="quantityChange" class="text-sm font-medium">Quantity *</label>
+						<Input id="quantityChange" name="quantityChange" type="number" step="0.01" required placeholder="Nilai positif" class="text-[16px]" inputmode="decimal" />
+					</div>
+					<div class="grid gap-2">
+						<label for="movementDate" class="text-sm font-medium">Tanggal</label>
+						<Input id="movementDate" name="movementDate" type="date" bind:value={movementDate} class="text-[16px]" />
+					</div>
+					<div class="grid gap-2">
+						<label for="note" class="text-sm font-medium">Keterangan</label>
+						<textarea id="note" name="note" class="h-11 rounded-lg border bg-background px-3 py-2.5 text-[16px]" rows="2"></textarea>
+					</div>
 				</div>
-				<div class="grid gap-2">
-					<label for="quantityChange" class="text-sm font-medium">Quantity *</label>
-					<Input id="quantityChange" name="quantityChange" type="number" step="0.01" required placeholder="Nilai positif" />
+				<div class="sticky bottom-0 flex justify-end gap-3 border-t bg-popover px-4 py-4 sm:px-0 sm:pb-0 sm:pt-4">
+					<Button type="button" variant="outline" onclick={() => showModal = false}>Batal</Button>
+					<Button type="submit">Simpan</Button>
 				</div>
-				<div class="grid gap-2">
-					<label for="movementDate" class="text-sm font-medium">Tanggal</label>
-					<Input id="movementDate" name="movementDate" type="date" bind:value={movementDate} />
-				</div>
-
-				<div class="grid gap-2">
-					<label for="note" class="text-sm font-medium">Keterangan</label>
-					<textarea id="note" name="note" class="rounded-lg border bg-background px-3 py-2 text-sm" rows="2"></textarea>
-				</div>
-			</div>
-			<DialogFooter><Button type="submit">Simpan</Button></DialogFooter>
-		</form>
+			</form>
+		</div>
 	</DialogContent>
 </Dialog>
 
