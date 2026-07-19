@@ -277,9 +277,9 @@
 	<section id="products" class="px-3 py-8 md:px-6 md:py-16">
 		<div class="mx-auto max-w-7xl">
 			<div class="mb-6 text-center">
-				<span class="mx-auto mb-3 block w-fit rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-[10px] font-medium uppercase tracking-[0.2em] text-foreground">Katalog</span>
-				<h2 class="mb-3 text-2xl font-bold tracking-tight md:text-3xl">Produk Kami</h2>
-				<p class="mx-auto max-w-md text-sm text-muted-foreground">Tersedia berbagai varian tepung tapioka dan produk turunan untuk kebutuhan Anda</p>
+				<span class="mx-auto mb-3 block w-fit rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-xs font-medium uppercase tracking-[0.2em] text-foreground">Katalog</span>
+				<h2 class="mb-3 text-3xl font-bold tracking-tight md:text-4xl">Produk Kami</h2>
+				<p class="mx-auto max-w-md text-base text-muted-foreground">Tersedia berbagai varian tepung tapioka dan produk turunan untuk kebutuhan Anda</p>
 			</div>
 
 			<div class="mb-3 flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
