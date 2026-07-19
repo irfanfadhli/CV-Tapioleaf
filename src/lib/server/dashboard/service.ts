@@ -1,5 +1,6 @@
 import { and, eq, gte, lte, sql, desc, isNull } from 'drizzle-orm';
 import { db } from '../db';
+import { user } from '../db/auth.schema';
 import { orders, orderItems } from '../db/schema/order';
 import { products, productCategories } from '../db/schema/product';
 import { productionEntries } from '../db/schema/production';
@@ -41,6 +42,7 @@ export type DashboardData = {
 	production: { totalKg: number; targetKg: number; percentage: number; count: number };
 	stock: { totalSKU: number; criticalCount: number };
 	revenue: { total: number; change: number | null; margin: number | null };
+	totalUsers: number;
 	salesTrend: Array<{ date: string; total: number; count: number }>;
 	productionTrend: Array<{ date: string; totalKg: number }>;
 	recentTransactions: Array<{
@@ -91,6 +93,9 @@ export async function getDashboardData(periodStr: string): Promise<DashboardData
 	const categoryDist = categoryResult.status === 'fulfilled' ? categoryResult.value : [];
 	const marginPerProductData = await getMarginPerProduct(range.start, range.end);
 
+	const [userResult] = await Promise.allSettled([getTotalUsers()]);
+	const totalUsers = userResult.status === 'fulfilled' ? userResult.value : 0;
+
 	const salesChange = prevSales.total > 0 ? ((sales.total - prevSales.total) / prevSales.total) * 100 : null;
 	const targetKg = await getCassavaTargetKg();
 	const percentage = production.totalKg > 0 ? Math.round((production.totalKg / targetKg) * 100) : 0;
@@ -105,6 +110,7 @@ export async function getDashboardData(periodStr: string): Promise<DashboardData
 		production: { totalKg: production.totalKg, targetKg, percentage, count: production.count },
 		stock: { totalSKU: stock.totalSKU, criticalCount: criticalProducts.length },
 		revenue: { total: profitTotal, change: profitChange, margin: marginPct },
+		totalUsers,
 		salesTrend,
 		productionTrend,
 		recentTransactions: transactions,
@@ -281,4 +287,11 @@ async function getMarginPerProduct(start: Date, end: Date) {
 
 	mapped.sort((a, b) => (b.margin ?? -999) - (a.margin ?? -999));
 	return mapped;
+}
+
+async function getTotalUsers(): Promise<number> {
+	const result = await db.select({ count: sql<number>`COUNT(*)` })
+		.from(user)
+		.limit(1);
+	return Number(result[0]?.count || 0);
 }

@@ -61,7 +61,14 @@
 	<StockAlertBanner products={dashboardData.stockAlerts} />
 
 	<!-- KPI Cards -->
-	<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+	<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+		<KPICard
+			title="Total User"
+			value={dashboardData.totalUsers.toString()}
+			subtitle="Pengguna terdaftar"
+			icon="👤"
+			loading={false}
+		/>
 		<KPICard
 			title="Penjualan"
 			value={'Rp ' + dashboardData.sales.total.toLocaleString('id-ID')}
