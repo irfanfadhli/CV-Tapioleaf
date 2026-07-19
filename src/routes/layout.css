@@ -198,4 +198,11 @@
 	.reveal-delay-3 { transition-delay: 0.24s; }
 	.reveal-delay-4 { transition-delay: 0.32s; }
 	.reveal-delay-5 { transition-delay: 0.40s; }
+	.scrollbar-hide {
+		-ms-overflow-style: none;
+		scrollbar-width: none;
+	}
+	.scrollbar-hide::-webkit-scrollbar {
+		display: none;
+	}
 }

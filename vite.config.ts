@@ -8,6 +8,16 @@ export default defineConfig({
 	server: {
 		allowedHosts: ['shredder-radiator-legible.ngrok-free.dev']
 	},
+	build: {
+		rollupOptions: {
+			output: {
+				manualChunks: (id: string) => {
+					if (id.includes('lucide') || id.includes('@lucide')) return 'icons';
+					if (id.includes('bits-ui') || id.includes('@melt')) return 'ui';
+				}
+			}
+		}
+	},
 	test: {
 		expect: { requireAssertions: true },
 		projects: [

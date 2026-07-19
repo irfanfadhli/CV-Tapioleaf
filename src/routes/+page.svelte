@@ -3,6 +3,8 @@
 	import Button from '@/components/ui/button/button.svelte';
 	import CheckoutModal from '$lib/components/checkout/CheckoutModal.svelte';
 	import { siteConfig } from '$lib/config';
+	import { ShoppingCart, Check } from '@lucide/svelte';
+	import { toast } from 'svelte-sonner';
 
 	let { data } = $props();
 
@@ -10,6 +12,18 @@
 	let checkoutProduct = $state<{
 		id: string; name: string; code: string; price: string; unit: string; description: string | null;
 	} | null>(null);
+
+	let activeCategory = $state('Semua');
+	let addedIds = $state<Set<string>>(new Set());
+	let prevScrollY = 0;
+	let navHidden = $state(false);
+	let scrollThreshold = 60;
+
+	let filteredItems = $derived(
+		activeCategory === 'Semua'
+			? data.items
+			: data.items.filter((item) => item.categoryName === activeCategory)
+	);
 
 	function formatStock(stock: number, unit: string): string {
 		if (unit === 'SAK' || unit === 'PCS') return Math.floor(stock).toLocaleString('id-ID');
@@ -19,9 +33,8 @@
 
 	function formatPrice(price: string, unit: string): string {
 		const num = Number(price);
-		if (num >= 1000000) return `Rp ${(num / 1000000).toFixed(1)} juta/${unit.toLowerCase()}`;
-		if (num >= 1000) return `Rp ${(num / 1000).toFixed(0)} rb/${unit.toLowerCase()}`;
-		return `Rp ${num.toLocaleString('id-ID')}/${unit.toLowerCase()}`;
+		if (num >= 1000000) return `Rp ${(num / 1000000).toFixed(1)} Juta`;
+		return `Rp ${num.toLocaleString('id-ID')}`;
 	}
 
 	function openCheckout(item: any) {
@@ -30,6 +43,19 @@
 			id: item.id, name: item.name, code: item.code,
 			price: item.price, unit: item.unit, description: item.description
 		};
+	}
+
+	function handleAddToCart(item: any, e: Event) {
+		e.stopPropagation();
+		if (!data.user) { goto('/login'); return; }
+		addedIds = new Set([...addedIds, item.id]);
+		toast.success(`${item.name} ditambahkan ke keranjang`);
+		setTimeout(() => {
+			const next = new Set(addedIds);
+			next.delete(item.id);
+			addedIds = next;
+		}, 1500);
+		openCheckout(item);
 	}
 
 	let observer: IntersectionObserver | undefined;
@@ -45,6 +71,39 @@
 		);
 		document.querySelectorAll('.reveal').forEach((el) => observer!.observe(el));
 		return () => observer?.disconnect();
+	});
+
+	$effect(() => {
+		if (menuOpen) {
+			document.body.style.overflow = 'hidden';
+		} else {
+			document.body.style.overflow = '';
+		}
+		return () => { document.body.style.overflow = ''; };
+	});
+
+	$effect(() => {
+		function onScroll() {
+			const y = window.scrollY;
+			if (y < 10) {
+				navHidden = false;
+			} else if (!menuOpen && y > prevScrollY + scrollThreshold) {
+				navHidden = true;
+			} else if (y < prevScrollY - scrollThreshold) {
+				navHidden = false;
+			}
+			prevScrollY = y;
+		}
+		window.addEventListener('scroll', onScroll, { passive: true });
+		return () => window.removeEventListener('scroll', onScroll);
+	});
+
+	$effect(() => {
+		if (menuOpen) {
+			document.body.style.overflow = 'hidden';
+		} else {
+			document.body.style.overflow = '';
+		}
 	});
 </script>
 
@@ -75,14 +134,14 @@
 
 <!-- Fluid Island Nav -->
 <nav
-	class="fixed inset-x-0 top-0 z-50 flex justify-center"
+	class="fixed inset-x-0 top-0 z-50 flex justify-center transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] {navHidden ? '-translate-y-full' : 'translate-y-0'}"
 	aria-label="Navigasi utama"
 >
 	<div
 		class="mt-4 flex items-center gap-6 rounded-full border border-white/10 bg-background/70 px-5 py-2 shadow-[0_8px_32px_rgba(0,0,0,0.12)] backdrop-blur-2xl transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] md:px-6"
 	>
 		<a href="/" class="flex items-center gap-2" aria-label="Beranda">
-			<picture><source srcset="/img/logo.webp" type="image/webp" /><img src="/img/logo.png" alt="TapioLeaf" class="h-7 w-7 rounded-lg object-cover" width="28" height="28" /></picture>
+			<picture><source srcset="/img/logo.webp" type="image/webp" /><img src="/img/logo.png" alt="TapioLeaf" class="h-7 w-7 rounded-lg object-cover" width="28" height="28" decoding="async" /></picture>
 			<span class="text-sm font-bold tracking-tight">TapioLeaf</span>
 		</a>
 		<div class="hidden items-center gap-5 text-sm md:flex">
@@ -120,53 +179,60 @@
 			</div>
 		</button>
 	</div>
-	{#if menuOpen}
-		<div
-			class="fixed inset-0 z-40 flex items-center justify-center bg-background/80 backdrop-blur-3xl transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)]"
-			role="dialog"
-			aria-modal="true"
-		>
+</nav>
+
+{#if menuOpen}
+	<div
+		class="fixed inset-0 z-[100] flex flex-col bg-background transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]"
+		role="dialog"
+		aria-modal="true"
+	>
+		<div class="flex items-center justify-between border-b px-5 py-4">
+			<a href="/" class="flex items-center gap-2" onclick={() => (menuOpen = false)} aria-label="Beranda">
+				<picture><source srcset="/img/logo.webp" type="image/webp" /><img src="/img/logo.png" alt="TapioLeaf" class="h-7 w-7 rounded-lg object-cover" width="28" height="28" decoding="async" /></picture>
+				<span class="text-sm font-bold tracking-tight">TapioLeaf</span>
+			</a>
 			<button
 				onclick={() => (menuOpen = false)}
-				class="absolute top-6 right-6 flex h-10 w-10 items-center justify-center rounded-full bg-muted/50 transition-all duration-300 hover:bg-muted active:scale-95"
+				class="flex h-10 w-10 items-center justify-center rounded-full bg-muted/50 transition-all duration-300 hover:bg-muted active:scale-95"
 				aria-label="Tutup menu"
 			>
 				<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
 			</button>
-			<div class="flex flex-col items-center gap-8 text-lg">
-				<a href="#products" onclick={() => (menuOpen = false)} class="transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] translate-y-0 opacity-100 hover:text-foreground">Produk</a>
-				<a href="#about" onclick={() => (menuOpen = false)} class="transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] translate-y-0 opacity-100 hover:text-foreground">Tentang</a>
-				<a href="#contact" onclick={() => (menuOpen = false)} class="transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] translate-y-0 opacity-100 hover:text-foreground">Kontak</a>
-				{#if data.user}
-					<a href="/orders" onclick={() => (menuOpen = false)} class="transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] translate-y-0 opacity-100 hover:text-foreground">Pesanan</a>
-					<a href="/account" onclick={() => (menuOpen = false)} class="transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] translate-y-0 opacity-100 hover:text-foreground">Dashboard</a>
-					<form method="post" action="/api/sign-out">
-						<button type="submit" onclick={() => (menuOpen = false)} class="cursor-pointer rounded-full bg-destructive/10 px-6 py-2 text-sm font-medium text-destructive hover:bg-destructive/20">Keluar</button>
-					</form>
-				{:else}
-					<Button variant="default" href="/login" onclick={() => (menuOpen = false)} class="!rounded-full">Masuk</Button>
-				{/if}
-			</div>
 		</div>
-	{/if}
-</nav>
+		<div class="flex flex-1 flex-col items-center justify-center gap-8 text-lg">
+			<a href="#products" onclick={() => (menuOpen = false)} class="hover:text-foreground">Produk</a>
+			<a href="#about" onclick={() => (menuOpen = false)} class="hover:text-foreground">Tentang</a>
+			<a href="#contact" onclick={() => (menuOpen = false)} class="hover:text-foreground">Kontak</a>
+			{#if data.user}
+				<a href="/orders" onclick={() => (menuOpen = false)} class="hover:text-foreground">Pesanan</a>
+				<a href="/account" onclick={() => (menuOpen = false)} class="hover:text-foreground">Dashboard</a>
+				<form method="post" action="/api/sign-out">
+					<button type="submit" onclick={() => (menuOpen = false)} class="cursor-pointer rounded-full bg-destructive/10 px-6 py-2 text-sm font-medium text-destructive hover:bg-destructive/20">Keluar</button>
+				</form>
+			{:else}
+				<Button variant="default" href="/login" onclick={() => (menuOpen = false)} class="!rounded-full">Masuk</Button>
+			{/if}
+		</div>
+	</div>
+{/if}
 
 <!-- Hero: Editorial Split -->
 <section class="relative flex min-h-[100dvh] flex-col overflow-hidden">
-	<div class="relative z-10 mx-auto flex w-full max-w-7xl flex-1 flex-col items-center px-6 pb-8 pt-28 md:flex-row md:px-10 md:py-8">
-		<div class="flex w-full flex-col justify-center md:w-1/2 md:pr-12">
+	<div class="relative z-10 mx-auto flex w-full max-w-7xl flex-1 flex-col items-center px-4 pb-8 pt-28 md:flex-row md:px-10 md:py-8">
+		<div class="flex w-full flex-col justify-center md:order-none md:w-1/2 md:pr-12 order-last">
 			<span class="mb-4 w-fit rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-[10px] font-medium uppercase tracking-[0.2em] text-foreground">Produsen Tepung Tapioka</span>
 			<h1 class="mb-4 text-4xl font-bold leading-[1.08] tracking-tight md:text-6xl lg:text-7xl">
 				Tepung Tapioka<br />
 				<span class="text-primary">Premium</span>
 			</h1>
-			<p class="mb-8 max-w-lg text-base leading-relaxed text-muted-foreground md:text-lg">
+			<p class="mb-8 max-w-lg text-sm leading-relaxed text-muted-foreground md:text-base lg:text-lg">
 				Mengolah singkong pilihan petani lokal menjadi tepung tapioka berkualitas tinggi. Siap melayani kebutuhan industri dan rumah tangga Anda.
 			</p>
 			<div class="flex flex-col gap-3 sm:flex-row">
 				<a
 					href="#products"
-					class="group relative inline-flex items-center gap-2 rounded-full bg-primary px-7 py-3.5 text-sm font-semibold text-primary-foreground shadow-xl shadow-primary/20 transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] hover:shadow-2xl hover:shadow-primary/30 active:scale-[0.97]"
+					class="group relative inline-flex min-h-[44px] items-center justify-center gap-2 rounded-full bg-primary px-7 py-3.5 text-sm font-semibold text-primary-foreground shadow-xl shadow-primary/20 transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] hover:shadow-2xl hover:shadow-primary/30 active:scale-[0.97]"
 				>
 					Lihat Produk
 					<span class="flex h-7 w-7 items-center justify-center rounded-full bg-white/15 transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] group-hover:translate-x-0.5 group-hover:-translate-y-[1px] group-hover:scale-105">
@@ -175,13 +241,13 @@
 				</a>
 				<a
 					href="#about"
-					class="group inline-flex items-center gap-2 rounded-full border border-border bg-background px-7 py-3.5 text-sm font-medium transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] hover:border-primary/30 hover:bg-primary/5 active:scale-[0.97]"
+					class="group inline-flex min-h-[44px] items-center gap-2 rounded-full border border-border bg-background px-7 py-3.5 text-sm font-medium transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] hover:border-primary/30 hover:bg-primary/5 active:scale-[0.97]"
 				>
 					Tentang Kami
 				</a>
 			</div>
 		</div>
-		<div class="relative mt-8 flex w-full items-center justify-center md:mt-0 md:w-1/2">
+		<div class="relative mt-0 mb-6 flex w-full items-center justify-center md:mt-0 md:mb-0 md:w-1/2">
 			<div class="relative w-full overflow-hidden rounded-[2rem] shadow-2xl">
 				<div class="p-1.5">
 					<div class="overflow-hidden rounded-[calc(2rem-0.375rem)]">
@@ -191,7 +257,7 @@
 							<img
 								src="/img/cassava.jpg"
 								alt="Singkong segar pilihan petani lokal"
-								class="h-[320px] w-full object-cover transition-transform duration-1000 ease-[cubic-bezier(0.32,0.72,0,1)] hover:scale-105 md:h-[460px] lg:h-[520px]"
+								class="aspect-[4/3] w-full object-cover transition-transform duration-1000 ease-[cubic-bezier(0.32,0.72,0,1)] hover:scale-105 md:h-[460px] md:aspect-auto lg:h-[520px]"
 								width="800"
 								height="520"
 								fetchpriority="high"
@@ -207,83 +273,88 @@
 </section>
 
 <main>
-	<!-- Products: Asymmetrical Bento -->
-	<section id="products" class="px-6 py-24 md:px-10 md:py-32">
+	<!-- Products: Shopee-Style -->
+	<section id="products" class="px-3 py-8 md:px-6 md:py-16">
 		<div class="mx-auto max-w-7xl">
-			<div class="mb-12 text-center">
-				<span class="mx-auto mb-4 block w-fit rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-[10px] font-medium uppercase tracking-[0.2em] text-foreground">Katalog</span>
-				<h2 class="mb-4 text-3xl font-bold tracking-tight md:text-4xl">Produk Kami</h2>
-				<p class="mx-auto max-w-md text-muted-foreground">Tersedia berbagai varian tepung tapioka dan produk turunan untuk kebutuhan Anda</p>
+			<div class="mb-6 text-center">
+				<span class="mx-auto mb-3 block w-fit rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-[10px] font-medium uppercase tracking-[0.2em] text-foreground">Katalog</span>
+				<h2 class="mb-3 text-2xl font-bold tracking-tight md:text-3xl">Produk Kami</h2>
+				<p class="mx-auto max-w-md text-sm text-muted-foreground">Tersedia berbagai varian tepung tapioka dan produk turunan untuk kebutuhan Anda</p>
 			</div>
 
-			{#if data.items.length === 0}
-				<div class="py-16 text-center">
-					<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="mx-auto mb-4 text-muted-foreground/40"><path d="M16.5 9.4 7.55 4.24"/><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><path d="M3.27 6.96 12 12.01l8.73-5.05"/><path d="M12 22.08V12"/></svg>
-					<p class="text-lg font-medium text-muted-foreground">Produk tidak tersedia</p>
+			<div class="mb-3 flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
+				<button
+					onclick={() => (activeCategory = 'Semua')}
+					class="shrink-0 rounded-full px-4 py-1.5 text-xs font-medium transition-colors {activeCategory === 'Semua' ? 'bg-primary text-primary-foreground' : 'border border-border bg-card text-muted-foreground hover:bg-muted'}"
+				>Semua</button>
+				{#each data.categories as cat}
+					<button
+						onclick={() => (activeCategory = cat.name)}
+						class="shrink-0 rounded-full px-4 py-1.5 text-xs font-medium transition-colors {activeCategory === cat.name ? 'bg-primary text-primary-foreground' : 'border border-border bg-card text-muted-foreground hover:bg-muted'}"
+					>{cat.name}</button>
+				{/each}
+			</div>
+
+			{#if filteredItems.length === 0}
+				<div class="flex flex-col items-center justify-center py-16 text-center">
+					<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="mb-4 text-muted-foreground/40"><path d="M16.5 9.4 7.55 4.24"/><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><path d="M3.27 6.96 12 12.01l8.73-5.05"/><path d="M12 22.08V12"/></svg>
+					<p class="text-sm font-medium text-muted-foreground">Belum ada produk tersedia</p>
 				</div>
 			{:else}
-				<div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-					{#each data.items as item, i}
+				<div class="grid grid-cols-2 gap-2.5 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+					{#each filteredItems as item (item.id)}
 						<div
-							class="group reveal"
-							class:reveal-delay-1={i % 5 === 0}
-							class:reveal-delay-2={i % 5 === 1}
-							class:reveal-delay-3={i % 5 === 2}
-							class:reveal-delay-4={i % 5 === 3}
-							class:reveal-delay-5={i % 5 === 4}
+							onclick={() => openCheckout(item)}
+							onkeydown={(e) => { if (e.key === 'Enter' || e.key === ' ') openCheckout(item); }}
+							role="button"
+							tabindex="0"
+							class="group relative overflow-hidden rounded-xl border border-gray-200 bg-white transition-shadow hover:shadow-md active:scale-[0.98]"
 						>
-							<div class="h-full rounded-[1.5rem] bg-black/[0.03] p-1.5 ring-1 ring-black/5 transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] group-hover:shadow-lg dark:bg-white/[0.03] dark:ring-white/10">
-								<div class="flex h-full flex-col rounded-[calc(1.5rem-0.375rem)] bg-card shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)]">
+							<div class="relative aspect-square w-full overflow-hidden bg-gray-100">
 								{#if item.imageUrl}
-									<div class="overflow-hidden rounded-[calc(1.5rem-0.375rem)] rounded-b-none">
-										<img
-											src={item.imageUrl}
-											alt={item.name}
-											class="h-44 w-full object-cover transition-transform duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] group-hover:scale-105 md:h-52"
-											loading="lazy"
-											decoding="async"
-											width="400"
-											height="208"
-										/>
-									</div>
+									<img
+										src={item.imageUrl}
+										alt={item.name}
+										class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+										loading="lazy"
+										decoding="async"
+									/>
 								{:else}
-									<div class="flex h-44 items-center justify-center rounded-[calc(1.5rem-0.375rem)] rounded-b-none bg-primary/5 md:h-52">
-										<span class="text-4xl font-bold text-primary/30">{item.name.charAt(0)}</span>
+									<div class="flex h-full w-full items-center justify-center bg-primary/5">
+										<span class="text-4xl font-bold text-primary/20">{item.name.charAt(0)}</span>
 									</div>
 								{/if}
-									<div class="flex flex-1 flex-col p-5">
-										<div class="mb-3 flex items-start gap-3">
-											<div class="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-primary/5 ring-1 ring-primary/10">
-												{#if !item.imageUrl}
-													<span class="text-sm font-bold text-primary">{item.name.charAt(0)}</span>
-												{/if}
-											</div>
-											<div class="min-w-0 flex-1">
-												<h3 class="font-semibold leading-tight">{item.name}</h3>
-												<p class="mt-0.5 text-xs text-muted-foreground">{item.description || 'Produk CV TapioLeaf'}</p>
-											</div>
-										</div>
-										<div class="mt-auto flex items-center justify-between border-t border-border/50 pt-3">
-											<span class="text-sm font-bold text-primary">{formatPrice(item.price, item.unit)}</span>
-											<span class="text-xs text-muted-foreground">{formatStock(item.currentStock, item.unit)} {item.unit}</span>
-										</div>
-										<button
-											onclick={() => openCheckout(item)}
-											class="group/btn mt-3 inline-flex w-full items-center justify-center gap-2 rounded-full bg-primary py-2.5 text-xs font-semibold text-primary-foreground transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] hover:bg-primary/90 active:scale-[0.97]"
-										>
-											Pesan Sekarang
-											<span class="flex h-5 w-5 items-center justify-center rounded-full bg-white/15 transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] group-hover/btn:translate-x-0.5 scale-105">
-												<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
-											</span>
-										</button>
-										{#if (item.unit === 'SAK' || item.unit === 'PCS' ? Math.floor(item.currentStock) : Math.round(item.currentStock)) < 10}
-											<div class="mt-1.5 flex items-center gap-1 text-xs text-destructive">
-												<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" x2="12" y1="9" y2="13"/><line x1="12" x2="12.01" y1="17" y2="17"/></svg>
-												Stok terbatas
-											</div>
-										{/if}
-									</div>
-								</div>
+
+								{#if item.label}
+									<span class="absolute left-0 top-0 rounded-br-lg px-2 py-0.5 text-[10px] font-bold text-white shadow-sm
+										{item.label === 'Terlaris' ? 'bg-red-500' : item.label === 'Promo' ? 'bg-orange-500' : 'bg-blue-500'}">
+										{item.label}
+									</span>
+								{/if}
+
+								{#if (item.unit === 'SAK' || item.unit === 'PCS' ? Math.floor(item.currentStock) : Math.round(item.currentStock)) < 10}
+									<span class="absolute right-0 top-0 rounded-bl-lg bg-red-600 px-1.5 py-0.5 text-[10px] font-bold text-white shadow-sm">
+										Stok Tipis
+									</span>
+								{/if}
+							</div>
+
+							<div class="p-2.5">
+								<h3 class="line-clamp-2 text-xs font-medium leading-snug text-gray-800 min-h-[2rem]">{item.name}</h3>
+								{#if item.description}
+									<p class="mt-0.5 text-[10px] text-gray-400 line-clamp-1">{item.description}</p>
+								{/if}
+								<p class="mt-1.5 text-sm font-bold text-primary">{formatPrice(item.price, item.unit)}</p>
+								<p class="mt-0.5 text-[10px] text-gray-400">{formatStock(item.currentStock, item.unit)} {item.unit} tersedia</p>
+								<button
+									onclick={(e) => { e.stopPropagation(); openCheckout(item); }}
+									class="group/btn mt-2 inline-flex w-full items-center justify-center gap-2 rounded-full bg-primary py-2 text-xs font-semibold text-primary-foreground transition-colors hover:bg-primary/90 active:scale-[0.97]"
+								>
+									Pesan Sekarang
+									<span class="flex h-5 w-5 items-center justify-center rounded-full bg-white/15 transition-all duration-300 group-hover/btn:translate-x-0.5">
+										<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+									</span>
+								</button>
 							</div>
 						</div>
 					{/each}
@@ -562,7 +633,7 @@
 <footer class="border-t px-6 py-10 text-center text-sm text-muted-foreground">
 	<div class="mx-auto max-w-7xl">
 		<div class="mb-6 flex items-center justify-center gap-2">
-			<picture><source srcset="/img/logo.webp" type="image/webp" /><img src="/img/logo.png" alt="TapioLeaf" class="h-6 w-6 rounded-md object-cover" width="24" height="24" /></picture>
+			<picture><source srcset="/img/logo.webp" type="image/webp" /><img src="/img/logo.png" alt="TapioLeaf" class="h-6 w-6 rounded-md object-cover" width="24" height="24" loading="lazy" decoding="async" /></picture>
 			<span class="text-sm font-bold tracking-tight">{siteConfig.name}</span>
 		</div>
 		<p class="mb-2">&copy; 2026 CV TapioLeaf. All rights reserved.</p>

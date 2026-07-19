@@ -19,6 +19,7 @@ export const products = pgTable('products', {
 	minimumStock: integer('minimum_stock').default(0).notNull(),
 	imageUrl: text('image_url'),
 	isActive: boolean('is_active').default(true).notNull(),
+	label: text('label'),
 	categoryId: text('category_id').references(() => productCategories.id, { onDelete: 'set null' }),
 	createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
 	updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),

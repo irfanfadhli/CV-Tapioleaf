@@ -8,7 +8,7 @@ import { optimizeImageUrl } from '$lib/utils';
 export const load: PageServerLoad = async (event) => {
 	const search = event.url.searchParams.get('search') || '';
 	const page = Number(event.url.searchParams.get('page')) || 1;
-	const limit = 12;
+	const limit = 20;
 	const offset = (page - 1) * limit;
 
 	const conditions = [isNull(products.deletedAt), eq(products.isActive, true)];

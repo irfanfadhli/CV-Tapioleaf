@@ -112,89 +112,92 @@
 </script>
 
 <Dialog {open} onOpenChange={(o) => { if (!o) handleClose(); }}>
-	<DialogContent class="sm:max-w-lg">
-		<DialogHeader>
-			<DialogTitle>{product ? 'Edit Produk' : 'Tambah Produk'}</DialogTitle>
-			<DialogDescription>Isi data produk {product ? 'yang akan diperbarui' : 'baru'}</DialogDescription>
-		</DialogHeader>
-		<form
-			method="post"
-			action={product ? '?/update' : '?/create'}
-			onsubmit={handleSubmit}
-		>
-			<input type="hidden" name="id" value={product?.id || ''} />
-			<div class="flex flex-col gap-4 py-4">
-				<div class="grid gap-2">
-					<Label for="name">Nama Produk *</Label>
-					<Input id="name" name="name" required bind:value={name} />
-				</div>
-				<div class="grid gap-2">
-					<Label for="code">Kode Produk</Label>
-					<Input id="code" name="code" placeholder="Auto-generate" bind:value={code} disabled={!!product} />
-				</div>
-				<div class="grid gap-2">
-					<Label for="price">Harga *</Label>
-					<Input id="price" name="price" type="number" required bind:value={price} />
-				</div>
-				<div class="grid gap-2">
-					<Label for="costPrice">Harga Modal (optional)</Label>
-					<Input id="costPrice" name="costPrice" type="number" bind:value={costPrice} />
-				</div>
-				<div class="grid gap-2">
-					<Label for="unit">Satuan *</Label>
-					<select id="unit" name="unit" class="rounded-lg border bg-background px-3 py-2 text-sm" bind:value={unit}>
-						<option value="KG">Kg</option>
-						<option value="TON">Ton</option>
-						<option value="SAK">Sak</option>
-						<option value="PCS">Pcs</option>
-					</select>
-				</div>
-				<div class="grid gap-2">
-					<Label for="categoryId">Kategori *</Label>
-					<select id="categoryId" name="categoryId" class="rounded-lg border bg-background px-3 py-2 text-sm" bind:value={categoryId}>
-						<option value="">Pilih kategori</option>
-						{#each categories as cat}
-							<option value={cat.id}>{cat.name}</option>
-						{/each}
-					</select>
-				</div>
-				<div class="grid gap-2">
-					<Label for="minimumStock">Stok Minimum</Label>
-					<Input id="minimumStock" name="minimumStock" type="number" bind:value={minimumStock} />
-				</div>
-				<div class="grid gap-2">
-					<Label for="image">Gambar (opsional)</Label>
-					<Input id="image" name="image" type="file" accept="image/jpeg,image/png,image/webp" onchange={handleImageSelect} />
-				</div>
-			{#if imagePreview}
-				<div class="flex flex-col items-center gap-2 rounded-lg border bg-muted/20 p-4">
-					{#if !imageFile && product?.imageUrl}
-						<p class="text-xs text-muted-foreground">Gambar Saat Ini</p>
-					{/if}
-					<div class="relative">
-						<img src={imagePreview} alt="Preview" class="h-32 w-32 rounded-lg object-cover sm:h-40 sm:w-40" onerror={() => imageError = true} class:hidden={imageError} />
-						{#if imageError}
-							<div class="flex h-32 w-32 items-center justify-center rounded-lg bg-muted sm:h-40 sm:w-40">
-								<ImageOff size={32} class="text-muted-foreground/50" />
-							</div>
-						{/if}
+	<DialogContent class="sm:max-w-lg !p-0 sm:!p-6 overflow-hidden">
+		<div class="flex max-h-[90dvh] flex-col">
+			<DialogHeader class="px-4 pt-4 pb-0 sm:px-0 sm:pt-0">
+				<DialogTitle>{product ? 'Edit Produk' : 'Tambah Produk'}</DialogTitle>
+				<DialogDescription>Isi data produk {product ? 'yang akan diperbarui' : 'baru'}</DialogDescription>
+			</DialogHeader>
+			<form
+				method="post"
+				action={product ? '?/update' : '?/create'}
+				onsubmit={handleSubmit}
+				class="flex min-h-0 flex-1 flex-col"
+			>
+				<input type="hidden" name="id" value={product?.id || ''} />
+				<div class="flex-1 space-y-4 overflow-y-auto px-4 py-4 sm:px-0">
+					<div class="grid gap-2">
+						<Label for="name">Nama Produk *</Label>
+						<Input id="name" name="name" required bind:value={name} class="text-[16px]" />
 					</div>
-					<Button type="button" variant="ghost" size="sm" class="text-destructive" onclick={removeImage}>Hapus Gambar</Button>
+					<div class="grid gap-2">
+						<Label for="code">Kode Produk</Label>
+						<Input id="code" name="code" placeholder="Auto-generate" bind:value={code} disabled={!!product} class="text-[16px]" />
+					</div>
+					<div class="grid gap-2">
+						<Label for="price">Harga *</Label>
+						<Input id="price" name="price" type="number" required bind:value={price} class="text-[16px]" />
+					</div>
+					<div class="grid gap-2">
+						<Label for="costPrice">Harga Modal (optional)</Label>
+						<Input id="costPrice" name="costPrice" type="number" bind:value={costPrice} class="text-[16px]" />
+					</div>
+					<div class="grid gap-2">
+						<Label for="unit">Satuan *</Label>
+						<select id="unit" name="unit" class="h-11 rounded-lg border bg-background px-3 text-[16px]" bind:value={unit}>
+							<option value="KG">Kg</option>
+							<option value="TON">Ton</option>
+							<option value="SAK">Sak</option>
+							<option value="PCS">Pcs</option>
+						</select>
+					</div>
+					<div class="grid gap-2">
+						<Label for="categoryId">Kategori *</Label>
+						<select id="categoryId" name="categoryId" class="h-11 rounded-lg border bg-background px-3 text-[16px]" bind:value={categoryId}>
+							<option value="">Pilih kategori</option>
+							{#each categories as cat}
+								<option value={cat.id}>{cat.name}</option>
+							{/each}
+						</select>
+					</div>
+					<div class="grid gap-2">
+						<Label for="minimumStock">Stok Minimum</Label>
+						<Input id="minimumStock" name="minimumStock" type="number" bind:value={minimumStock} class="text-[16px]" />
+					</div>
+					<div class="grid gap-2">
+						<Label for="image">Gambar (opsional)</Label>
+						<Input id="image" name="image" type="file" accept="image/jpeg,image/png,image/webp" onchange={handleImageSelect} class="text-[16px]" />
+					</div>
+				{#if imagePreview}
+					<div class="flex flex-col items-center gap-2 rounded-lg border bg-muted/20 p-4">
+						{#if !imageFile && product?.imageUrl}
+							<p class="text-xs text-muted-foreground">Gambar Saat Ini</p>
+						{/if}
+						<div class="relative w-full max-w-[160px]">
+							<img src={imagePreview} alt="Preview" class="w-full rounded-lg object-cover aspect-square" onerror={() => imageError = true} class:hidden={imageError} />
+							{#if imageError}
+								<div class="flex aspect-square w-full items-center justify-center rounded-lg bg-muted">
+									<ImageOff size={32} class="text-muted-foreground/50" />
+								</div>
+							{/if}
+						</div>
+						<Button type="button" variant="ghost" size="sm" class="text-destructive" onclick={removeImage}>Hapus Gambar</Button>
+					</div>
+				{/if}
+				<input type="hidden" name="removeImage" value={!imageFile && !imagePreview && product?.imageUrl ? '1' : ''} />
+					<div class="grid gap-2">
+						<Label for="description">Deskripsi</Label>
+						<textarea id="description" name="description" rows="3" class="h-11 rounded-lg border bg-background px-3 py-2.5 text-[16px]" bind:value={description}></textarea>
+					</div>
 				</div>
-			{/if}
-			<input type="hidden" name="removeImage" value={!imageFile && !imagePreview && product?.imageUrl ? '1' : ''} />
-				<div class="grid gap-2">
-					<Label for="description">Deskripsi</Label>
-					<textarea id="description" name="description" rows="2" class="rounded-lg border bg-background px-3 py-2 text-sm" bind:value={description}></textarea>
+				<div class="sticky bottom-0 flex justify-end gap-3 border-t bg-popover px-4 py-4 sm:px-0 sm:pb-0 sm:pt-4">
+					<Button type="button" variant="outline" onclick={handleClose}>Batal</Button>
+					<Button type="submit" disabled={submitting}>
+						{#if submitting}<Loader2 size={14} class="mr-1 animate-spin" />{/if}
+						{product ? 'Perbarui' : 'Simpan'}
+					</Button>
 				</div>
-			</div>
-			<div class="flex justify-end gap-3">
-				<Button type="button" variant="outline" onclick={handleClose}>Batal</Button>
-				<Button type="submit" disabled={submitting}>
-					{#if submitting}<Loader2 size={14} class="mr-1 animate-spin" />{/if}
-					{product ? 'Perbarui' : 'Simpan'}
-				</Button>
-			</div>
-		</form>
+			</form>
+		</div>
 	</DialogContent>
 </Dialog>
