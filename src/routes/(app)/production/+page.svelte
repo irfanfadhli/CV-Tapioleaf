@@ -21,7 +21,7 @@
 </script>
 
 <div class="space-y-6">
-	<div class="flex flex-wrap items-center gap-2">
+	<div class="flex flex-wrap items-center justify-between gap-2">
 		<div class="flex items-center gap-3">
 			<Factory size={24} class="text-primary" />
 			<h1 class="text-xl font-bold md:text-2xl">Produksi Harian</h1>
@@ -128,10 +128,10 @@
 					else if (result.type === 'failure') { update(); const msg = (result.data as any)?.message; if (msg) toast.error(msg); }
 				};
 			}} class="flex min-h-0 flex-1 flex-col">
-				<div class="flex-1 space-y-4 overflow-y-auto px-4 py-4 sm:px-0">
+				<div class="flex-1 space-y-4 overflow-y-auto overflow-x-hidden px-4 py-4 sm:px-0">
 					<div class="grid gap-2">
 						<label for="prod-productId" class="text-sm font-medium">Produk *</label>
-						<select id="prod-productId" name="productId" class="h-11 rounded-lg border bg-background px-3 text-[16px]" required>
+						<select id="prod-productId" name="productId" class="h-9 rounded-md border border-input bg-transparent px-2.5 py-1 text-base" required>
 							<option value="">Pilih produk</option>
 							{#each data.products as p}
 								<option value={p.id}>{p.code} — {p.name}</option>

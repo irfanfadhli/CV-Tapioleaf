@@ -30,13 +30,15 @@
 </script>
 
 <div class="space-y-6">
-	<div class="flex flex-wrap items-center gap-2">
+	<div class="flex flex-wrap items-center justify-between gap-2">
 		<div class="flex items-center gap-3">
 			<Wheat size={24} class="text-primary" />
 			<h1 class="text-xl font-bold md:text-2xl">Penerimaan Singkong</h1>
 		</div>
-		<Button onclick={() => showSupplierModal = true} variant="outline" size="sm" class="md:default"><Plus size={16} class="mr-1" /> Supplier</Button>
-		<Button onclick={() => showModal = true} size="sm" class="md:default"><Plus size={16} class="mr-1" /> Tambah Penerimaan</Button>
+		<div class="flex items-center gap-2">
+			<Button onclick={() => showSupplierModal = true} variant="outline" size="sm" class="md:default"><Plus size={16} class="mr-1" /> Supplier</Button>
+			<Button onclick={() => showModal = true} size="sm" class="md:default"><Plus size={16} class="mr-1" /> Tambah Penerimaan</Button>
+		</div>
 	</div>
 
 	<!-- Summary -->
@@ -121,7 +123,7 @@
 					else if (result.type === 'failure') { await update(); const msg = (result.data as any)?.message; if (msg) toast.error(msg); }
 				};
 			}} class="flex min-h-0 flex-1 flex-col">
-				<div class="flex-1 space-y-4 overflow-y-auto px-4 py-4 sm:px-0">
+				<div class="flex-1 space-y-4 overflow-y-auto overflow-x-hidden px-4 py-4 sm:px-0">
 					<div class="grid gap-2">
 						<label for="cs-supplier" class="text-sm font-medium">Supplier *</label>
 						{#if data.suppliers.length === 0}
@@ -200,7 +202,7 @@
 				};
 			}} class="flex min-h-0 flex-1 flex-col">
 				<input type="hidden" name="id" value={editTarget?.id || ''} />
-				<div class="flex-1 space-y-4 overflow-y-auto px-4 py-4 sm:px-0">
+				<div class="flex-1 space-y-4 overflow-y-auto overflow-x-hidden px-4 py-4 sm:px-0">
 					<div class="grid gap-2">
 						<label for="ed-supplier" class="text-sm font-medium">Supplier *</label>
 						<select id="ed-supplier" name="supplierId" class="h-11 rounded-lg border bg-background px-3 text-[16px]" required>

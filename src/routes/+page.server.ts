@@ -6,6 +6,10 @@ import { sql, eq, isNull, asc, and } from 'drizzle-orm';
 import { optimizeImageUrl } from '$lib/utils';
 
 export const load: PageServerLoad = async (event) => {
+	event.setHeaders({
+		'Cache-Control': 'public, max-age=60, stale-while-revalidate=300'
+	});
+
 	const items = await db.select({
 		id: products.id,
 		code: products.code,

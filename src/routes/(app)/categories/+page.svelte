@@ -77,7 +77,7 @@
 </script>
 
 <div class="space-y-6">
-	<div class="flex flex-wrap items-center gap-2">
+	<div class="flex flex-wrap items-center justify-between gap-2">
 		<div class="flex items-center gap-3">
 			<Tags size={24} class="text-primary" />
 			<h1 class="text-xl font-bold md:text-2xl">Kategori Produk</h1>

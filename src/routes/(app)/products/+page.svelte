@@ -64,7 +64,7 @@ import ProductFormModal from '$lib/components/products/ProductFormModal.svelte';
 </script>
 
 <div class="space-y-6">
-	<div class="flex flex-wrap items-center gap-2">
+	<div class="flex flex-wrap items-center justify-between gap-2">
 		<h1 class="text-xl font-bold md:text-2xl">Manajemen Produk</h1>
 		<Button onclick={openCreate} size="sm" class="md:default"><Plus size={16} class="mr-1" /> Tambah Produk</Button>
 	</div>
