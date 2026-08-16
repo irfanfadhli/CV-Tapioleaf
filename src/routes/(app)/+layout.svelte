@@ -1,14 +1,21 @@
 <script lang="ts">
 	import { page } from '$app/stores';
+	import { goto } from '$app/navigation';
 	import { Button } from '$lib/components/ui/button';
 	import { Separator } from '$lib/components/ui/separator';
-	import { LogOut, LayoutDashboard, Package, Warehouse, Factory, Tags, Menu, X, Wheat, Building2, Home } from '@lucide/svelte';
-	import { goto } from '$app/navigation';
+	import { LogOut, LayoutDashboard, Package, Warehouse, Factory, Tags, Menu, X, Wheat, Building2, Home, ShoppingBag } from '@lucide/svelte';
 	import { Toaster } from 'svelte-sonner';
+	import { onMount } from 'svelte';
+	import { get } from 'svelte/store';
+	import { notifications } from '$lib/stores/notifications';
+	import NotificationToast from '$lib/components/order/NotificationToast.svelte';
 
 	let { children, data } = $props();
 
 	let sidebarOpen = $state(false);
+	let showNewOrderToast = $state(false);
+	let toastOrder = $state<{ id: string; customerName: string | null; totalAmount: string } | null>(null);
+	let lastKnownCount = $state(0);
 
 	const roleLabels: Record<string, string> = {
 		owner: 'Owner',
@@ -23,10 +30,59 @@
 		fetch('/api/sign-out', { method: 'POST' }).catch(() => {});
 		window.location.href = '/login';
 	}
+
+	onMount(() => {
+		lastKnownCount = data.pendingCount || 0;
+		notifications.refresh();
+		const interval = setInterval(() => {
+			notifications.refresh().then(() => {
+				const state = get(notifications);
+				if (state.pendingCount > lastKnownCount) {
+					// New order arrived
+					lastKnownCount = state.pendingCount;
+					if (state.recentPending.length > 0) {
+						const newest = state.recentPending[0];
+						toastOrder = { id: newest.id, customerName: newest.customerName, totalAmount: newest.totalAmount };
+						showNewOrderToast = true;
+						notifications.markSeen(newest.id);
+					}
+				} else if (state.pendingCount < lastKnownCount) {
+					// Order was processed (approved/cancelled)
+					lastKnownCount = state.pendingCount;
+				}
+			});
+		}, 30000);
+
+		return () => clearInterval(interval);
+	});
+
+	function dismissToast() {
+		showNewOrderToast = false;
+	}
+
+	function handleToastClick() {
+		if (toastOrder) {
+			goto(`/admin-orders/${toastOrder.id}`);
+			dismissToast();
+		}
+	}
 </script>
 
-<Toaster position="top-right" richColors />
-<div class="flex min-h-screen bg-background">
+	<!-- Toast notifications -->
+	{#if showNewOrderToast && toastOrder}
+		<div class="fixed top-20 right-4 z-[100] max-w-xs animate-in slide-in-from-top-2 duration-300">
+			<button onclick={handleToastClick} class="block w-full text-left cursor-pointer">
+				<NotificationToast
+					customerName={toastOrder.customerName}
+					totalAmount={toastOrder.totalAmount}
+					onDismiss={dismissToast}
+				/>
+			</button>
+		</div>
+	{/if}
+
+	<Toaster position="top-right" richColors />
+	<div class="flex min-h-screen bg-background">
 	<!-- Mobile overlay -->
 	{#if sidebarOpen}
 		<button class="fixed inset-0 z-40 bg-foreground/80 backdrop-blur-sm md:hidden" onclick={closeSidebar} aria-label="Tutup menu"></button>
@@ -53,6 +109,14 @@
 			<a href="/dashboard" onclick={closeSidebar} class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors hover:bg-accent hover:text-accent-foreground" class:bg-accent={$page.url.pathname === '/dashboard'}>
 				<LayoutDashboard size={18} /> Dashboard
 			</a>
+		<a href="/admin-orders" onclick={closeSidebar} class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors hover:bg-accent hover:text-accent-foreground" class:bg-accent={$page.url.pathname === '/admin-orders' || $page.url.pathname.startsWith('/admin-orders')}>
+			<ShoppingBag size={18} /> Pesanan
+			{#if $notifications.pendingCount > 0}
+				<span class="inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-red-500/10 px-1.5 text-[10px] font-bold text-red-600">
+					{$notifications.pendingCount > 9 ? '9+' : $notifications.pendingCount}
+				</span>
+			{/if}
+		</a>
 			<div class="px-3 pt-2 pb-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Bahan Baku</div>
 			<a href="/suppliers" onclick={closeSidebar} class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors hover:bg-accent hover:text-accent-foreground" class:bg-accent={$page.url.pathname === '/suppliers'}>
 				<Building2 size={18} /> Supplier

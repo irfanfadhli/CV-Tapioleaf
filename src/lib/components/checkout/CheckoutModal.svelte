@@ -45,8 +45,13 @@
 
 			const data = typeof body.data === 'string' ? parse(body.data) : body.data;
 
-			if (body.type === 'success' && data?.invoiceUrl) {
-				window.location.href = data.invoiceUrl;
+			if (body.type === 'success') {
+				if (data?.invoiceUrl) {
+					window.location.href = data.invoiceUrl;
+				} else {
+					toast.success('Pesanan dibuat! Silakan cek status pesanan Anda.');
+					window.location.href = `/orders/${data?.orderId}`;
+				}
 			} else {
 				errorMessage = data?.message || 'Gagal membuat pesanan';
 				toast.error(errorMessage);
@@ -92,9 +97,9 @@
 			</div>
 			<div class="flex justify-end gap-3">
 				<Button type="button" variant="outline" onclick={onClose} disabled={submitting}>Batal</Button>
-				<Button type="submit" disabled={submitting}>
+					<Button type="submit" disabled={submitting}>
 					{#if submitting}<Loader2 size={14} class="mr-1 animate-spin" />{/if}
-					Bayar Sekarang
+					Ajukan Pesanan
 				</Button>
 			</div>
 		</form>

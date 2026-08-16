@@ -29,6 +29,10 @@
 	let totalCost = $derived(finalWeight * pricePerKg);
 </script>
 
+<svelte:head>
+	<title>Penerimaan Singkong — CV TapioLeaf</title>
+</svelte:head>
+
 <div class="space-y-6">
 	<div class="flex flex-wrap items-center justify-between gap-2">
 		<div class="flex items-center gap-3">
@@ -138,41 +142,41 @@
 					</div>
 					<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
 						<div class="grid gap-2">
-							<label class="text-sm font-medium">Tanggal</label>
-							<Input name="receiptDate" type="date" bind:value={receiptDate} class="text-[16px]" />
+							<label for="cs-receipt-date" class="text-sm font-medium">Tanggal</label>
+							<Input id="cs-receipt-date" name="receiptDate" type="date" bind:value={receiptDate} class="text-[16px]" />
 						</div>
 						<div class="grid gap-2">
-							<label class="text-sm font-medium">No. Kendaraan *</label>
-							<Input name="vehicleNumber" bind:value={vehicleNumber} required placeholder="Contoh: H 1234 AB" class="text-[16px]" />
+							<label for="cs-vehicle-number" class="text-sm font-medium">No. Kendaraan *</label>
+							<Input id="cs-vehicle-number" name="vehicleNumber" bind:value={vehicleNumber} required placeholder="Contoh: H 1234 AB" class="text-[16px]" />
 						</div>
 					</div>
 					<div class="grid gap-2">
-						<label class="text-sm font-medium">Nama Supir</label>
-						<Input name="driverName" bind:value={driverName} placeholder="Opsional" class="text-[16px]" />
+						<label for="cs-driver-name" class="text-sm font-medium">Nama Supir</label>
+						<Input id="cs-driver-name" name="driverName" bind:value={driverName} placeholder="Opsional" class="text-[16px]" />
 					</div>
 					<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
 						<div class="grid gap-2">
-							<label class="text-sm font-medium">Gross Weight (kg) *</label>
-							<Input name="grossWeight" type="number" step="0.01" bind:value={grossWeight} required class="text-[16px]" inputmode="decimal" />
+							<label for="cs-gross-weight" class="text-sm font-medium">Gross Weight (kg) *</label>
+							<Input id="cs-gross-weight" name="grossWeight" type="number" step="0.01" bind:value={grossWeight} required class="text-[16px]" inputmode="decimal" />
 						</div>
 						<div class="grid gap-2">
-							<label class="text-sm font-medium">Tara Weight (kg) *</label>
-							<Input name="taraWeight" type="number" step="0.01" bind:value={taraWeight} required class="text-[16px]" inputmode="decimal" />
+							<label for="cs-tara-weight" class="text-sm font-medium">Tara Weight (kg) *</label>
+							<Input id="cs-tara-weight" name="taraWeight" type="number" step="0.01" bind:value={taraWeight} required class="text-[16px]" inputmode="decimal" />
 						</div>
 					</div>
 					<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
 						<div class="grid gap-2">
-							<label class="text-sm font-medium">Refraksi (kg) *</label>
-							<Input name="refraction" type="number" step="0.01" bind:value={refraction} required class="text-[16px]" inputmode="decimal" />
+							<label for="cs-refraction" class="text-sm font-medium">Refraksi (kg) *</label>
+							<Input id="cs-refraction" name="refraction" type="number" step="0.01" bind:value={refraction} required class="text-[16px]" inputmode="decimal" />
 						</div>
 						<div class="grid gap-2">
-							<label class="text-sm font-medium">Harga/Kg (Rp) *</label>
-							<Input name="pricePerKg" type="number" step="50" bind:value={pricePerKg} required class="text-[16px]" inputmode="decimal" />
+							<label for="cs-price-per-kg" class="text-sm font-medium">Harga/Kg (Rp) *</label>
+							<Input id="cs-price-per-kg" name="pricePerKg" type="number" step="50" bind:value={pricePerKg} required class="text-[16px]" inputmode="decimal" />
 						</div>
 					</div>
 					<div class="grid gap-2">
-						<label class="text-sm font-medium">Keterangan</label>
-						<textarea name="notes" class="h-11 rounded-lg border bg-background px-3 py-2.5 text-[16px]" rows="2" bind:value={notes}></textarea>
+						<label for="cs-notes" class="text-sm font-medium">Keterangan</label>
+						<textarea id="cs-notes" name="notes" class="h-11 rounded-lg border bg-background px-3 py-2.5 text-[16px]" rows="2" bind:value={notes}></textarea>
 					</div>
 					<!-- Live Calculation -->
 					<div class="rounded-lg border bg-primary/5 p-4 text-sm space-y-1">

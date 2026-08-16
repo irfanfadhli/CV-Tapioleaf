@@ -40,6 +40,6 @@ export const load: PageServerLoad = async (event) => {
 		throw redirect(303, roleRedirects[roleAfterUpdate]);
 	}
 
-	const ordersData = await orderService.getUserOrders(event.locals.user.id, 1, 10);
+	const ordersData = await orderService.getUserPaidOrders(event.locals.user.id, 1, 10);
 	return { user: event.locals.user, orders: ordersData.items };
 };

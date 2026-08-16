@@ -11,6 +11,10 @@
 	let deleteTargetId = $state<string | null>(null);
 </script>
 
+<svelte:head>
+	<title>Supplier Singkong — CV TapioLeaf</title>
+</svelte:head>
+
 <div class="space-y-6">
 	<div class="flex items-center gap-3">
 		<Building2 size={24} class="text-primary" />

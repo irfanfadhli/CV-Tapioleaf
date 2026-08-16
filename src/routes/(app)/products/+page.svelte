@@ -63,6 +63,10 @@ import ProductFormModal from '$lib/components/products/ProductFormModal.svelte';
 	});
 </script>
 
+<svelte:head>
+	<title>Manajemen Produk — CV TapioLeaf</title>
+</svelte:head>
+
 <div class="space-y-6">
 	<div class="flex flex-wrap items-center justify-between gap-2">
 		<h1 class="text-xl font-bold md:text-2xl">Manajemen Produk</h1>

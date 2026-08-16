@@ -51,6 +51,10 @@
 	}
 </script>
 
+<svelte:head>
+	<title>Riwayat Mutasi Stok — CV TapioLeaf</title>
+</svelte:head>
+
 <div class="space-y-6">
 	<div class="flex items-center justify-between">
 		<div class="flex items-center gap-3">

@@ -5,7 +5,7 @@ export const orders = pgTable('orders', {
 	id: text('id').$defaultFn(() => crypto.randomUUID()).primaryKey(),
 	userId: text('user_id'),
 	status: text('status', {
-		enum: ['PENDING', 'PAID', 'PROCESSING', 'SHIPPED', 'COMPLETED', 'CANCELLED']
+		enum: ['PENDING', 'APPROVED', 'PAID', 'PROCESSING', 'SHIPPED', 'COMPLETED', 'CANCELLED']
 	}).default('PENDING').notNull(),
 	totalAmount: decimal('total_amount', { precision: 15, scale: 2 }).notNull(),
 	xenditInvoiceId: text('xendit_invoice_id'),
@@ -15,6 +15,7 @@ export const orders = pgTable('orders', {
 	customerPhone: text('customer_phone'),
 	customerAddress: text('customer_address'),
 	notes: text('notes'),
+	cancelledBy: text('cancelled_by', { enum: ['ADMIN', 'CUSTOMER'] }),
 	createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
 	updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull()
 }, (table) => [

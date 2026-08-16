@@ -7,6 +7,7 @@ export const task = pgTable('task', {
 });
 
 export * from './auth.schema';
+export * from './schema/notification';
 export * from './schema/auth-logs';
 export * from './schema/product';
 export * from './schema/stock';

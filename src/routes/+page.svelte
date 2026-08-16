@@ -131,9 +131,6 @@
 			<a href="#about" class="text-muted-foreground transition-colors duration-300 hover:text-foreground">Tentang</a>
 			<a href="#contact" class="text-muted-foreground transition-colors duration-300 hover:text-foreground">Kontak</a>
 			{#if data.user}
-				{#if data.user.role === 'pembeli_umkm'}
-					<a href="/orders" class="text-muted-foreground transition-colors duration-300 hover:text-foreground">Pesanan</a>
-				{/if}
 				<a href="/account" class="text-muted-foreground transition-colors duration-300 hover:text-foreground">Dashboard</a>
 				<form method="post" action="/api/sign-out" class="inline">
 					<button type="submit" class="cursor-pointer rounded-full bg-destructive/10 px-4 py-1.5 text-xs font-medium text-destructive transition-all duration-300 hover:bg-destructive/20 active:scale-[0.97]">Logout</button>
@@ -155,9 +152,6 @@
 				<DropdownMenuItem><a href="#contact" class="flex w-full items-center gap-2">Kontak</a></DropdownMenuItem>
 				<DropdownMenuSeparator />
 				{#if data.user}
-					{#if data.user.role === 'pembeli_umkm'}
-						<DropdownMenuItem><a href="/orders" class="flex w-full items-center gap-2">Pesanan</a></DropdownMenuItem>
-					{/if}
 					<DropdownMenuItem><a href="/account" class="flex w-full items-center gap-2">Dashboard</a></DropdownMenuItem>
 					<DropdownMenuSeparator />
 					<DropdownMenuItem>

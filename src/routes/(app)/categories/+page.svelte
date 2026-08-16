@@ -76,6 +76,10 @@
 	}
 </script>
 
+<svelte:head>
+	<title>Kategori Produk — CV TapioLeaf</title>
+</svelte:head>
+
 <div class="space-y-6">
 	<div class="flex flex-wrap items-center justify-between gap-2">
 		<div class="flex items-center gap-3">

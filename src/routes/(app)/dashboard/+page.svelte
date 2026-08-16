@@ -46,6 +46,10 @@
 	}
 </script>
 
+<svelte:head>
+	<title>Dashboard — CV TapioLeaf</title>
+</svelte:head>
+
 <div class="space-y-4">
 	<div class="flex flex-wrap items-center justify-between gap-2">
 		<div>

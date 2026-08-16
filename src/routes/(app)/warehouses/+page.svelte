@@ -60,6 +60,10 @@ let searchQuery = $state($page.url.searchParams.get('search') || '');
 
 </script>
 
+<svelte:head>
+	<title>Gudang & Stok — CV TapioLeaf</title>
+</svelte:head>
+
 <div class="space-y-6">
 	<!-- Stock Summary -->
 	<div class="grid gap-4 sm:grid-cols-2">
