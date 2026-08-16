@@ -191,7 +191,7 @@
 				</a>
 				<a
 					href="#about"
-					class="group inline-flex min-h-[44px] items-center gap-2 rounded-full border border-border bg-background px-7 py-3.5 text-sm font-medium transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] hover:border-primary/30 hover:bg-primary/5 active:scale-[0.97]"
+					class="group inline-flex min-h-[44px] items-center justify-center gap-2 rounded-full border border-border bg-background px-7 py-3.5 text-sm font-medium transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] hover:border-primary/30 hover:bg-primary/5 active:scale-[0.97]"
 				>
 					Tentang Kami
 				</a>
