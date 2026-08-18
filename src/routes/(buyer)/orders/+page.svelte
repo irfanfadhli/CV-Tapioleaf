@@ -35,15 +35,44 @@
 	<BackButton fallbackHref="/account" label="Kembali ke Dashboard" variant="ghost" />
 </div>
 
-<div class="mb-6 flex items-center gap-3">
-	<div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
-		<ShoppingBag size={22} />
-	</div>
-	<div>
-		<h1 class="text-2xl font-bold tracking-tight">Pesanan Saya</h1>
-		<p class="text-xs text-muted-foreground sm:text-sm">Semua riwayat dan status pesanan Anda</p>
+<div class="mb-6 flex items-center justify-between">
+	<div class="flex items-center gap-3">
+		<div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+			<ShoppingBag size={22} />
+		</div>
+		<div>
+			<h1 class="text-2xl font-bold tracking-tight">Pesanan Saya</h1>
+			<p class="text-xs text-muted-foreground sm:text-sm">Semua riwayat dan status pesanan Anda</p>
+		</div>
 	</div>
 </div>
+
+{#if data.orders.some((o: any) => o.status === 'APPROVED' || (o.status === 'CANCELLED' && o.cancelledBy === 'ADMIN'))}
+	<div class="mb-6 space-y-2.5">
+		{#each data.orders.filter((o: any) => o.status === 'APPROVED') as approvedOrder}
+			<div class="flex items-center justify-between gap-3 rounded-xl border border-primary/30 bg-primary/5 p-3.5 sm:p-4 text-xs sm:text-sm">
+				<div class="flex items-center gap-2.5">
+					<div class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-primary/20 text-primary">
+						<Clock size={15} />
+					</div>
+					<div>
+						<p class="font-semibold text-foreground">
+							Pesanan #{approvedOrder.id.slice(0, 8)} Telah Disetujui Admin!
+						</p>
+						<p class="text-[11px] text-muted-foreground">
+							Silakan lanjutkan pembayaran sebesar <strong>Rp {Number(approvedOrder.totalAmount).toLocaleString('id-ID')}</strong>
+						</p>
+					</div>
+				</div>
+				<a href="/orders/{approvedOrder.id}">
+					<Button size="sm" class="h-8 gap-1.5 text-xs font-semibold">
+						Bayar Sekarang
+					</Button>
+				</a>
+			</div>
+		{/each}
+	</div>
+{/if}
 
 {#if data.orders.length === 0}
 	<Card>

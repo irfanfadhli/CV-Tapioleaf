@@ -43,16 +43,33 @@
 	<div class="grid grid-cols-2 gap-3">
 		<a
 			href="/orders"
-			class="group flex flex-col justify-between rounded-xl border bg-card p-3.5 transition-all hover:border-primary/40 hover:shadow-sm active:scale-[0.98] sm:p-4"
+			class="group relative flex flex-col justify-between rounded-xl border bg-card p-3.5 transition-all hover:border-primary/40 hover:shadow-sm active:scale-[0.98] sm:p-4"
 		>
 			<div class="flex items-center justify-between">
-				<div class="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary sm:h-9 sm:w-9">
+				<div class="relative flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary sm:h-9 sm:w-9">
 					<ShoppingBag size={18} />
+					{#if data.unreadCount && data.unreadCount > 0}
+						<span class="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-destructive text-[10px] font-bold text-destructive-foreground animate-pulse">
+							{data.unreadCount}
+						</span>
+					{/if}
 				</div>
-				<ChevronRight size={16} class="text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:text-primary" />
+				<div class="flex items-center gap-1.5">
+					{#if data.unreadCount && data.unreadCount > 0}
+						<span class="inline-flex items-center rounded-full bg-destructive/10 px-2 py-0.5 text-[10px] font-semibold text-destructive">
+							Notifikasi Baru
+						</span>
+					{/if}
+					<ChevronRight size={16} class="text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:text-primary" />
+				</div>
 			</div>
 			<div class="mt-2.5">
-				<p class="text-xs font-semibold text-foreground sm:text-sm">Semua Pesanan</p>
+				<div class="flex items-center gap-1.5">
+					<p class="text-xs font-semibold text-foreground sm:text-sm">Semua Pesanan</p>
+					{#if data.unreadCount && data.unreadCount > 0}
+						<span class="h-2 w-2 rounded-full bg-destructive animate-ping"></span>
+					{/if}
+				</div>
 				<p class="text-[11px] text-muted-foreground">Lihat status & proses pesanan</p>
 			</div>
 		</a>

@@ -63,7 +63,8 @@
 	}
 
 	onMount(() => {
-		const interval = setInterval(pollNotifications, 30000);
+		pollNotifications();
+		const interval = setInterval(pollNotifications, 10000);
 		return () => clearInterval(interval);
 	});
 </script>

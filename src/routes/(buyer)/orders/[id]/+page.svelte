@@ -6,17 +6,12 @@
 		CheckCircle2,
 		Clock,
 		XCircle,
-		TriangleAlert,
-		Loader2,
 		User,
 		Phone,
 		MapPin,
 		FileText
 	} from '@lucide/svelte';
 	import BackButton from '$lib/components/ui/back-button.svelte';
-	import * as Dialog from '$lib/components/ui/dialog';
-	import { toast } from 'svelte-sonner';
-	import { enhance } from '$app/forms';
 
 	let { data } = $props();
 
@@ -104,17 +99,10 @@
 			</div>
 
 			{#if data.order.status === 'PENDING'}
-				<div class="mt-2 flex items-center gap-2">
-					<p class="text-sm text-muted-foreground">Pesanan Anda menunggu persetujuan admin.</p>
+				<div class="mt-2 flex items-center gap-2 rounded-lg bg-amber-500/10 border border-amber-500/20 p-3">
+					<Clock size={16} class="text-amber-600 shrink-0" />
+					<p class="text-xs sm:text-sm text-amber-700">Pesanan Anda sedang menunggu persetujuan admin.</p>
 				</div>
-				<Button
-					type="button"
-					variant="destructive"
-					class="mt-2 w-full"
-					onclick={() => (isCancelModalOpen = true)}
-				>
-					Batalkan Pesanan
-				</Button>
 			{:else if data.order.status === 'APPROVED'}
 				{#if data.order.xenditInvoiceUrl}
 					<a
@@ -128,14 +116,6 @@
 				{:else}
 					<p class="text-sm text-destructive">Invoice belum tersedia, silakan hubungi admin</p>
 				{/if}
-				<Button
-					type="button"
-					variant="destructive"
-					class="mt-2 w-full"
-					onclick={() => (isCancelModalOpen = true)}
-				>
-					Batalkan Pesanan
-				</Button>
 			{/if}
 
 			<!-- Informasi Pembeli Section -->
@@ -199,56 +179,3 @@
 		</CardContent>
 	</Card>
 </div>
-
-<!-- Modal Konfirmasi Pembatalan Pesanan -->
-<Dialog.Root bind:open={isCancelModalOpen}>
-	<Dialog.Content class="sm:max-w-md">
-		<div class="flex flex-col items-center gap-4 py-2 text-center">
-			<div
-				class="flex h-14 w-14 items-center justify-center rounded-full bg-destructive/10 text-destructive"
-			>
-				<TriangleAlert size={28} />
-			</div>
-			<div class="space-y-2">
-				<Dialog.Title class="text-xl font-bold">Batalkan Pesanan?</Dialog.Title>
-				<Dialog.Description class="max-w-sm text-sm text-muted-foreground">
-					Apakah Anda yakin ingin membatalkan pesanan <span class="font-medium text-foreground"
-						>#{data.order.id.slice(0, 8)}</span
-					>? Tindakan ini tidak dapat diurungkan.
-				</Dialog.Description>
-			</div>
-		</div>
-
-		<form
-			method="POST"
-			action="?/cancel"
-			use:enhance={() => {
-				isCancelling = true;
-				return async ({ result, update }) => {
-					await update();
-					isCancelling = false;
-					isCancelModalOpen = false;
-					if (result.type === 'success') {
-						toast.success('Pesanan berhasil dibatalkan');
-					} else if (result.type === 'failure') {
-						toast.error((result.data as any)?.message || 'Gagal membatalkan pesanan');
-					}
-				};
-			}}
-			class="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end"
-		>
-			<input type="hidden" name="orderId" value={data.order.id} />
-			<Button
-				type="button"
-				variant="outline"
-				disabled={isCancelling}
-				onclick={() => (isCancelModalOpen = false)}
-			>
-				Kembali
-			</Button>
-			<Button type="submit" variant="destructive" disabled={isCancelling}>
-				{isCancelling ? 'Membatalkan...' : 'Ya, Batalkan Pesanan'}
-			</Button>
-		</form>
-	</Dialog.Content>
-</Dialog.Root>

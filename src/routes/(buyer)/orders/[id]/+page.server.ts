@@ -11,20 +11,4 @@ export const load: PageServerLoad = async (event) => {
 	return { order };
 };
 
-export const actions: Actions = {
-	cancel: async (event) => {
-		if (!event.locals.user) return fail(401, { message: 'Silakan login terlebih dahulu' });
-		
-		const formData = await event.request.formData();
-		const orderId = formData.get('orderId')?.toString() ?? '';
-		
-		if (!orderId) return fail(400, { message: 'ID pesanan tidak valid' });
-		
-		try {
-			await orderService.cancelOrder(orderId);
-			return { success: true, message: 'Pesanan berhasil dibatalkan' };
-		} catch (e) {
-			return fail(400, { message: e instanceof Error ? e.message : 'Gagal membatalkan pesanan' });
-		}
-	}
-};
+export const actions: Actions = {};
