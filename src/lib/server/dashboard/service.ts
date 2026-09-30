@@ -5,6 +5,7 @@ import { orders, orderItems } from '../db/schema/order';
 import { products, productCategories } from '../db/schema/product';
 import { productionEntries } from '../db/schema/production';
 import { stockMovements } from '../db/schema/stock';
+import { sales } from '../db/schema/sales';
 import { getCassavaTargetKg } from '../production/service';
 
 type Period = 'today' | 'week' | 'month';
@@ -47,7 +48,7 @@ export type DashboardData = {
 	productionTrend: Array<{ date: string; totalKg: number }>;
 	recentTransactions: Array<{
 		id: string; customerName: string | null; totalAmount: string;
-		status: string; createdAt: Date | null;
+		status: string; createdAt: Date | null; source: 'order' | 'sale';
 	}>;
 	stockAlerts: Array<{
 		id: string; name: string; currentStock: number; minimumStock: number; code: string;
@@ -125,13 +126,26 @@ export async function getDashboardDataWithMargins(periodStr: string): Promise<Da
 }
 
 async function getSalesSummary(start: Date, end: Date) {
-	const result = await db.select({
+	// Online orders (PAID)
+	const ordersResult = await db.select({
 		total: sql<string>`COALESCE(SUM(total_amount::numeric), 0)`,
 		count: sql<number>`COUNT(*)`,
 	}).from(orders)
 		.where(and(eq(orders.status, 'PAID'), gte(orders.createdAt, start), lte(orders.createdAt, end)))
 		.limit(1);
-	return { total: Number(result[0]?.total || 0), count: Number(result[0]?.count || 0) };
+
+	// Offline sales (confirmed)
+	const salesResult = await db.select({
+		total: sql<string>`COALESCE(SUM(total_payment::numeric), 0)`,
+		count: sql<number>`COUNT(*)`,
+	}).from(sales)
+		.where(and(eq(sales.status, 'confirmed'), gte(sales.sale_date, start), lte(sales.sale_date, end)))
+		.limit(1);
+
+	return {
+		total: Number(ordersResult[0]?.total || 0) + Number(salesResult[0]?.total || 0),
+		count: Number(ordersResult[0]?.count || 0) + Number(salesResult[0]?.count || 0)
+	};
 }
 
 async function getProductionSummary(start: Date, end: Date) {
@@ -180,7 +194,8 @@ async function getStockAlerts() {
 }
 
 async function getSalesTrend() {
-	const result = await db.select({
+	// Online orders trend
+	const ordersTrend = await db.select({
 		date: sql<string>`DATE(${orders.createdAt})`,
 		total: sql<string>`COALESCE(SUM(total_amount::numeric), 0)`,
 		count: sql<number>`COUNT(*)`,
@@ -190,7 +205,37 @@ async function getSalesTrend() {
 		.groupBy(sql`DATE(${orders.createdAt})`)
 		.orderBy(sql`DATE(${orders.createdAt})`);
 
-	return result.map(r => ({ date: r.date, total: Number(r.total), count: Number(r.count) }));
+	// Offline sales trend
+	const salesTrend = await db.select({
+		date: sql<string>`DATE(${sales.sale_date})`,
+		total: sql<string>`COALESCE(SUM(total_payment::numeric), 0)`,
+		count: sql<number>`COUNT(*)`,
+	})
+		.from(sales)
+		.where(and(eq(sales.status, 'confirmed'), gte(sales.sale_date, sql`NOW() - INTERVAL '7 days'`)))
+		.groupBy(sql`DATE(${sales.sale_date})`)
+		.orderBy(sql`DATE(${sales.sale_date})`);
+
+	// Merge both trends by date
+	const merged = new Map<string, { total: number; count: number }>();
+	for (const r of ordersTrend) {
+		const key = r.date;
+		const existing = merged.get(key) || { total: 0, count: 0 };
+		existing.total += Number(r.total);
+		existing.count += Number(r.count);
+		merged.set(key, existing);
+	}
+	for (const r of salesTrend) {
+		const key = r.date;
+		const existing = merged.get(key) || { total: 0, count: 0 };
+		existing.total += Number(r.total);
+		existing.count += Number(r.count);
+		merged.set(key, existing);
+	}
+
+	return Array.from(merged.entries())
+		.map(([date, v]) => ({ date, total: v.total, count: v.count }))
+		.sort((a, b) => a.date.localeCompare(b.date));
 }
 
 async function getProductionTrend() {
@@ -207,7 +252,8 @@ async function getProductionTrend() {
 }
 
 async function getRecentTransactions() {
-	const result = await db.select({
+	// Online orders
+	const orderResults = await db.select({
 		id: orders.id,
 		customerName: orders.customerName,
 		totalAmount: orders.totalAmount,
@@ -219,13 +265,46 @@ async function getRecentTransactions() {
 		.orderBy(desc(orders.createdAt))
 		.limit(5);
 
-	return result.map(r => ({
-		id: r.id,
-		customerName: r.customerName,
-		totalAmount: r.totalAmount,
-		status: r.status,
-		createdAt: r.createdAt,
-	}));
+	// Offline sales
+	const saleResults = await db.select({
+		id: sales.id,
+		buyerName: sales.buyer_name,
+		totalPayment: sales.total_payment,
+		status: sales.status,
+		createdAt: sales.created_at,
+	})
+		.from(sales)
+		.where(sql`${sales.status} IN ('confirmed', 'draft')`)
+		.orderBy(desc(sales.created_at))
+		.limit(5);
+
+	// Combine, sort by date, take top 5
+	const combined = [
+		...orderResults.map(r => ({
+			id: r.id,
+			customerName: r.customerName,
+			totalAmount: r.totalAmount,
+			status: r.status,
+			createdAt: r.createdAt,
+			source: 'order' as const,
+		})),
+		...saleResults.map(r => ({
+			id: r.id,
+			customerName: r.buyerName,
+			totalAmount: r.totalPayment || '0',
+			status: r.status === 'confirmed' ? 'PAID' : 'PENDING',
+			createdAt: r.createdAt,
+			source: 'sale' as const,
+		})),
+	];
+
+	combined.sort((a, b) => {
+		const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+		const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+		return dateB - dateA;
+	});
+
+	return combined.slice(0, 8);
 }
 
 async function getCategoryDistribution(start: Date, end: Date) {

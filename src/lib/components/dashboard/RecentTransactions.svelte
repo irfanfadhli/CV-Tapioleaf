@@ -1,8 +1,17 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 
-	let { transactions = [] as Array<{ id: string; customerName: string | null; totalAmount: string; status: string; createdAt: Date | null }>, loading = false }: {
-		transactions?: Array<{ id: string; customerName: string | null; totalAmount: string; status: string; createdAt: Date | null }>;
+	type Transaction = {
+		id: string;
+		customerName: string | null;
+		totalAmount: string;
+		status: string;
+		createdAt: Date | null;
+		source?: 'order' | 'sale';
+	};
+
+	let { transactions = [] as Transaction[], loading = false }: {
+		transactions?: Transaction[];
 		loading?: boolean;
 	} = $props();
 
@@ -14,6 +23,14 @@
 	function statusLabel(status: string): string {
 		const map: Record<string, string> = { PAID: 'Lunas', PENDING: 'Menunggu', CANCELLED: 'Batal' };
 		return map[status] || status;
+	}
+
+	function handleClick(t: Transaction) {
+		if (t.source === 'sale') {
+			goto(`/sales/${t.id}`);
+		} else {
+			goto(`/admin-orders/${t.id}`);
+		}
 	}
 </script>
 
@@ -30,9 +47,16 @@
 	{:else}
 		<div class="space-y-2">
 			{#each transactions as t}
-				<button onclick={() => goto(`/orders/${t.id}`)} class="flex w-full items-center justify-between rounded-lg p-2 text-left transition-colors hover:bg-muted/50">
+				<button onclick={() => handleClick(t)} class="flex w-full items-center justify-between rounded-lg p-2 text-left transition-colors hover:bg-muted/50">
 					<div class="min-w-0 flex-1">
-						<p class="truncate text-sm font-medium">{t.customerName || 'Anonim'}</p>
+						<div class="flex items-center gap-1.5">
+							<p class="truncate text-sm font-medium">{t.customerName || 'Anonim'}</p>
+							{#if t.source === 'sale'}
+								<span class="shrink-0 rounded-sm bg-emerald-100 px-1.5 py-0 text-[10px] font-semibold text-emerald-700">Penjualan</span>
+							{:else}
+								<span class="shrink-0 rounded-sm bg-blue-100 px-1.5 py-0 text-[10px] font-semibold text-blue-700">Pesanan</span>
+							{/if}
+						</div>
 						<p class="text-xs text-muted-foreground">#{t.id.slice(0, 8).toUpperCase()} · {t.createdAt ? new Date(t.createdAt).toLocaleString('id-ID') : '-'}</p>
 					</div>
 					<div class="flex items-center gap-2 shrink-0">

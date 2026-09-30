@@ -118,11 +118,11 @@
 						<h3 class="text-xs font-semibold uppercase tracking-wider text-foreground">Informasi Pembeli</h3>
 					</div>
 					{#if data.order.userId}
-						<span class="inline-flex items-center gap-1 rounded-full bg-blue-50 px-2.5 py-0.5 text-[11px] font-semibold text-blue-700">
+						<span class="inline-flex items-center gap-1 rounded-full bg-info/10 px-2.5 py-0.5 text-[11px] font-semibold text-info">
 							Pesanan Online
 						</span>
 					{:else}
-						<span class="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2.5 py-0.5 text-[11px] font-semibold text-amber-700">
+						<span class="inline-flex items-center gap-1 rounded-full bg-warning/10 px-2.5 py-0.5 text-[11px] font-semibold text-warning">
 							Transaksi Tunai (Offline)
 						</span>
 					{/if}

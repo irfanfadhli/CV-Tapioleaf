@@ -3,7 +3,7 @@
 	import { goto } from '$app/navigation';
 	import { Button } from '$lib/components/ui/button';
 	import { Separator } from '$lib/components/ui/separator';
-	import { LogOut, LayoutDashboard, Package, Warehouse, Factory, Tags, Menu, X, Wheat, Building2, Home, ShoppingBag } from '@lucide/svelte';
+	import { LogOut, LayoutDashboard, Package, Warehouse, Factory, Tags, Menu, X, Wheat, Building2, Home, ShoppingBag, Receipt, Scale, FileText } from '@lucide/svelte';
 	import { Toaster } from 'svelte-sonner';
 	import { onMount } from 'svelte';
 	import { get } from 'svelte/store';
@@ -117,6 +117,9 @@
 				</span>
 			{/if}
 		</a>
+		<a href="/sales" onclick={closeSidebar} class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors hover:bg-accent hover:text-accent-foreground" class:bg-accent={$page.url.pathname === '/sales' || $page.url.pathname.startsWith('/sales/')}>
+			<Scale size={18} /> Timbangan Tepung
+		</a>
 			<div class="px-3 pt-2 pb-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Bahan Baku</div>
 			<a href="/suppliers" onclick={closeSidebar} class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors hover:bg-accent hover:text-accent-foreground" class:bg-accent={$page.url.pathname === '/suppliers'}>
 				<Building2 size={18} /> Supplier
@@ -129,12 +132,17 @@
 				<Factory size={18} /> Produksi Harian
 			</a>
 			<div class="px-3 pt-2 pb-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Stok & Produk</div>
-			<a href="/warehouses" onclick={closeSidebar} class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors hover:bg-accent hover:text-accent-foreground" class:bg-accent={$page.url.pathname === '/warehouses' || $page.url.pathname === '/warehouses/history'}>
-				<Warehouse size={18} /> Gudang
+<a href="/warehouses" onclick={closeSidebar} class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors hover:bg-accent hover:text-accent-foreground" class:bg-accent={$page.url.pathname === '/warehouses' || $page.url.pathname === '/warehouses/history'}>
+			<Warehouse size={18} /> Gudang
+		</a>
+		{#if data.user.role === 'owner' || data.user.role === 'admin_penjualan' || data.user.role === 'petugas_gudang' || data.user.role === 'bagian_produksi'}
+			<a href="/laporan" onclick={closeSidebar} class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors hover:bg-accent hover:text-accent-foreground" class:bg-accent={$page.url.pathname === '/laporan' || $page.url.pathname.startsWith('/laporan/')}>
+				<FileText size={18} /> Laporan
 			</a>
-			<a href="/categories" onclick={closeSidebar} class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors hover:bg-accent hover:text-accent-foreground" class:bg-accent={$page.url.pathname === '/categories'}>
-				<Tags size={18} /> Kategori Produk
-			</a>
+		{/if}
+		<a href="/categories" onclick={closeSidebar} class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors hover:bg-accent hover:text-accent-foreground" class:bg-accent={$page.url.pathname === '/categories'}>
+			<Tags size={18} /> Kategori Produk
+		</a>
 			<a href="/products" onclick={closeSidebar} class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors hover:bg-accent hover:text-accent-foreground" class:bg-accent={$page.url.pathname === '/products'}>
 				<Package size={18} /> Produk
 			</a>

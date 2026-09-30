@@ -15,3 +15,4 @@ export * from './schema/production';
 export * from './schema/order';
 export * from './schema/supplier';
 export * from './schema/cassava';
+export * from './schema/sales';

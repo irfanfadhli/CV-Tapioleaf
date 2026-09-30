@@ -17,13 +17,15 @@ const routeMap: Record<string, RouteConfig> = {
 	'/warehouses': { protected: true, roles: ['owner', 'petugas_gudang'] },
 	'/production': { protected: true, roles: ['owner', 'bagian_produksi'] },
 	'/suppliers': { protected: true, roles: ['owner', 'petugas_gudang'] },
-	'/cassava': { protected: true, roles: ['owner', 'petugas_gudang'] }
+	'/cassava': { protected: true, roles: ['owner', 'petugas_gudang'] },
+	'/sales': { protected: true, roles: ['owner', 'admin_penjualan'] }
 };
 
 export function getRouteConfig(pathname: string): RouteConfig | null {
 	if (routeMap[pathname]) return routeMap[pathname];
 	if (pathname.startsWith('/warehouses/')) return routeMap['/warehouses'];
 	if (pathname.startsWith('/production/')) return routeMap['/production'];
+	if (pathname.startsWith('/sales/')) return routeMap['/sales'];
 	if (pathname.startsWith('/api/auth')) return { protected: false };
 	if (pathname.startsWith('/api/xendit')) return { protected: false };
 	if (pathname.startsWith('/api/sign-out')) return { protected: false };

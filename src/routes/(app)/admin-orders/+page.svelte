@@ -69,13 +69,13 @@
 	};
 
 	const statusColors: Record<string, string> = {
-		PENDING: 'text-amber-700 bg-amber-100',
-		APPROVED: 'text-blue-700 bg-blue-100',
-		PAID: 'text-emerald-700 bg-emerald-100',
-		PROCESSING: 'text-blue-700 bg-blue-100',
-		SHIPPED: 'text-purple-700 bg-purple-100',
-		COMPLETED: 'text-emerald-700 bg-emerald-100',
-		CANCELLED: 'text-red-700 bg-red-100'
+		PENDING: 'text-warning bg-warning/10',
+		APPROVED: 'text-info bg-info/10',
+		PAID: 'text-primary bg-primary/10',
+		PROCESSING: 'text-secondary-foreground bg-secondary',
+		SHIPPED: 'text-info bg-info/10',
+		COMPLETED: 'text-primary bg-primary/10',
+		CANCELLED: 'text-destructive bg-destructive/10'
 	};
 
 	const statusIcons: Record<string, any> = {
@@ -156,13 +156,13 @@
 
 	<!-- Alerts -->
 	{#if form?.success}
-		<div class="flex items-center gap-1.5 rounded-sm border border-emerald-200 bg-emerald-50 px-2.5 py-1.5 text-xs text-emerald-700">
+		<div class="flex items-center gap-1.5 rounded-sm border border-primary/20 bg-primary/5 px-2.5 py-1.5 text-xs text-primary">
 			<CheckCircle2 size={12} />
 			{form.message}
 		</div>
 	{/if}
 	{#if form && !form.success && form.message}
-		<div class="flex items-center gap-1.5 rounded-sm border border-red-200 bg-red-50 px-2.5 py-1.5 text-xs text-red-700">
+		<div class="flex items-center gap-1.5 rounded-sm border border-destructive/20 bg-destructive/5 px-2.5 py-1.5 text-xs text-destructive">
 			<X size={12} />
 			{form.message}
 		</div>
@@ -195,8 +195,12 @@
 					<div class="flex items-center justify-between">
 						<span class="font-mono text-xs text-muted-foreground">#{order.id.slice(0, 8)}</span>
 						<span class="inline-flex items-center gap-0.5 rounded-full px-2.5 py-0.5 text-xs font-medium {statusColors[order.status] || 'bg-muted/50 text-muted-foreground'}">
-							{#if statusIcons[order.status]}
-								<svelte:component this={statusIcons[order.status]} size={8} />
+							{#if statusIcons[order.status] && statusIcons[order.status] === Clock}
+								<Clock size={8} />
+							{:else if statusIcons[order.status] && statusIcons[order.status] === CheckCircle2}
+								<CheckCircle2 size={8} />
+							{:else if statusIcons[order.status] && statusIcons[order.status] === X}
+								<X size={8} />
 							{/if}
 							{statusLabels[order.status] || order.status}
 						</span>
@@ -262,10 +266,10 @@
 <Dialog open={showCreateModal} onOpenChange={(o) => { if (!o) closeCreateModal(); }}>
 	<DialogContent class="sm:max-w-lg max-h-[90vh] overflow-y-auto">
 		<DialogHeader>
-			<div class="flex items-center gap-2">
-				<div class="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-100 text-emerald-700">
-					<Banknote size={18} />
-				</div>
+		<div class="flex items-center gap-2">
+			<div class="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
+				<Banknote size={18} />
+			</div>
 				<div>
 					<DialogTitle>Tambah Pesanan Offline (Tunai)</DialogTitle>
 					<DialogDescription>Catat transaksi jual beli tunai langsung di toko / pabrik</DialogDescription>
@@ -422,18 +426,18 @@
 				</div>
 
 				<!-- Total & Payment Method Banner -->
-				<div class="flex items-center justify-between rounded-lg border border-emerald-200 bg-emerald-50/80 p-3 text-emerald-900">
+				<div class="flex items-center justify-between rounded-lg border border-primary/20 bg-primary/5 p-3 text-primary">
 					<div>
 						<div class="flex items-center gap-1.5">
-							<span class="inline-flex items-center gap-1 rounded-full bg-emerald-200/80 px-2 py-0.5 text-[10px] font-semibold text-emerald-800">
+							<span class="inline-flex items-center gap-1 rounded-full bg-primary/20 px-2 py-0.5 text-[10px] font-semibold text-primary">
 								<CheckCircle2 size={10} /> Tunai (Lunas)
 							</span>
 						</div>
-						<p class="mt-0.5 text-[11px] text-emerald-700">Stok produk otomatis terpotong saat transaksi disimpan.</p>
+						<p class="mt-0.5 text-[11px] text-primary/80">Stok produk otomatis terpotong saat transaksi disimpan.</p>
 					</div>
 					<div class="text-right">
-						<p class="text-[10px] uppercase font-semibold text-emerald-700">Total Transaksi</p>
-						<p class="text-base font-bold text-emerald-900">
+						<p class="text-[10px] uppercase font-semibold text-primary/80">Total Transaksi</p>
+						<p class="text-base font-bold text-primary">
 							Rp {calculatedTotal.toLocaleString('id-ID')}
 						</p>
 					</div>
@@ -444,7 +448,7 @@
 				<Button type="button" variant="outline" onclick={closeCreateModal} disabled={creating}>
 					Batal
 				</Button>
-				<Button type="submit" disabled={creating || calculatedTotal <= 0} class="gap-1.5 bg-emerald-700 hover:bg-emerald-800 text-white">
+				<Button type="submit" disabled={creating || calculatedTotal <= 0} class="gap-1.5 bg-primary hover:bg-primary/90 text-primary-foreground">
 					{#if creating}
 						<Loader2 size={14} class="animate-spin" />
 					{:else}

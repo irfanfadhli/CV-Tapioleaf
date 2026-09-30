@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-export const movementTypeEnum = ['PURCHASE_IN', 'MANUAL_IN', 'MANUAL_OUT', 'ADJUSTMENT'] as const;
+export const movementTypeEnum = ['PURCHASE_IN', 'MANUAL_IN', 'MANUAL_OUT', 'ADJUSTMENT', 'SALE_OUT'] as const;
 
 export const createMovementSchema = z.object({
 	productId: z.string().min(1, 'Produk wajib dipilih'),
@@ -39,12 +39,14 @@ export const MOVEMENT_LABELS: Record<string, string> = {
 	PURCHASE_IN: 'Pembelian',
 	MANUAL_IN: 'Stok Masuk',
 	MANUAL_OUT: 'Stok Keluar',
-	ADJUSTMENT: 'Penyesuaian'
+	ADJUSTMENT: 'Penyesuaian',
+	SALE_OUT: 'Penjualan'
 };
 
 export const MOVEMENT_ICONS: Record<string, string> = {
 	PURCHASE_IN: 'in',
 	MANUAL_IN: 'in',
 	MANUAL_OUT: 'out',
-	ADJUSTMENT: 'adjust'
+	ADJUSTMENT: 'adjust',
+	SALE_OUT: 'out'
 };

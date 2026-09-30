@@ -19,3 +19,26 @@ export function optimizeImageUrl(url: string | null | undefined, width = 400, qu
 	}
 	return url;
 }
+
+const STATUS_LABELS: Record<string, string> = {
+	PAID: 'Lunas',
+	PENDING: 'Menunggu',
+	APPROVED: 'Disetujui',
+	PROCESSING: 'Diproses',
+	SHIPPED: 'Dikirim',
+	COMPLETED: 'Selesai',
+	CANCELLED: 'Dibatalkan',
+	draft: 'Draft',
+	confirmed: 'Terkonfirmasi',
+	cancelled: 'Dibatalkan'
+};
+
+/** Pusat mapping status → label Indonesia (laporan & ekspor). */
+export function reportStatusLabel(status: string): string {
+	return STATUS_LABELS[status] ?? status;
+}
+
+/** Pusat mapping tipe transaksi → label Indonesia. */
+export function reportTypeLabel(type: 'sale' | 'order'): string {
+	return type === 'sale' ? 'Penjualan Timbangan' : 'Pesanan Katalog';
+}

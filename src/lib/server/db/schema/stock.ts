@@ -6,7 +6,7 @@ export const stockMovements = pgTable('stock_movements', {
 	productId: text('product_id').notNull().references(() => products.id),
 	quantityChange: decimal('quantity_change', { precision: 10, scale: 2 }).notNull(),
 	movementType: text('movement_type', {
-		enum: ['PURCHASE_IN', 'MANUAL_IN', 'MANUAL_OUT', 'ADJUSTMENT']
+		enum: ['PURCHASE_IN', 'MANUAL_IN', 'MANUAL_OUT', 'ADJUSTMENT', 'SALE_OUT']
 	}).notNull(),
 	movementDate: timestamp('movement_date', { withTimezone: true }).defaultNow().notNull(),
 	note: text('note'),
