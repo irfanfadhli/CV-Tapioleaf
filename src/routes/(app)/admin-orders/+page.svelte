@@ -9,6 +9,8 @@
 	let { data, form } = $props();
 
 	let searchQuery = $state((data.search as string) || '');
+	let statusFilter = $state((data.status as string) || 'all');
+	let limitValue = $state(data.limit ?? 25);
 	let debounceTimer: ReturnType<typeof setTimeout> | undefined;
 
 	// Offline order modal state
@@ -88,17 +90,39 @@
 		CANCELLED: X
 	};
 
+	function buildUrl(params: Record<string, string | undefined>) {
+		const url = new URL('/admin-orders', window.location.origin);
+		const q = { search: searchQuery || undefined, status: statusFilter === 'all' ? undefined : statusFilter, limit: String(limitValue), ...params };
+		for (const [k, v] of Object.entries(q)) {
+			if (v) url.searchParams.set(k, v);
+			else url.searchParams.delete(k);
+		}
+		return url.toString();
+	}
+
 	function handleSearch() {
 		clearTimeout(debounceTimer);
 		debounceTimer = setTimeout(() => {
-			const section = data.section === 'all' ? 'all' : null;
-			const url = new URL('/admin-orders', window.location.origin);
-			if (section) url.searchParams.set('section', 'all');
-			if (searchQuery) url.searchParams.set('search', searchQuery);
-			else url.searchParams.delete('search');
-			url.searchParams.set('page', '1');
-			window.location.href = url.toString();
+			window.location.href = buildUrl({});
 		}, 400);
+	}
+
+	function handleStatusChange(e: Event) {
+		statusFilter = (e.target as HTMLSelectElement).value;
+		window.location.href = buildUrl({});
+	}
+
+	function handleLimitChange(e: Event) {
+		limitValue = Number((e.target as HTMLSelectElement).value);
+		window.location.href = buildUrl({});
+	}
+
+	function goNext() {
+		if (data.nextCursor) window.location.href = buildUrl({ cursor: data.nextCursor, dir: 'next' });
+	}
+
+	function goPrev() {
+		if (data.prevCursor) window.location.href = buildUrl({ cursor: data.prevCursor, dir: 'prev' });
 	}
 
 	function formatDate(dateStr: string): string {
@@ -148,6 +172,28 @@
 					class="h-8 w-full rounded-lg border bg-background py-1.5 pr-1.5 pl-8 text-xs outline-none focus:ring-2 focus:ring-ring"
 				/>
 			</div>
+			<select
+				bind:value={statusFilter}
+				onchange={handleStatusChange}
+				class="h-8 rounded-lg border bg-background px-2 py-1 text-xs outline-none focus:ring-2 focus:ring-ring"
+				aria-label="Filter status"
+			>
+				<option value="all">Semua Status</option>
+				{#each Object.keys(statusLabels) as s}
+					<option value={s}>{statusLabels[s]}</option>
+				{/each}
+			</select>
+			<select
+				bind:value={limitValue}
+				onchange={handleLimitChange}
+				class="h-8 rounded-lg border bg-background px-2 py-1 text-xs outline-none focus:ring-2 focus:ring-ring"
+				aria-label="Jumlah per halaman"
+			>
+				<option value="10">10</option>
+				<option value="25">25</option>
+				<option value="50">50</option>
+				<option value="100">100</option>
+			</select>
 			<Button size="sm" onclick={openCreateModal} class="gap-1.5 h-8 text-xs whitespace-nowrap">
 				<Plus size={14} /> Pesanan Offline (Tunai)
 			</Button>
@@ -178,85 +224,76 @@
 			</Button>
 		</div>
 	{:else}
-		<!-- Section header for "all" view -->
-		{#if data.section === 'all'}
-			<div class="flex items-center justify-between">
-				<h2 class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Daftar Pesanan</h2>
-				{#if data.total > 0}
-					<span class="text-xs text-muted-foreground">{data.total} pesanan</span>
-				{/if}
-			</div>
-		{/if}
-
-		<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-			{#each orders as order (order.id)}
-				<div class="flex flex-col rounded-sm border bg-card p-3.5 shadow-xs min-h-[160px] transition-colors hover:border-muted-foreground/20">
-					<!-- Top row: ID + Status badge -->
-					<div class="flex items-center justify-between">
-						<span class="font-mono text-xs text-muted-foreground">#{order.id.slice(0, 8)}</span>
-						<span class="inline-flex items-center gap-0.5 rounded-full px-2.5 py-0.5 text-xs font-medium {statusColors[order.status] || 'bg-muted/50 text-muted-foreground'}">
-							{#if statusIcons[order.status] && statusIcons[order.status] === Clock}
-								<Clock size={8} />
-							{:else if statusIcons[order.status] && statusIcons[order.status] === CheckCircle2}
-								<CheckCircle2 size={8} />
-							{:else if statusIcons[order.status] && statusIcons[order.status] === X}
-								<X size={8} />
-							{/if}
-							{statusLabels[order.status] || order.status}
-						</span>
-					</div>
-
-					<!-- Customer name -->
-					<p class="mt-1 text-sm font-semibold break-words">{order.customerName || '-'}</p>
-
-					<!-- Phone -->
-					<p class="mt-0.5 text-xs text-muted-foreground break-all">{order.customerPhone || '-'}</p>
-
-					<!-- Date -->
-					<p class="mt-0.5 text-xs text-muted-foreground">{formatDate(order.createdAt.toString())}</p>
-
-					<!-- Total + items row -->
-					<div class="mt-1 flex items-baseline gap-1 text-xs">
-						<span class="font-bold">Rp {Number(order.totalAmount).toLocaleString('id-ID')}</span>
-						<span class="text-muted-foreground/50">·</span>
-						<span>{order.items?.length ?? 0} item</span>
-					</div>
-
-					<!-- Detail button at bottom-right -->
-					<div class="mt-2 flex justify-end">
-						<Button variant="outline" class="text-xs px-2.5 py-1.5 h-7" href={`/admin-orders/${order.id}`}>
-							<ChevronRight size={10} />
-							<span class="sr-only">Detail</span>
-							Detail
-						</Button>
-					</div>
-				</div>
-			{/each}
+		<!-- Section header -->
+		<div class="flex items-center justify-between">
+			<h2 class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Daftar Pesanan</h2>
+			{#if data.total > 0}
+				<span class="text-xs text-muted-foreground">{data.total} pesanan</span>
+			{/if}
 		</div>
 
-		<!-- "Lihat Semua Pesanan" button on main page (latest section only) -->
-		{#if data.section === 'latest' && data.total > 6}
-			<div class="flex justify-center pt-2">
-				<a href="/admin-orders?section=all" class="inline-flex items-center gap-1.5 rounded-sm border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-muted">
-					Lihat Semua Pesanan
-					<ChevronRight size={14} />
-				</a>
-			</div>
-		{/if}
+		<div class="overflow-x-auto rounded-sm border bg-card">
+			<table class="w-full text-sm">
+				<thead class="bg-muted/50">
+					<tr>
+						<th class="px-3 py-2.5 text-left font-medium text-muted-foreground">ID Pesanan</th>
+						<th class="px-3 py-2.5 text-left font-medium text-muted-foreground">Pelanggan</th>
+						<th class="hidden md:table-cell px-3 py-2.5 text-left font-medium text-muted-foreground">Telepon</th>
+						<th class="hidden lg:table-cell px-3 py-2.5 text-left font-medium text-muted-foreground">Tanggal</th>
+						<th class="px-3 py-2.5 text-right font-medium text-muted-foreground">Total</th>
+						<th class="px-3 py-2.5 text-center font-medium text-muted-foreground">Status</th>
+						<th class="px-3 py-2.5 text-center font-medium text-muted-foreground">Aksi</th>
+					</tr>
+				</thead>
+				<tbody>
+					{#each orders as order (order.id)}
+						<tr class="border-t transition-colors hover:bg-muted/30">
+							<td class="px-3 py-2.5 font-mono text-xs text-muted-foreground">#{order.id.slice(0, 8)}</td>
+							<td class="px-3 py-2.5 font-semibold break-words">{order.customerName || '-'}</td>
+							<td class="hidden md:table-cell px-3 py-2.5 text-xs text-muted-foreground break-all">{order.customerPhone || '-'}</td>
+							<td class="hidden lg:table-cell px-3 py-2.5 text-xs text-muted-foreground">{formatDate(order.createdAt.toString())}</td>
+							<td class="px-3 py-2.5 text-right">
+								<span class="font-bold">Rp {Number(order.totalAmount).toLocaleString('id-ID')}</span>
+								<span class="text-xs text-muted-foreground"> · {order.items?.length ?? 0} item</span>
+							</td>
+							<td class="px-3 py-2.5 text-center">
+								<span class="inline-flex items-center gap-0.5 rounded-full px-2.5 py-0.5 text-xs font-medium {statusColors[order.status] || 'bg-muted/50 text-muted-foreground'}">
+									{#if statusIcons[order.status] && statusIcons[order.status] === Clock}
+										<Clock size={8} />
+									{:else if statusIcons[order.status] && statusIcons[order.status] === CheckCircle2}
+										<CheckCircle2 size={8} />
+									{:else if statusIcons[order.status] && statusIcons[order.status] === X}
+										<X size={8} />
+									{/if}
+									{statusLabels[order.status] || order.status}
+								</span>
+							</td>
+							<td class="px-3 py-2.5">
+								<div class="flex justify-center">
+									<Button variant="outline" class="text-xs px-2.5 py-1.5 h-7" href={`/admin-orders/${order.id}`}>
+										<ChevronRight size={10} />
+										<span class="sr-only">Detail</span>
+										Detail
+									</Button>
+								</div>
+							</td>
+						</tr>
+					{/each}
+				</tbody>
+			</table>
+		</div>
 
-		<!-- Pagination only on "all" section -->
-		{#if data.section === 'all'}
+		<!-- Pagination -->
+		{#if data.totalPages > 1}
 			<div class="flex items-center justify-between pt-3">
 				<span class="text-xs text-muted-foreground">
 					Menampilkan {(data.page - 1) * data.limit + 1}–{Math.min(data.page * data.limit, data.total)} dari {data.total} pesanan
 				</span>
-				{#if data.totalPages > 1}
-					<div class="flex items-center gap-1.5">
-						<Button variant="outline" size="default" disabled={data.page <= 1} href={data.page > 1 ? `?section=all&page=${data.page - 1}${data.search ? `&search=${data.search}` : ''}` : undefined}>Sebelumnya</Button>
-						<span class="text-xs text-muted-foreground">Halaman {data.page} dari {data.totalPages}</span>
-						<Button variant="outline" size="default" disabled={data.page >= data.totalPages} href={data.page < data.totalPages ? `?section=all&page=${data.page + 1}${data.search ? `&search=${data.search}` : ''}` : undefined}>Berikutnya</Button>
-					</div>
-				{/if}
+				<div class="flex items-center gap-1.5">
+					<Button variant="outline" size="default" disabled={data.page <= 1} href={data.page > 1 ? `?page=${data.page - 1}${data.search ? `&search=${data.search}` : ''}` : undefined}>Sebelumnya</Button>
+					<span class="text-xs text-muted-foreground">Halaman {data.page} dari {data.totalPages}</span>
+					<Button variant="outline" size="default" disabled={data.page >= data.totalPages} href={data.page < data.totalPages ? `?page=${data.page + 1}${data.search ? `&search=${data.search}` : ''}` : undefined}>Berikutnya</Button>
+				</div>
 			</div>
 		{/if}
 	{/if}

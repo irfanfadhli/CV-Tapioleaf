@@ -2,44 +2,34 @@ import { fail, redirect } from '@sveltejs/kit';
 import type { PageServerLoad, Actions } from './$types';
 import * as orderService from '$lib/server/order/service';
 
+const LIMIT_OPTIONS = [10, 25, 50, 100] as const;
+
 export const load: PageServerLoad = async (event) => {
 	if (!event.locals.user) throw redirect(303, '/login');
 
-	const section = event.url.searchParams.get('section') || 'latest';
 	const activeProducts = await orderService.getActiveProductsForOrder();
 
-	if (section === 'all') {
-		const page = Number(event.url.searchParams.get('page')) || 1;
-		const limit = 12;
-		const search = event.url.searchParams.get('search') || undefined;
+	const cursor = event.url.searchParams.get('cursor') || undefined;
+	const dir = (event.url.searchParams.get('dir') === 'prev' ? 'prev' : 'next') as 'next' | 'prev';
+	const rawLimit = Number(event.url.searchParams.get('limit') || 25);
+	const limit = LIMIT_OPTIONS.includes(rawLimit as never) ? rawLimit : 25;
+	const status = event.url.searchParams.get('status') || 'all';
+	const search = event.url.searchParams.get('search') || undefined;
 
-		const items = await orderService.getAllOrders(search, page, limit);
-		const total = await orderService.getOrderCount(search);
-
-		return {
-			orders: items,
-			activeProducts,
-			page,
-			limit,
-			total,
-			totalPages: Math.ceil(total / limit),
-			search,
-			section: 'all'
-		};
-	}
-
-	const items = await orderService.getAllOrders(undefined, 1, 6);
-	const total = await orderService.getOrderCount();
+	const result = await orderService.getAdminOrdersCursor({ search, status, limit, cursor, dir });
+	const total = await orderService.getOrderCount(search, status);
 
 	return {
-		orders: items,
+		orders: result.items,
 		activeProducts,
-		page: 1,
-		limit: 6,
+		status,
+		search,
+		limit,
 		total,
-		totalPages: 1,
-		search: undefined,
-		section: 'latest'
+		nextCursor: result.nextCursor,
+		prevCursor: result.prevCursor,
+		hasNext: result.hasNext,
+		hasPrev: result.hasPrev
 	};
 };
 

@@ -1,4 +1,4 @@
-import { and, eq, desc, asc, isNull, sql, or, ilike, inArray } from 'drizzle-orm';
+import { and, eq, desc, asc, isNull, lt, gt, type SQL, sql, or, ilike, inArray } from 'drizzle-orm';
 import { db } from '../db';
 import { orders, orderItems } from '../db/schema/order';
 import { products } from '../db/schema/product';
@@ -158,53 +158,153 @@ export async function getUserPaidOrders(userId: string, page = 1, limit = 10): P
 	return { items: ordersWithItems, total: Number(countResult.count), page, limit };
 }
 
-export async function getAllOrders(search?: string, page = 1, limit = 20) {
-	const offset = (page - 1) * limit;
-	const conditions = [];
+function buildOrderConditions(search?: string, status?: string): SQL<unknown>[] {
+	const conditions: SQL<unknown>[] = [];
 	if (search) {
-		conditions.push(ilike(orders.customerName, `%${search}%`));
-		conditions.push(ilike(orders.id, `%${search}%`));
+		conditions.push(or(
+			ilike(orders.customerName, `%${search}%`),
+			ilike(orders.id, `%${search}%`)
+		) as SQL<unknown>);
+	}
+	if (status && status !== 'all') {
+		conditions.push(eq(orders.status, status as never));
+	}
+	return conditions;
+}
+
+/** Enkode cursor menjadi string base64url (aman untuk URL). */
+function encodeCursor(createdAt: Date, id: string): string {
+	const raw = `${createdAt.getTime()}:${id}`;
+	return Buffer.from(raw).toString('base64url');
+}
+
+/** Dekode cursor; mengembalikan null bila format tidak valid. */
+function decodeCursor(cursor?: string): { ts: number; id: string } | null {
+	if (!cursor) return null;
+	try {
+		const raw = Buffer.from(cursor, 'base64url').toString('utf8');
+		const sep = raw.indexOf(':');
+		if (sep === -1) return null;
+		const ts = Number(raw.slice(0, sep));
+		const id = raw.slice(sep + 1);
+		if (!Number.isFinite(ts)) return null;
+		return { ts, id };
+	} catch {
+		return null;
+	}
+}
+
+const ORDER_SELECT = {
+	id: orders.id,
+	userId: orders.userId,
+	status: orders.status,
+	totalAmount: orders.totalAmount,
+	customerName: orders.customerName,
+	customerPhone: orders.customerPhone,
+	createdAt: orders.createdAt
+};
+
+async function attachItemCounts(items: Array<Record<string, unknown>>) {
+	for (const order of items) {
+		const [itemCount] = await db
+			.select({ count: sql<number>`count(*)` })
+			.from(orderItems)
+			.where(eq(orderItems.orderId, order.id as string));
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		(order as any).items = [{ count: Number(itemCount.count) }];
+	}
+	return items;
+}
+
+/**
+ * Cursor-based pagination untuk daftar pesanan admin.
+ * Urutan: createdAt DESC, lalu id DESC sebagai tie-breaker.
+ * - dir=next: halaman setelah cursor (data lebih lama)
+ * - dir=prev: halaman sebelum cursor (data lebih baru)
+ */
+export async function getAdminOrdersCursor(opts: {
+	search?: string;
+	status?: string;
+	limit?: number;
+	cursor?: string;
+	dir?: 'next' | 'prev';
+}) {
+	const limit = Math.min(Math.max(opts.limit ?? 25, 1), 100);
+	const parsed = decodeCursor(opts.cursor);
+	const conditions = buildOrderConditions(opts.search, opts.status);
+
+	if (parsed && opts.dir && parsed.id) {
+		const ts = new Date(parsed.ts);
+		if (opts.dir === 'next') {
+			// createdAt < ts OR (createdAt = ts AND id < cursorId)
+			conditions.push(
+				or(
+					sql<boolean>`${orders.createdAt} < ${ts}`,
+					and(eq(orders.createdAt, ts), lt(orders.id, parsed.id))
+				) as SQL<unknown>
+			);
+		} else {
+			// createdAt > ts OR (createdAt = ts AND id > cursorId)
+			conditions.push(
+				or(
+					sql<boolean>`${orders.createdAt} > ${ts}`,
+					and(eq(orders.createdAt, ts), gt(orders.id, parsed.id))
+				) as SQL<unknown>
+			);
+		}
 	}
 
-	const where = conditions.length > 0 ? or(...conditions) : undefined;
+	const where = conditions.length > 0 ? and(...conditions) : undefined;
+
+	// Ambil limit+1 untuk deteksi hasMore
+	const items = await db
+		.select(ORDER_SELECT)
+		.from(orders)
+		.where(where)
+		.orderBy(opts.dir === 'prev' ? asc(orders.createdAt) : desc(orders.createdAt), opts.dir === 'prev' ? asc(orders.id) : desc(orders.id))
+		.limit(limit + 1);
+
+	const hasMore = items.length > limit;
+	let rows = items.slice(0, limit);
+
+	if (opts.dir === 'prev') {
+		rows = rows.reverse();
+	}
+
+	// nextCursor: barang terakhir yang ditampilkan (untuk maju ke data lama)
+	const nextCursor = rows.length > 0 ? encodeCursor(rows[rows.length - 1].createdAt, rows[rows.length - 1].id) : null;
+	// prevCursor: barang pertama yang ditampilkan (untuk mundur ke data baru)
+	const prevCursor = rows.length > 0 ? encodeCursor(rows[0].createdAt, rows[0].id) : null;
+
+	const attached = await attachItemCounts(rows as unknown as Array<Record<string, unknown>>);
+
+	return {
+		items: attached,
+		nextCursor,
+		prevCursor,
+		hasNext: opts.dir === 'prev' ? false : hasMore,
+		hasPrev: opts.dir === 'prev' ? hasMore : !!opts.cursor
+	};
+}
+
+export async function getAllOrders(search?: string, page = 1, limit = 20) {
+	const offset = (page - 1) * limit;
+	const where = buildOrderConditions(search).length > 0 ? and(...buildOrderConditions(search)) : undefined;
 
 	const items = await db
-		.select({
-			id: orders.id,
-			userId: orders.userId,
-			status: orders.status,
-			totalAmount: orders.totalAmount,
-			customerName: orders.customerName,
-			customerPhone: orders.customerPhone,
-			createdAt: orders.createdAt
-		})
+		.select(ORDER_SELECT)
 		.from(orders)
 		.where(where)
 		.orderBy(desc(orders.createdAt))
 		.limit(limit)
 		.offset(offset);
 
-	// Get items count for each order
-	for (const order of items) {
-		const [itemCount] = await db
-			.select({ count: sql<number>`count(*)` })
-			.from(orderItems)
-			.where(eq(orderItems.orderId, order.id));
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		(order as any).items = [{ count: Number(itemCount.count) }];
-	}
-
-	return items;
+	return attachItemCounts(items as unknown as Array<Record<string, unknown>>);
 }
 
-export async function getOrderCount(search?: string) {
-	const conditions = [];
-	if (search) {
-		conditions.push(ilike(orders.customerName, `%${search}%`));
-		conditions.push(ilike(orders.id, `%${search}%`));
-	}
-
-	const where = conditions.length > 0 ? or(...conditions) : undefined;
+export async function getOrderCount(search?: string, status?: string) {
+	const conditions = buildOrderConditions(search, status);
+	const where = conditions.length > 0 ? and(...conditions) : undefined;
 	const [countResult] = await db.select({ count: sql<number>`count(*)` }).from(orders).where(where);
 	return Number(countResult.count);
 }
