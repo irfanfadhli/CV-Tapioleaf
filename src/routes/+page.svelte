@@ -1,9 +1,10 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import Button from '@/components/ui/button/button.svelte';
-	import CheckoutModal from '$lib/components/checkout/CheckoutModal.svelte';
+	import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '$lib/components/ui/dialog';
 	import { siteConfig } from '$lib/config';
 	import { toast } from 'svelte-sonner';
+	import Loader2 from '@lucide/svelte/icons/loader-2';
 	import {
 		DropdownMenu,
 		DropdownMenuContent,
@@ -14,9 +15,11 @@
 
 	let { data } = $props();
 
-	let checkoutProduct = $state<{
+	let selectedProductForLogin = $state<{
 		id: string; name: string; code: string; price: string; unit: string; description: string | null;
 	} | null>(null);
+	let isLoginModalOpen = $state(false);
+	let isLoggingIn = $state(false);
 
 	let activeCategory = $state('Semua');
 	let addedIds = $state<Set<string>>(new Set());
@@ -40,7 +43,39 @@
 	}
 
 	function openCheckout(item: any) {
+		if (!data.user) {
+			selectedProductForLogin = item;
+			isLoginModalOpen = true;
+			return;
+		}
 		goto(`/checkout?productId=${item.id}&qty=1`);
+	}
+
+	async function handleGoogleLoginFromModal() {
+		if (isLoggingIn || !selectedProductForLogin) return;
+		isLoggingIn = true;
+		const targetCheckoutUrl = `/checkout?productId=${selectedProductForLogin.id}&qty=1`;
+		try {
+			const res = await fetch('/api/auth/sign-in/social', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					provider: 'google',
+					callbackURL: targetCheckoutUrl,
+					disableRedirect: true
+				})
+			});
+			const resJson = await res.json();
+			if (resJson.url) {
+				window.location.href = resJson.url;
+			} else {
+				isLoggingIn = false;
+				toast.error('Gagal mendapatkan URL login Google');
+			}
+		} catch {
+			isLoggingIn = false;
+			toast.error('Gagal memulai login Google');
+		}
 	}
 
 	function handleAddToCart(item: any, e: Event) {
@@ -58,7 +93,7 @@
 
 	let observer: IntersectionObserver | undefined;
 
-	// Setelah login dari halaman produk, langsung buka checkout
+	// Setelah login dari halaman produk, jika ada pending redirect ke checkout
 	$effect(() => {
 		if (data.user) {
 			const pending = sessionStorage.getItem('pendingCheckoutProduct');
@@ -66,13 +101,7 @@
 				try {
 					const product = JSON.parse(pending);
 					sessionStorage.removeItem('pendingCheckoutProduct');
-					const url = new URL(window.location.href);
-					if (url.searchParams.get('checkout') === '1') {
-						// Hapus query param dari URL tanpa reload
-						url.searchParams.delete('checkout');
-						window.history.replaceState({}, '', url.toString());
-						checkoutProduct = product;
-					}
+					goto(`/checkout?productId=${product.id}&qty=1`);
 				} catch { sessionStorage.removeItem('pendingCheckoutProduct'); }
 			}
 		}
@@ -628,8 +657,56 @@
 	</div>
 </footer>
 
-<CheckoutModal
-	open={checkoutProduct !== null}
-	product={checkoutProduct}
-	onClose={() => (checkoutProduct = null)}
-/>
+<!-- Modal Notifikasi Login untuk Pemesanan -->
+<Dialog open={isLoginModalOpen} onOpenChange={(open) => { if (!open) { isLoginModalOpen = false; selectedProductForLogin = null; } }}>
+	<DialogContent class="sm:max-w-md p-6 rounded-2xl">
+		<DialogHeader class="text-center sm:text-center">
+			<div class="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+				<picture>
+					<source srcset="/img/logo.webp" type="image/webp" />
+					<img src="/img/logo.png" alt="TapioLeaf" class="h-10 w-10 rounded-lg object-contain" width="40" height="40" />
+				</picture>
+			</div>
+			<DialogTitle class="text-lg sm:text-xl font-bold">Masuk untuk Memesan</DialogTitle>
+			<DialogDescription class="text-xs sm:text-sm text-muted-foreground mt-1">
+				{#if selectedProductForLogin}
+					Anda akan memesan <strong class="text-foreground">{selectedProductForLogin.name}</strong>. Silakan masuk menggunakan akun Google untuk melanjutkan langsung ke form pesanan.
+				{:else}
+					Silakan masuk menggunakan akun Google Anda untuk melanjutkan pemesanan.
+				{/if}
+			</DialogDescription>
+		</DialogHeader>
+
+		<div class="space-y-3 pt-3">
+			<Button
+				variant="outline"
+				class="w-full h-11 gap-3 rounded-xl border-border bg-background text-sm font-semibold shadow-xs hover:bg-muted/70 transition-all flex items-center justify-center"
+				onclick={handleGoogleLoginFromModal}
+				disabled={isLoggingIn}
+			>
+				{#if isLoggingIn}
+					<Loader2 size={16} class="animate-spin text-primary" />
+					<span>Menghubungkan ke Google...</span>
+				{:else}
+					<svg class="h-5 w-5" viewBox="0 0 24 24" aria-hidden="true">
+						<path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
+						<path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
+						<path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" fill="#FBBC05" />
+						<path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" fill="#EA4335" />
+					</svg>
+					<span>Lanjutkan dengan Google</span>
+				{/if}
+			</Button>
+
+			<Button
+				variant="ghost"
+				size="sm"
+				class="w-full text-xs text-muted-foreground hover:text-foreground"
+				onclick={() => { isLoginModalOpen = false; selectedProductForLogin = null; }}
+				disabled={isLoggingIn}
+			>
+				Batal
+			</Button>
+		</div>
+	</DialogContent>
+</Dialog>

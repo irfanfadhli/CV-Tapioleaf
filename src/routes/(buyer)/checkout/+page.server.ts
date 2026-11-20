@@ -3,6 +3,7 @@ import type { PageServerLoad } from './$types';
 import { db } from '$lib/server/db';
 import { products } from '$lib/server/db/schema';
 import { eq } from 'drizzle-orm';
+import wilayahData from '$lib/data/wilayah-indonesia.json';
 
 export const load: PageServerLoad = async (event) => {
 	if (!event.locals.user) {
@@ -42,6 +43,8 @@ export const load: PageServerLoad = async (event) => {
 	return {
 		product,
 		initialQty,
-		user: event.locals.user
+		user: event.locals.user,
+		provinces: wilayahData.provinces
 	};
 };
+

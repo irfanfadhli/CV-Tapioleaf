@@ -11,6 +11,7 @@
 	import ArrowLeft from '@lucide/svelte/icons/arrow-left';
 	import Loader2 from '@lucide/svelte/icons/loader-2';
 	import Package from '@lucide/svelte/icons/package';
+	import SearchableSelect from '$lib/components/ui/SearchableSelect.svelte';
 	import { toast } from 'svelte-sonner';
 	import { parse } from 'devalue';
 
@@ -26,46 +27,75 @@
 	let customerAddress = $state('');
 	let notes = $state('');
 
-	// === State Ongkir & RajaOngkir ===
-	let destinationSearchQuery = $state('');
-	let destinationResults = $state<Array<{ id: number; label: string }>>([]);
-	let selectedDestination = $state<{ id: number; label: string } | null>(null);
-	let isSearchingDestination = $state(false);
-	let destinationDebounceTimer: ReturnType<typeof setTimeout> | undefined;
+	// === State Wilayah Cascading (Provinsi -> Kota/Kabupaten -> Kecamatan) ===
+	const provinces = $derived(data.provinces || []);
+	let selectedProvCode = $state('');
+	let selectedRegCode = $state('');
+	let selectedDistCode = $state('');
+
+	let regenciesList = $state<Array<{ kode: string; nama: string }>>([]);
+	let districtsList = $state<Array<{ kode: string; nama: string }>>([]);
+
+	let isLoadingRegencies = $state(false);
+	let isLoadingDistricts = $state(false);
 
 	let shippingRates = $state<Array<{ courier_name: string; courier_code: string; service_name: string; cost: number; etd: string }>>([]);
 	let selectedShippingRate = $state<{ courier_name: string; courier_code: string; service_name: string; cost: number; etd: string } | null>(null);
 	let isLoadingRates = $state(false);
 
-	async function handleDestinationInput(val: string) {
-		destinationSearchQuery = val;
-		clearTimeout(destinationDebounceTimer);
-		if (val.trim().length < 3) {
-			destinationResults = [];
+	async function onProvinceChange(provKode: string) {
+		selectedProvCode = provKode;
+		selectedRegCode = '';
+		selectedDistCode = '';
+		regenciesList = [];
+		districtsList = [];
+		shippingRates = [];
+		selectedShippingRate = null;
+
+		if (!provKode) return;
+		isLoadingRegencies = true;
+		try {
+			const res = await fetch(`/api/shipping/destination?type=regencies&parent=${provKode}`);
+			const json = await res.json();
+			regenciesList = json.results || [];
+		} catch {
+			regenciesList = [];
+		} finally {
+			isLoadingRegencies = false;
+		}
+	}
+
+	async function onRegencyChange(regKode: string) {
+		selectedRegCode = regKode;
+		selectedDistCode = '';
+		districtsList = [];
+		shippingRates = [];
+		selectedShippingRate = null;
+
+		if (!regKode) return;
+		isLoadingDistricts = true;
+		try {
+			const res = await fetch(`/api/shipping/destination?type=districts&parent=${regKode}`);
+			const json = await res.json();
+			districtsList = json.results || [];
+		} catch {
+			districtsList = [];
+		} finally {
+			isLoadingDistricts = false;
+		}
+	}
+
+	async function onDistrictChange(distKode: string) {
+		selectedDistCode = distKode;
+		if (!distKode) {
+			shippingRates = [];
+			selectedShippingRate = null;
 			return;
 		}
-		isSearchingDestination = true;
-		destinationDebounceTimer = setTimeout(async () => {
-			try {
-				const res = await fetch(`/api/shipping/destination?q=${encodeURIComponent(val.trim())}`);
-				const json = await res.json();
-				destinationResults = json.results || [];
-			} catch {
-				destinationResults = [];
-			} finally {
-				isSearchingDestination = false;
-			}
-		}, 400);
+		await fetchRates(distKode);
 	}
 
-	async function selectDestination(dest: { id: number; label: string }) {
-		selectedDestination = dest;
-		destinationSearchQuery = dest.label;
-		destinationResults = [];
-		await fetchRates(dest.id);
-	}
-
-	async function fetchRates(destId: number) {
+	async function fetchRates(destCode: string) {
 		if (!product) return;
 		isLoadingRates = true;
 		shippingRates = [];
@@ -75,7 +105,7 @@
 		const itemVal = Number(product.price || 0) * qtyNum;
 
 		try {
-			const res = await fetch(`/api/shipping/cost?destinationId=${destId}&weight=${qtyNum}&value=${itemVal}`);
+			const res = await fetch(`/api/shipping/cost?destinationId=${destCode}&weight=${qtyNum}&value=${itemVal}`);
 			const json = await res.json();
 			shippingRates = json.rates || [];
 			if (shippingRates.length > 0) {
@@ -87,6 +117,14 @@
 			isLoadingRates = false;
 		}
 	}
+
+	// Nama teks lengkap wilayah untuk catatan pesanan
+	const selectedProvinceName = $derived(provinces.find((p: any) => p.kode === selectedProvCode)?.nama || '');
+	const selectedRegencyName = $derived(regenciesList.find((r) => r.kode === selectedRegCode)?.nama || '');
+	const selectedDistrictName = $derived(districtsList.find((d) => d.kode === selectedDistCode)?.nama || '');
+	const fullRegionLabel = $derived(
+		selectedDistCode ? `Kec. ${selectedDistrictName}, ${selectedRegencyName}, ${selectedProvinceName}` : ''
+	);
 
 	// Hitung Total Bayar Dinamis
 	const subtotalProduct = $derived(Number(product?.price || 0) * (Number(quantity) || 0));
@@ -188,8 +226,8 @@
 		const current = Number(quantity) || 1;
 		const next = Math.max(1, current + delta);
 		quantity = String(next);
-		if (selectedDestination) {
-			fetchRates(selectedDestination.id);
+		if (selectedDistCode) {
+			fetchRates(selectedDistCode);
 		}
 	}
 
@@ -217,8 +255,18 @@
 		}
 
 		if (deliveryMethod === 'DELIVERY') {
-			if (!selectedDestination) {
-				errorMessage = 'Silakan pilih Kota/Kecamatan tujuan dari daftar autocomplete';
+			if (!selectedProvCode) {
+				errorMessage = 'Silakan pilih Provinsi tujuan';
+				toast.error(errorMessage);
+				return;
+			}
+			if (!selectedRegCode) {
+				errorMessage = 'Silakan pilih Kota/Kabupaten tujuan';
+				toast.error(errorMessage);
+				return;
+			}
+			if (!selectedDistCode) {
+				errorMessage = 'Silakan pilih Kecamatan tujuan';
 				toast.error(errorMessage);
 				return;
 			}
@@ -249,7 +297,7 @@
 			const finalAddress =
 				deliveryMethod === 'PICKUP'
 					? `Ambil di Tempat (${formattedPickupDate}, Pukul ${pickupTime} WIB)`
-					: `${customerAddress.trim()} [${selectedDestination?.label}]`;
+					: `${customerAddress.trim()} [${fullRegionLabel}]`;
 
 			let finalNotes = '';
 			if (deliveryMethod === 'PICKUP') {
@@ -377,49 +425,84 @@
 
 						{#if deliveryMethod === 'DELIVERY'}
 							<div class="space-y-3.5 border-t border-border/60 pt-3.5">
-								<!-- Autocomplete Tujuan Wilayah -->
-								<div class="grid gap-1.5 relative">
-									<label for="co-dest" class="text-xs font-semibold text-foreground">Kota / Kecamatan Tujuan *</label>
-									<div class="relative">
-										<Input
-											id="co-dest"
-											type="text"
-											placeholder="Ketik minimal 3 huruf (contoh: Margoyoso, Pati / Kebumen)"
-											value={destinationSearchQuery}
-											oninput={(e) => handleDestinationInput((e.target as HTMLInputElement).value)}
+								<!-- 3 Cascading Select: Provinsi -> Kota/Kabupaten -> Kecamatan -->
+								<div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+									<!-- 1. Provinsi -->
+									<div class="grid gap-1.5">
+										<label for="co-prov" class="text-xs font-semibold text-foreground">Provinsi *</label>
+										<select
+											id="co-prov"
+											class="h-9 w-full rounded-xl border border-border bg-background px-2.5 py-1 text-xs sm:text-sm text-foreground focus:ring-1 focus:ring-primary outline-hidden"
+											value={selectedProvCode}
+											onchange={(e) => onProvinceChange((e.target as HTMLSelectElement).value)}
 											disabled={submitting}
-											class="h-9 text-xs sm:text-sm pr-9 bg-background"
 											required
-										/>
-										{#if isSearchingDestination}
-											<div class="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground">
-												<Loader2 size={15} class="animate-spin" />
-											</div>
-										{/if}
+										>
+											<option value="">Pilih Provinsi</option>
+											{#each provinces as prov}
+												<option value={prov.kode}>{prov.nama}</option>
+											{/each}
+										</select>
 									</div>
 
-									{#if destinationResults.length > 0}
-										<div class="absolute left-0 right-0 top-full z-50 mt-1 max-h-52 overflow-y-auto rounded-xl border border-border bg-popover p-1.5 shadow-xl">
-											{#each destinationResults as dest}
-												<button
-													type="button"
-													class="w-full rounded-lg px-3 py-2 text-left text-xs transition-colors hover:bg-accent hover:text-accent-foreground"
-													onclick={() => selectDestination(dest)}
-												>
-													{dest.label}
-												</button>
-											{/each}
+									<!-- 2. Kota / Kabupaten -->
+									<div class="grid gap-1.5">
+										<div class="flex items-center justify-between">
+											<label for="co-reg" class="text-xs font-semibold text-foreground">Kota / Kabupaten *</label>
+											{#if isLoadingRegencies}
+												<Loader2 size={12} class="animate-spin text-primary" />
+											{/if}
 										</div>
-									{/if}
+										<select
+											id="co-reg"
+											class="h-9 w-full rounded-xl border border-border bg-background px-2.5 py-1 text-xs sm:text-sm text-foreground focus:ring-1 focus:ring-primary outline-hidden disabled:bg-muted/50"
+											value={selectedRegCode}
+											onchange={(e) => onRegencyChange((e.target as HTMLSelectElement).value)}
+											disabled={submitting || !selectedProvCode || isLoadingRegencies}
+											required
+										>
+											<option value="">
+												{!selectedProvCode ? 'Pilih Provinsi dulu' : isLoadingRegencies ? 'Memuat kab/kota...' : 'Pilih Kota/Kabupaten'}
+											</option>
+											{#each regenciesList as reg}
+												<option value={reg.kode}>{reg.nama}</option>
+											{/each}
+										</select>
+									</div>
+
+									<!-- 3. Kecamatan -->
+									<div class="grid gap-1.5">
+										<div class="flex items-center justify-between">
+											<label for="co-dist" class="text-xs font-semibold text-foreground">Kecamatan *</label>
+											{#if isLoadingDistricts}
+												<Loader2 size={12} class="animate-spin text-primary" />
+											{/if}
+										</div>
+										<select
+											id="co-dist"
+											class="h-9 w-full rounded-xl border border-border bg-background px-2.5 py-1 text-xs sm:text-sm text-foreground focus:ring-1 focus:ring-primary outline-hidden disabled:bg-muted/50"
+											value={selectedDistCode}
+											onchange={(e) => onDistrictChange((e.target as HTMLSelectElement).value)}
+											disabled={submitting || !selectedRegCode || isLoadingDistricts}
+											required
+										>
+											<option value="">
+												{!selectedRegCode ? 'Pilih Kab/Kota dulu' : isLoadingDistricts ? 'Memuat kecamatan...' : 'Pilih Kecamatan'}
+											</option>
+											{#each districtsList as dist}
+												<option value={dist.kode}>{dist.nama}</option>
+											{/each}
+										</select>
+									</div>
 								</div>
 
 								<!-- Opsi Kurir Ekspedisi (Shopee Style Opsi Pengiriman) -->
-								{#if selectedDestination}
+								{#if selectedDistCode}
 									<div class="rounded-xl border border-primary/20 bg-primary/5 p-3.5 space-y-2.5">
 										<div class="flex items-center justify-between">
 											<span class="text-xs font-bold text-primary flex items-center gap-1.5">
 												<Truck size={15} />
-												<span>Opsi Pengiriman (Kurir) *</span>
+												<span>Opsi Pengiriman ke {fullRegionLabel} *</span>
 											</span>
 											{#if isLoadingRates}
 												<span class="text-xs text-muted-foreground flex items-center gap-1">
@@ -574,7 +657,7 @@
 										step="0.01"
 										min="0.01"
 										bind:value={quantity}
-										onchange={() => { if (selectedDestination) fetchRates(selectedDestination.id); }}
+										onchange={() => { if (selectedDistCode) fetchRates(selectedDistCode); }}
 										class="w-14 text-center text-xs font-bold focus:outline-hidden"
 									/>
 									<button

@@ -1,68 +1,67 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { db } from '$lib/server/db';
-import { wilayah } from '$lib/server/db/schema/wilayah';
-import { ilike } from 'drizzle-orm';
-import { searchDestination as searchDestinationOnline } from '$lib/server/shipping/rajaongkir';
-import { INDONESIA_REGIONS } from '$lib/data/indonesia-regions';
+import wilayahData from '$lib/data/wilayah-indonesia.json';
 
 export const GET: RequestHandler = async ({ url }) => {
-	const keyword = (url.searchParams.get('q') || '').trim();
-	if (keyword.length < 2) {
-		return json({ results: [] });
-	}
+	const type = url.searchParams.get('type') || 'provinces';
+	const parentKode = url.searchParams.get('parent') || '';
 
-	const qLower = keyword.toLowerCase();
-
-	// 1. Prioritaskan cari dari database lokal (tabel wilayah) jika sudah di-seed
-	try {
-		const localRows = await db
-			.select({
-				kode: wilayah.kode,
-				nama: wilayah.nama
-			})
-			.from(wilayah)
-			.where(ilike(wilayah.nama, `%${keyword}%`))
-			.limit(15);
-
-		if (localRows.length > 0) {
-			const results = localRows.map((r) => ({
-				id: r.kode,
-				label: r.nama
-			}));
-			return json({ results });
-		}
-	} catch (err) {
-		console.warn('Gagal membaca tabel wilayah lokal:', err);
-	}
-
-	// 2. Gunakan Master Data Wilayah Lengkap 38 Provinsi (cahyadsn/wilayah Kemendagri)
-	const matchedRegions = INDONESIA_REGIONS.filter((item) =>
-		item.nama.toLowerCase().includes(qLower) || item.kode.toLowerCase().includes(qLower)
-	).slice(0, 15);
-
-	if (matchedRegions.length > 0) {
+	if (type === 'provinces') {
 		return json({
-			results: matchedRegions.map((m) => ({
-				id: m.kode,
-				label: m.nama
+			results: wilayahData.provinces.map((p) => ({
+				kode: p.kode,
+				nama: p.nama
 			}))
 		});
 	}
 
-	// 3. Fallback ke service online RajaOngkir jika ada
-	const onlineResults = await searchDestinationOnline(keyword);
-	if (onlineResults && onlineResults.length > 0) {
-		return json({ results: onlineResults });
+	if (type === 'regencies') {
+		if (!parentKode) {
+			return json({ results: [] });
+		}
+		const filtered = wilayahData.regencies.filter((r) => r.provKode === parentKode);
+		return json({
+			results: filtered.map((r) => ({
+				kode: r.kode,
+				nama: r.nama
+			}))
+		});
 	}
 
-	// 4. Jika masih tidak ditemukan, buat opsi dinamis agar pembeli tetap bisa memesan
-	return json({
-		results: [
-			{
-				id: `custom-${encodeURIComponent(keyword)}`,
-				label: `${keyword} (Wilayah Lainnya)`
-			}
-		]
-	});
+	if (type === 'districts') {
+		if (!parentKode) {
+			return json({ results: [] });
+		}
+		const filtered = wilayahData.districts.filter((d) => d.regKode === parentKode);
+		return json({
+			results: filtered.map((d) => ({
+				kode: d.kode,
+				nama: d.nama
+			}))
+		});
+	}
+
+	// Fitur pencarian cepat jika ada parameter query `q`
+	const query = (url.searchParams.get('q') || '').toLowerCase().trim();
+	if (query.length >= 2) {
+		const matchedDistricts = wilayahData.districts
+			.filter((d) => d.nama.toLowerCase().includes(query))
+			.slice(0, 15);
+
+		const regMap = new Map(wilayahData.regencies.map((r) => [r.kode, r]));
+		const provMap = new Map(wilayahData.provinces.map((p) => [p.kode, p.nama]));
+
+		const results = matchedDistricts.map((d) => {
+			const reg = regMap.get(d.regKode);
+			const provNama = reg ? provMap.get(reg.provKode) || '' : '';
+			return {
+				id: d.kode,
+				label: `Kec. ${d.nama}, ${reg?.nama || ''}, ${provNama}`
+			};
+		});
+
+		return json({ results });
+	}
+
+	return json({ results: [] });
 };
