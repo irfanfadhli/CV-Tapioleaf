@@ -40,11 +40,7 @@
 	}
 
 	function openCheckout(item: any) {
-		if (!data.user) { goto('/login'); return; }
-		checkoutProduct = {
-			id: item.id, name: item.name, code: item.code,
-			price: item.price, unit: item.unit, description: item.description
-		};
+		goto(`/checkout?productId=${item.id}&qty=1`);
 	}
 
 	function handleAddToCart(item: any, e: Event) {
@@ -61,6 +57,26 @@
 	}
 
 	let observer: IntersectionObserver | undefined;
+
+	// Setelah login dari halaman produk, langsung buka checkout
+	$effect(() => {
+		if (data.user) {
+			const pending = sessionStorage.getItem('pendingCheckoutProduct');
+			if (pending) {
+				try {
+					const product = JSON.parse(pending);
+					sessionStorage.removeItem('pendingCheckoutProduct');
+					const url = new URL(window.location.href);
+					if (url.searchParams.get('checkout') === '1') {
+						// Hapus query param dari URL tanpa reload
+						url.searchParams.delete('checkout');
+						window.history.replaceState({}, '', url.toString());
+						checkoutProduct = product;
+					}
+				} catch { sessionStorage.removeItem('pendingCheckoutProduct'); }
+			}
+		}
+	});
 	let prevScrollY = 0;
 	let navHidden = $state(false);
 
@@ -254,11 +270,11 @@
 				<div class="grid grid-cols-2 gap-2.5 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
 					{#each filteredItems as item (item.id)}
 						<div
-							onclick={() => openCheckout(item)}
-							onkeydown={(e) => { if (e.key === 'Enter' || e.key === ' ') openCheckout(item); }}
+							onclick={() => { if (item.currentStock > 0) openCheckout(item); }}
+							onkeydown={(e) => { if ((e.key === 'Enter' || e.key === ' ') && item.currentStock > 0) openCheckout(item); }}
 							role="button"
-							tabindex="0"
-							class="group relative overflow-hidden rounded-xl border border-gray-200 bg-white transition-shadow hover:shadow-md active:scale-[0.98]"
+							tabindex={item.currentStock <= 0 ? -1 : 0}
+							class="group relative overflow-hidden rounded-xl border border-gray-200 bg-white transition-shadow {item.currentStock <= 0 ? 'opacity-70' : 'hover:shadow-md active:scale-[0.98]'}"
 						>
 							<div class="relative aspect-square w-full overflow-hidden bg-gray-100">
 								{#if item.imageUrl}
@@ -282,7 +298,11 @@
 									</span>
 								{/if}
 
-								{#if (item.unit === 'SAK' || item.unit === 'PCS' ? Math.floor(item.currentStock) : Math.round(item.currentStock)) < 10}
+								{#if item.currentStock <= 0}
+									<span class="absolute right-0 top-0 rounded-bl-lg bg-gray-500 px-1.5 py-0.5 text-[10px] font-bold text-white shadow-sm">
+										Stok Habis
+									</span>
+								{:else if (item.unit === 'SAK' || item.unit === 'PCS' ? Math.floor(item.currentStock) : Math.round(item.currentStock)) < 10}
 									<span class="absolute right-0 top-0 rounded-bl-lg bg-red-600 px-1.5 py-0.5 text-[10px] font-bold text-white shadow-sm">
 										Stok Tipis
 									</span>
@@ -295,16 +315,30 @@
 									<p class="mt-0.5 text-[10px] text-muted-foreground line-clamp-1">{item.description}</p>
 								{/if}
 								<p class="mt-1.5 text-sm font-bold text-primary">{formatPrice(item.price, item.unit)}</p>
-								<p class="mt-0.5 text-[10px] text-muted-foreground">{formatStock(item.currentStock, item.unit)} {item.unit} tersedia</p>
-								<button
-									onclick={(e) => { e.stopPropagation(); openCheckout(item); }}
-									class="group/btn mt-2 inline-flex w-full items-center justify-center gap-2 rounded-full bg-primary py-2 text-xs font-semibold text-primary-foreground transition-colors hover:bg-primary/90 active:scale-[0.97]"
-								>
-									Pesan Sekarang
-									<span class="flex h-5 w-5 items-center justify-center rounded-full bg-white/15 transition-all duration-300 group-hover/btn:translate-x-0.5">
-										<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
-									</span>
-								</button>
+								{#if item.currentStock <= 0}
+									<p class="mt-0.5 text-[10px] text-destructive font-medium">Stok habis</p>
+								{:else}
+									<p class="mt-0.5 text-[10px] text-muted-foreground">{formatStock(item.currentStock, item.unit)} {item.unit} tersedia</p>
+								{/if}
+								{#if item.currentStock <= 0}
+									<button
+										disabled
+										onclick={(e) => e.stopPropagation()}
+										class="mt-2 inline-flex w-full cursor-not-allowed items-center justify-center gap-2 rounded-full bg-gray-200 py-2 text-xs font-semibold text-gray-400"
+									>
+										Stok Habis
+									</button>
+								{:else}
+									<button
+										onclick={(e) => { e.stopPropagation(); openCheckout(item); }}
+										class="group/btn mt-2 inline-flex w-full items-center justify-center gap-2 rounded-full bg-primary py-2 text-xs font-semibold text-primary-foreground transition-colors hover:bg-primary/90 active:scale-[0.97]"
+									>
+										Pesan Sekarang
+										<span class="flex h-5 w-5 items-center justify-center rounded-full bg-white/15 transition-all duration-300 group-hover/btn:translate-x-0.5">
+											<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+										</span>
+									</button>
+								{/if}
 							</div>
 						</div>
 					{/each}

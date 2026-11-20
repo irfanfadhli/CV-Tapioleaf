@@ -8,6 +8,7 @@ export const orders = pgTable('orders', {
 		enum: ['PENDING', 'APPROVED', 'PAID', 'PROCESSING', 'SHIPPED', 'COMPLETED', 'CANCELLED']
 	}).default('PENDING').notNull(),
 	totalAmount: decimal('total_amount', { precision: 15, scale: 2 }).notNull(),
+	shippingFee: decimal('shipping_fee', { precision: 15, scale: 2 }).default('0'),
 	xenditInvoiceId: text('xendit_invoice_id'),
 	xenditInvoiceUrl: text('xendit_invoice_url'),
 	paidAt: timestamp('paid_at', { withTimezone: true }),
@@ -16,6 +17,7 @@ export const orders = pgTable('orders', {
 	customerAddress: text('customer_address'),
 	notes: text('notes'),
 	cancelledBy: text('cancelled_by', { enum: ['ADMIN', 'CUSTOMER'] }),
+	cancellationReason: text('cancellation_reason'),
 	createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
 	updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull()
 }, (table) => [

@@ -5,7 +5,8 @@ import * as productService from '$lib/server/product/service';
 import { db } from '$lib/server/db';
 import { cassavaReceipts } from '$lib/server/db/schema/cassava';
 import { productionEntries } from '$lib/server/db/schema/production';
-import { sql, eq } from 'drizzle-orm';
+import { products } from '$lib/server/db/schema/product';
+import { sql, eq, isNull, and } from 'drizzle-orm';
 
 export const load: PageServerLoad = async (event) => {
 	const todaySummary = await productionService.getTodaySummary();
@@ -13,8 +14,8 @@ export const load: PageServerLoad = async (event) => {
 	const query = Object.fromEntries(event.url.searchParams);
 	const todayItems = await productionService.listProductions({ page: 1, limit: 100, sort: 'productionDate', order: 'desc' } as any);
 
-	const [cassavaIn] = await db.select({ total: sql<string>`COALESCE(SUM(final_weight::numeric), 0)` }).from(cassavaReceipts).limit(1);
-	const [cassavaOut] = await db.select({ total: sql<string>`COALESCE(SUM(cassava_used_kg::numeric), 0)` }).from(productionEntries).limit(1);
+	const [cassavaIn] = await db.select({ total: sql<string>`COALESCE(SUM(final_weight::numeric), 0)` }).from(cassavaReceipts).where(isNull(cassavaReceipts.deletedAt)).limit(1);
+	const [cassavaOut] = await db.select({ total: sql<string>`COALESCE(SUM(cassava_used_kg::numeric), 0)` }).from(productionEntries).where(isNull(productionEntries.deletedAt)).limit(1);
 	const cassavaStock = Math.max(0, Number(cassavaIn?.total || 0) - Number(cassavaOut?.total || 0));
 
 	return { todaySummary, products: allProducts.items, query, todayItems: todayItems.items, cassavaStock };
@@ -23,8 +24,18 @@ export const load: PageServerLoad = async (event) => {
 export const actions: Actions = {
 	create: async (event) => {
 		const formData = await event.request.formData();
+		let productId = formData.get('productId')?.toString() ?? '';
+
+		if (!productId) {
+			let [firstProd] = await db.select({ id: products.id }).from(products).where(and(eq(products.isActive, true), isNull(products.deletedAt))).limit(1);
+			if (!firstProd) {
+				[firstProd] = await db.select({ id: products.id }).from(products).where(isNull(products.deletedAt)).limit(1);
+			}
+			productId = firstProd?.id || '';
+		}
+
 		const input = {
-			productId: formData.get('productId')?.toString() ?? '',
+			productId,
 			quantityKg: Number(formData.get('quantityKg')?.toString() ?? '0'),
 			cassavaUsedKg: Number(formData.get('cassavaUsedKg') ?? '0'),
 			yieldPercentage: formData.get('yieldPercentage') ? Number(formData.get('yieldPercentage')) : undefined,
@@ -48,18 +59,35 @@ export const actions: Actions = {
 		return { success: true, message: 'Produksi hari ini dikonfirmasi' };
 	},
 
+	update: async (event) => {
+		const formData = await event.request.formData();
+		const id = formData.get('id')?.toString() ?? '';
+		if (!id) return fail(400, { message: 'ID tidak valid' });
+
+		const input = {
+			productId: formData.get('productId')?.toString() || undefined,
+			quantityKg: formData.get('quantityKg') ? Number(formData.get('quantityKg')) : undefined,
+			cassavaUsedKg: formData.get('cassavaUsedKg') ? Number(formData.get('cassavaUsedKg')) : undefined,
+			yieldPercentage: formData.get('yieldPercentage') ? Number(formData.get('yieldPercentage')) : undefined,
+			productionDate: formData.get('productionDate')?.toString() || undefined,
+			notes: formData.get('notes')?.toString() ?? ''
+		};
+
+		try {
+			await productionService.updateProduction(id, input, event.locals.user?.id);
+		} catch (e) {
+			return fail(400, { message: e instanceof Error ? e.message : 'Gagal memperbarui produksi' });
+		}
+		return { success: true, message: 'Produksi berhasil diperbarui' };
+	},
+
 	delete: async (event) => {
 		const formData = await event.request.formData();
 		const id = formData.get('id')?.toString() ?? '';
 		if (!id) return fail(400, { message: 'ID tidak valid' });
 
-		const [entry] = await db.select().from(productionEntries).where(eq(productionEntries.id, id)).limit(1);
-		if (entry?.status === 'CONFIRMED') {
-			return fail(400, { message: 'Batch yang sudah CONFIRMED tidak bisa dihapus langsung.' });
-		}
-
 		try {
-			await productionService.deleteProduction(id);
+			await productionService.deleteProduction(id, event.locals.user?.id);
 		} catch (e) {
 			return fail(400, { message: e instanceof Error ? e.message : 'Gagal menghapus' });
 		}

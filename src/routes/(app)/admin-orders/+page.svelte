@@ -8,9 +8,14 @@
 
 	let { data, form } = $props();
 
-	let searchQuery = $state((data.search as string) || '');
-	let statusFilter = $state((data.status as string) || 'all');
-	let limitValue = $state(data.limit ?? 25);
+	let searchQuery = $state('');
+	let statusFilter = $state('all');
+	let limitValue = $state(25);
+	$effect(() => {
+		searchQuery = (data.search as string) || '';
+		statusFilter = (data.status as string) || 'all';
+		limitValue = data.limit ?? 25;
+	});
 	let debounceTimer: ReturnType<typeof setTimeout> | undefined;
 
 	// Offline order modal state
@@ -49,6 +54,16 @@
 		showCreateModal = false;
 	}
 
+	function handleOfflineName(e: Event) {
+		const target = e.target as HTMLInputElement;
+		customerName = target.value.replace(/[^a-zA-Z\s.,'-]/g, '');
+	}
+
+	function handleOfflinePhone(e: Event) {
+		const target = e.target as HTMLInputElement;
+		customerPhone = target.value.replace(/[^0-9+]/g, '');
+	}
+
 	function addItem() {
 		const firstProduct = activeProducts.length > 0 ? activeProducts[0].id : '';
 		items = [...items, { productId: firstProduct, quantity: 1 }];
@@ -64,9 +79,6 @@
 		PENDING: 'Menunggu Persetujuan',
 		APPROVED: 'Menunggu Pembayaran',
 		PAID: 'Lunas',
-		PROCESSING: 'Diproses',
-		SHIPPED: 'Dikirim',
-		COMPLETED: 'Selesai',
 		CANCELLED: 'Dibatalkan'
 	};
 
@@ -74,9 +86,6 @@
 		PENDING: 'text-warning bg-warning/10',
 		APPROVED: 'text-info bg-info/10',
 		PAID: 'text-primary bg-primary/10',
-		PROCESSING: 'text-secondary-foreground bg-secondary',
-		SHIPPED: 'text-info bg-info/10',
-		COMPLETED: 'text-primary bg-primary/10',
 		CANCELLED: 'text-destructive bg-destructive/10'
 	};
 
@@ -84,9 +93,6 @@
 		PENDING: Clock,
 		APPROVED: Clock,
 		PAID: CheckCircle2,
-		PROCESSING: Clock,
-		SHIPPED: CheckCircle2,
-		COMPLETED: CheckCircle2,
 		CANCELLED: X
 	};
 
@@ -284,15 +290,14 @@
 		</div>
 
 		<!-- Pagination -->
-		{#if data.totalPages > 1}
+		{#if data.hasNext || data.hasPrev}
 			<div class="flex items-center justify-between pt-3">
 				<span class="text-xs text-muted-foreground">
-					Menampilkan {(data.page - 1) * data.limit + 1}–{Math.min(data.page * data.limit, data.total)} dari {data.total} pesanan
+					Total {data.total} pesanan
 				</span>
 				<div class="flex items-center gap-1.5">
-					<Button variant="outline" size="default" disabled={data.page <= 1} href={data.page > 1 ? `?page=${data.page - 1}${data.search ? `&search=${data.search}` : ''}` : undefined}>Sebelumnya</Button>
-					<span class="text-xs text-muted-foreground">Halaman {data.page} dari {data.totalPages}</span>
-					<Button variant="outline" size="default" disabled={data.page >= data.totalPages} href={data.page < data.totalPages ? `?page=${data.page + 1}${data.search ? `&search=${data.search}` : ''}` : undefined}>Berikutnya</Button>
+					<Button variant="outline" size="sm" disabled={!data.hasPrev} onclick={goPrev}>Sebelumnya</Button>
+					<Button variant="outline" size="sm" disabled={!data.hasNext} onclick={goNext}>Berikutnya</Button>
 				</div>
 			</div>
 		{/if}
@@ -349,6 +354,7 @@
 							name="customerName"
 							placeholder="Contoh: Bpk. Joko / Toko Berkah"
 							bind:value={customerName}
+							oninput={handleOfflineName}
 							required
 							disabled={creating}
 						/>
@@ -358,8 +364,10 @@
 						<Input
 							id="offline-customer-phone"
 							name="customerPhone"
+							type="tel"
 							placeholder="08123456789"
 							bind:value={customerPhone}
+							oninput={handleOfflinePhone}
 							disabled={creating}
 						/>
 					</div>

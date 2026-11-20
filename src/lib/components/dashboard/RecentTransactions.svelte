@@ -50,9 +50,9 @@
 				<button onclick={() => handleClick(t)} class="flex w-full items-center justify-between rounded-lg p-2 text-left transition-colors hover:bg-muted/50">
 					<div class="min-w-0 flex-1">
 						<div class="flex items-center gap-1.5">
-							<p class="truncate text-sm font-medium">{t.customerName || 'Anonim'}</p>
+							<p class="truncate text-sm font-medium">{t.customerName || (t.source === 'sale' ? 'Penimbangan Tepung' : 'Anonim')}</p>
 							{#if t.source === 'sale'}
-								<span class="shrink-0 rounded-sm bg-emerald-100 px-1.5 py-0 text-[10px] font-semibold text-emerald-700">Penjualan</span>
+								<span class="shrink-0 rounded-sm bg-emerald-100 px-1.5 py-0 text-[10px] font-semibold text-emerald-700">Penimbangan Tepung</span>
 							{:else}
 								<span class="shrink-0 rounded-sm bg-blue-100 px-1.5 py-0 text-[10px] font-semibold text-blue-700">Pesanan</span>
 							{/if}

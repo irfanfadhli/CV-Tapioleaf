@@ -11,9 +11,10 @@ export async function createReceipt(input: {
 }, userId: string) {
 	const gross = Number(input.grossWeight);
 	const tara = Number(input.taraWeight);
-	const refr = Number(input.refraction);
+	const refrPercent = Number(input.refraction);
 	const net = gross - tara;
-	const finalW = net - refr;
+	const refrKg = net * (refrPercent / 100);
+	const finalW = Math.max(net - refrKg, 0);
 	const cost = finalW * Number(input.pricePerKg);
 
 	const [receipt] = await db.insert(cassavaReceipts).values({
@@ -24,7 +25,7 @@ export async function createReceipt(input: {
 		grossWeight: String(gross),
 		taraWeight: String(tara),
 		netWeight: String(net),
-		refraction: String(refr),
+		refraction: String(refrPercent),
 		finalWeight: String(finalW),
 		pricePerKg: String(input.pricePerKg),
 		totalCost: String(cost),
@@ -92,9 +93,10 @@ export async function updateReceipt(id: string, input: {
 }, userId: string) {
 	const gross = Number(input.grossWeight);
 	const tara = Number(input.taraWeight);
-	const refr = Number(input.refraction);
+	const refrPercent = Number(input.refraction);
 	const net = gross - tara;
-	const finalW = net - refr;
+	const refrKg = net * (refrPercent / 100);
+	const finalW = Math.max(net - refrKg, 0);
 	const cost = finalW * Number(input.pricePerKg);
 
 	const [receipt] = await db.update(cassavaReceipts).set({
@@ -105,7 +107,7 @@ export async function updateReceipt(id: string, input: {
 		grossWeight: String(gross),
 		taraWeight: String(tara),
 		netWeight: String(net),
-		refraction: String(refr),
+		refraction: String(refrPercent),
 		finalWeight: String(finalW),
 		pricePerKg: String(input.pricePerKg),
 		totalCost: String(cost),
@@ -136,7 +138,7 @@ export async function deleteReceipt(id: string) {
 export async function getSummary() {
 	const [result] = await db.select({
 		totalGross: sql<string>`COALESCE(SUM(gross_weight::numeric), 0)`,
-		totalRefraction: sql<string>`COALESCE(SUM(refraction::numeric), 0)`,
+		totalRefraction: sql<string>`COALESCE(AVG(refraction::numeric), 0)`,
 		totalFinal: sql<string>`COALESCE(SUM(final_weight::numeric), 0)`,
 		totalCost: sql<string>`COALESCE(SUM(total_cost::numeric), 0)`,
 		count: sql<number>`COUNT(*)`,

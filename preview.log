@@ -1,0 +1,10 @@
+
+> my-svelte-app@0.0.1 preview
+> vite preview
+
+[31merror when starting preview server:
+Error: Server files not found at C:\Users\asus\my-svelte-app\.svelte-kit\output\server, did you run `build` first?
+    at preview (file:///C:/Users/asus/my-svelte-app/node_modules/@sveltejs/kit/src/exports/vite/preview/index.js:35:9)
+    at BasicMinimalPluginContext.configurePreviewServer (file:///C:/Users/asus/my-svelte-app/node_modules/@sveltejs/kit/src/exports/vite/index.js:1140:11)
+    at preview (file:///C:/Users/asus/my-svelte-app/node_modules/vite/dist/node/chunks/node.js:33911:102)
+    at async CAC.<anonymous> (file:///C:/Users/asus/my-svelte-app/node_modules/vite/dist/node/cli.js:808:18)[39m

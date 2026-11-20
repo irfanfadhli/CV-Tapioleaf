@@ -3,24 +3,35 @@ import { z } from 'zod';
 export const saleStatusEnum = ['draft', 'confirmed', 'cancelled'] as const;
 
 export const createSaleSchema = z.object({
-	buyerName: z.string().min(1, 'Nama pembeli wajib diisi'),
-	buyerType: z.enum(['pengepul', 'umkm'], { message: 'Jenis pembeli wajib dipilih' }),
-	productId: z.string().min(1, 'Produk wajib dipilih'),
+	buyerName: z.string().optional().default('Pelanggan'),
+	buyerPhone: z.string().optional(),
+	buyerAddress: z.string().optional(),
+	buyerType: z.enum(['pengepul', 'umkm']).optional().default('pengepul'),
+	weigherName: z.string().optional(),
+	weigherAddress: z.string().optional(),
+	weigherPhone: z.string().optional(),
+	productId: z.string().optional().default(''),
 	sackWeights: z.array(z.coerce.number().positive('Berat karung harus > 0')).min(1, 'Minimal 1 karung'),
 	taraPerSack: z.coerce.number().min(0, 'Tara tidak boleh negatif').default(2),
-	pricePerKg: z.coerce.number().positive('Harga per kg harus > 0'),
-	kuliFeePerSack: z.coerce.number().min(0, 'Biaya kuli tidak boleh negatif').default(3000),
+	pricePerKg: z.coerce.number().min(0, 'Harga per kg tidak boleh negatif').default(6000),
+	kuliFeePerSack: z.coerce.number().min(0, 'Biaya kuli tidak boleh negatif').default(3500),
 	saleDate: z.string().optional(),
-	status: z.enum(['draft', 'confirmed']).default('draft')
+	status: z.enum(['draft', 'confirmed']).default('draft'),
+	entryType: z.enum(['weighing', 'sale']).default('weighing')
 });
 
 export const updateSaleSchema = z.object({
-	buyerName: z.string().min(1, 'Nama pembeli wajib diisi').optional(),
+	buyerName: z.string().optional(),
+	buyerPhone: z.string().optional(),
+	buyerAddress: z.string().optional(),
 	buyerType: z.enum(['pengepul', 'umkm']).optional(),
-	productId: z.string().min(1, 'Produk wajib dipilih').optional(),
+	weigherName: z.string().optional(),
+	weigherAddress: z.string().optional(),
+	weigherPhone: z.string().optional(),
+	productId: z.string().optional(),
 	sackWeights: z.array(z.coerce.number().positive('Berat karung harus > 0')).min(1, 'Minimal 1 karung').optional(),
 	taraPerSack: z.coerce.number().min(0).optional(),
-	pricePerKg: z.coerce.number().positive().optional(),
+	pricePerKg: z.coerce.number().min(0).optional(),
 	kuliFeePerSack: z.coerce.number().min(0).optional(),
 	saleDate: z.string().optional()
 });

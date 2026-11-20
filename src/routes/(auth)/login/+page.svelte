@@ -2,8 +2,13 @@
 	import { Button } from '$lib/components/ui/button';
 	import { toast } from 'svelte-sonner';
 	import { ArrowLeft, ShieldCheck, Loader2 } from '@lucide/svelte';
+	import { page } from '$app/stores';
 
 	let loading = $state(false);
+
+	// Jika dari klik produk (checkout=1), redirect balik ke / dengan flag checkout
+	const isCheckoutFlow = $derived($page.url.searchParams.get('checkout') === '1');
+	const callbackURL = $derived(isCheckoutFlow ? '/?checkout=1' : '/account');
 
 	async function signInGoogle() {
 		if (loading) return;
@@ -12,7 +17,7 @@
 			const res = await fetch('/api/auth/sign-in/social', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ provider: 'google', callbackURL: '/account', disableRedirect: true })
+				body: JSON.stringify({ provider: 'google', callbackURL: callbackURL, disableRedirect: true })
 			});
 			const data = await res.json();
 			if (data.url) {
@@ -51,9 +56,15 @@
 				</picture>
 			</div>
 			<h1 class="text-2xl font-bold tracking-tight text-foreground">CV TapioLeaf</h1>
-			<p class="mt-1 text-xs sm:text-sm text-muted-foreground">
-				Masuk untuk berbelanja, kelola pesanan & pantau transaksi
-			</p>
+			{#if isCheckoutFlow}
+				<p class="mt-1 text-xs sm:text-sm text-muted-foreground">
+					Masuk untuk melanjutkan pemesanan produk
+				</p>
+			{:else}
+				<p class="mt-1 text-xs sm:text-sm text-muted-foreground">
+					Masuk untuk berbelanja, kelola pesanan & pantau transaksi
+				</p>
+			{/if}
 		</div>
 
 		<!-- Action Section -->

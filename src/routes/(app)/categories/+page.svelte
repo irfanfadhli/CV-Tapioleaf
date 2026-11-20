@@ -20,7 +20,10 @@
 	});
 
 	let searchRef: HTMLInputElement | undefined;
-	let searchQuery = $state(data.search || '');
+	let searchQuery = $state('');
+	$effect(() => {
+		searchQuery = data.search || '';
+	});
 	let debounceTimer: ReturnType<typeof setTimeout> | undefined;
 
 	afterNavigate(() => {

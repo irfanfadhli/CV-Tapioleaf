@@ -10,7 +10,6 @@
 	let { data } = $props();
 
 	let showModal = $state(false);
-	let showSupplierModal = $state(false);
 	let deleteTargetId = $state<string | null>(null);
 	let receiptDate = $state(new Date().toISOString().slice(0, 10));
 	let supplierId = $state('');
@@ -25,8 +24,20 @@
 	let editTarget = $state<any>(null);
 
 	let netWeight = $derived(Math.max(grossWeight - taraWeight, 0));
-	let finalWeight = $derived(Math.max(netWeight - refraction, 0));
+	let refractionPercent = $state(0);
+	let refractionKg = $derived(netWeight * (refractionPercent / 100));
+	let finalWeight = $derived(Math.max(netWeight - refractionKg, 0));
 	let totalCost = $derived(finalWeight * pricePerKg);
+
+	// Edit modal state
+	let editGross = $state(0);
+	let editTara = $state(0);
+	let editRefraction = $state(0);
+	let editPrice = $state(0);
+	let editNet = $derived(Math.max(editGross - editTara, 0));
+	let editRefractionKg = $derived(editNet * (editRefraction / 100));
+	let editFinal = $derived(Math.max(editNet - editRefractionKg, 0));
+	let editTotalCost = $derived(editFinal * editPrice);
 </script>
 
 <svelte:head>
@@ -40,7 +51,6 @@
 			<h1 class="text-xl font-bold md:text-2xl">Penerimaan Singkong</h1>
 		</div>
 		<div class="flex items-center gap-2">
-			<Button onclick={() => showSupplierModal = true} variant="outline" size="sm" class="md:default"><Plus size={16} class="mr-1" /> Supplier</Button>
 			<Button onclick={() => showModal = true} size="sm" class="md:default"><Plus size={16} class="mr-1" /> Tambah Penerimaan</Button>
 		</div>
 	</div>
@@ -53,7 +63,7 @@
 		</div>
 		<div class="rounded-xl border bg-card p-4 shadow-sm">
 			<p class="text-xs font-medium text-muted-foreground">Total Refraksi</p>
-			<p class="text-xl font-bold text-warning">{data.summary.totalRefraction.toLocaleString('id-ID')} kg</p>
+			<p class="text-xl font-bold text-warning">{data.summary.totalRefraction.toLocaleString('id-ID', { maximumFractionDigits: 1 })}%</p>
 		</div>
 		<div class="rounded-xl border bg-card p-4 shadow-sm">
 			<p class="text-xs font-medium text-muted-foreground">Total Final</p>
@@ -77,7 +87,7 @@
 						<th class="hidden md:table-cell px-4 py-3 text-right font-medium text-muted-foreground">Gross</th>
 						<th class="hidden md:table-cell px-4 py-3 text-right font-medium text-muted-foreground">Tara</th>
 						<th class="hidden lg:table-cell px-4 py-3 text-right font-medium text-muted-foreground">Net</th>
-						<th class="hidden md:table-cell px-4 py-3 text-right font-medium text-muted-foreground">Refraksi</th>
+						<th class="hidden md:table-cell px-4 py-3 text-right font-medium text-muted-foreground">Refraksi (%)</th>
 						<th class="px-4 py-3 text-right font-medium text-muted-foreground">Final</th>
 						<th class="hidden sm:table-cell px-4 py-3 text-right font-medium text-muted-foreground">Harga/Kg</th>
 						<th class="px-4 py-3 text-right font-medium text-muted-foreground">Total</th>
@@ -93,13 +103,19 @@
 							<td class="hidden md:table-cell px-4 py-3 text-right">{r.grossWeight.toLocaleString('id-ID')}</td>
 							<td class="hidden md:table-cell px-4 py-3 text-right">{r.taraWeight.toLocaleString('id-ID')}</td>
 							<td class="hidden lg:table-cell px-4 py-3 text-right font-medium">{r.netWeight.toLocaleString('id-ID')}</td>
-							<td class="hidden md:table-cell px-4 py-3 text-right text-warning">{r.refraction.toLocaleString('id-ID')}</td>
+							<td class="hidden md:table-cell px-4 py-3 text-right text-warning">{r.refraction.toLocaleString('id-ID')}%</td>
 							<td class="px-4 py-3 text-right font-medium text-primary">{r.finalWeight.toLocaleString('id-ID')}</td>
 							<td class="hidden sm:table-cell px-4 py-3 text-right">Rp {r.pricePerKg.toLocaleString('id-ID')}</td>
 							<td class="px-4 py-3 text-right font-semibold">Rp {r.totalCost.toLocaleString('id-ID')}</td>
 							<td class="px-4 py-3 text-center">
 								<div class="flex items-center justify-center gap-1">
-									<Button variant="ghost" size="sm" onclick={() => editTarget = r}><Pencil size={14} /></Button>
+									<Button variant="ghost" size="sm" onclick={() => {
+										editTarget = r;
+										editGross = r.grossWeight;
+										editTara = r.taraWeight;
+										editRefraction = r.refraction;
+										editPrice = r.pricePerKg;
+									}}><Pencil size={14} /></Button>
 									<Button variant="ghost" size="sm" type="button" onclick={() => deleteTargetId = r.id} class="text-destructive hover:text-destructive" aria-label="Hapus"><Trash2 size={14} /></Button>
 								</div>
 							</td>
@@ -166,8 +182,8 @@
 					</div>
 					<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
 						<div class="grid gap-2">
-							<label for="cs-refraction" class="text-sm font-medium">Refraksi (kg) *</label>
-							<Input id="cs-refraction" name="refraction" type="number" step="0.01" bind:value={refraction} required class="text-[16px]" inputmode="decimal" />
+							<label for="cs-refraction" class="text-sm font-medium">Refraksi (%) *</label>
+							<Input id="cs-refraction" name="refraction" type="number" step="0.01" min="0" max="100" bind:value={refractionPercent} required placeholder="Contoh: 5" class="text-[16px]" inputmode="decimal" />
 						</div>
 						<div class="grid gap-2">
 							<label for="cs-price-per-kg" class="text-sm font-medium">Harga/Kg (Rp) *</label>
@@ -181,6 +197,7 @@
 					<!-- Live Calculation -->
 					<div class="rounded-lg border bg-primary/5 p-4 text-sm space-y-1">
 						<p>Net Weight: <strong>{netWeight.toFixed(2)} kg</strong> (gross - tara)</p>
+						<p>Potongan Refraksi ({refractionPercent || 0}%): <strong>{refractionKg.toFixed(2)} kg</strong></p>
 						<p>Final Weight: <strong>{finalWeight.toFixed(2)} kg</strong> (net - refraksi)</p>
 						<p class="text-lg font-bold text-primary">Total Biaya: Rp {totalCost.toLocaleString('id-ID')}</p>
 					</div>
@@ -233,63 +250,38 @@
 					<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
 						<div class="grid gap-2">
 							<label for="ed-gross" class="text-sm font-medium">Gross Weight (kg) *</label>
-							<Input id="ed-gross" name="grossWeight" type="number" step="0.01" value={editTarget?.grossWeight || 0} required class="text-[16px]" inputmode="decimal" />
+							<Input id="ed-gross" name="grossWeight" type="number" step="0.01" bind:value={editGross} required class="text-[16px]" inputmode="decimal" />
 						</div>
 						<div class="grid gap-2">
 							<label for="ed-tara" class="text-sm font-medium">Tara Weight (kg) *</label>
-							<Input id="ed-tara" name="taraWeight" type="number" step="0.01" value={editTarget?.taraWeight || 0} required class="text-[16px]" inputmode="decimal" />
+							<Input id="ed-tara" name="taraWeight" type="number" step="0.01" bind:value={editTara} required class="text-[16px]" inputmode="decimal" />
 						</div>
 					</div>
 					<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
 						<div class="grid gap-2">
-							<label for="ed-refr" class="text-sm font-medium">Refraksi (kg) *</label>
-							<Input id="ed-refr" name="refraction" type="number" step="0.01" value={editTarget?.refraction || 0} required class="text-[16px]" inputmode="decimal" />
+							<label for="ed-refr" class="text-sm font-medium">Refraksi (%) *</label>
+							<Input id="ed-refr" name="refraction" type="number" step="0.01" min="0" max="100" bind:value={editRefraction} required class="text-[16px]" inputmode="decimal" />
 						</div>
 						<div class="grid gap-2">
 							<label for="ed-price" class="text-sm font-medium">Harga/Kg (Rp) *</label>
-							<Input id="ed-price" name="pricePerKg" type="number" step="50" value={editTarget?.pricePerKg || 0} required class="text-[16px]" inputmode="decimal" />
+							<Input id="ed-price" name="pricePerKg" type="number" step="50" bind:value={editPrice} required class="text-[16px]" inputmode="decimal" />
 						</div>
 					</div>
 					<div class="grid gap-2">
 						<label for="ed-notes" class="text-sm font-medium">Keterangan</label>
 						<textarea id="ed-notes" name="notes" class="h-11 rounded-lg border bg-background px-3 py-2.5 text-[16px]" rows="2">{editTarget?.notes || ''}</textarea>
 					</div>
+					<!-- Live Calculation Edit -->
+					<div class="rounded-lg border bg-primary/5 p-4 text-sm space-y-1">
+						<p>Net Weight: <strong>{editNet.toFixed(2)} kg</strong> (gross - tara)</p>
+						<p>Potongan Refraksi ({editRefraction || 0}%): <strong>{editRefractionKg.toFixed(2)} kg</strong></p>
+						<p>Final Weight: <strong>{editFinal.toFixed(2)} kg</strong> (net - refraksi)</p>
+						<p class="text-lg font-bold text-primary">Total Biaya: Rp {editTotalCost.toLocaleString('id-ID')}</p>
+					</div>
 				</div>
 				<div class="sticky bottom-0 flex justify-end gap-3 border-t bg-popover px-4 py-4 sm:px-0 sm:pb-0 sm:pt-4"><Button type="button" variant="outline" onclick={() => editTarget = null}>Batal</Button><Button type="submit">Simpan</Button></div>
 			</form>
 		</div>
-	</DialogContent>
-</Dialog>
-
-<!-- Add Supplier Modal -->
-<Dialog open={showSupplierModal} onOpenChange={(o) => { if (!o) showSupplierModal = false; }}>
-	<DialogContent class="sm:max-w-sm">
-		<DialogHeader>
-			<DialogTitle>Tambah Supplier</DialogTitle>
-			<DialogDescription>Tambahkan supplier singkong baru</DialogDescription>
-		</DialogHeader>
-		<form method="post" action="?/addSupplier" use:enhance={() => {
-			return async ({ result }) => {
-				if (result.type === 'success') { window.location.reload(); }
-				else if (result.type === 'failure') { const msg = (result.data as any)?.message; if (msg) toast.error(msg); }
-			};
-		}}>
-			<div class="grid gap-4 py-4">
-				<div class="grid gap-2">
-					<label for="sup-name" class="text-sm font-medium">Nama Supplier *</label>
-					<Input id="sup-name" name="name" required placeholder="Nama supplier" />
-				</div>
-				<div class="grid gap-2">
-					<label for="sup-phone" class="text-sm font-medium">Telepon</label>
-					<Input id="sup-phone" name="phone" placeholder="Opsional" />
-				</div>
-				<div class="grid gap-2">
-					<label for="sup-addr" class="text-sm font-medium">Alamat</label>
-					<textarea id="sup-addr" name="address" class="rounded-lg border bg-background px-3 py-2 text-sm" rows="2" placeholder="Opsional"></textarea>
-				</div>
-			</div>
-			<DialogFooter><Button type="submit">Simpan</Button></DialogFooter>
-		</form>
 	</DialogContent>
 </Dialog>
 
