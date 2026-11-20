@@ -2,7 +2,7 @@
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
 	import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '$lib/components/ui/dialog';
-	import { Plus, Loader2, CheckCircle2, Factory, Trash2, AlertTriangle } from '@lucide/svelte';
+	import { Plus, Loader2, CheckCircle2, Factory, Trash2, Pencil, AlertTriangle } from '@lucide/svelte';
 	import { toast } from 'svelte-sonner';
 	import { enhance } from '$app/forms';
 	import { invalidateAll } from '$app/navigation';
@@ -10,14 +10,53 @@
 	let { data } = $props();
 
 	let showModal = $state(false);
+	let editTarget = $state<any>(null);
 	let deleteTargetId = $state<string | null>(null);
-	let quantityKg = $state('');
+	let quantityInput = $state('');
+	let cassavaInput = $state('');
 	let productionDate = $state(new Date().toISOString().slice(0, 10));
 	let notes = $state('');
-	let showHistory = $state(data.todaySummary.confirmedCount > 0);
-	let cassavaInput = $state(0);
-	let yieldInput = $state(0);
-	let flourResult = $derived(cassavaInput * (yieldInput / 100));
+	let showHistory = $state(false);
+	$effect(() => {
+		showHistory = (data.todaySummary?.confirmedCount ?? 0) > 0;
+	});
+
+	// Edit form state
+	let editProductId = $state('');
+	let editQuantity = $state('');
+	let editCassava = $state('');
+	let editDate = $state('');
+	let editNotes = $state('');
+
+	let editAutoYield = $derived.by(() => {
+		const qty = Number(editQuantity);
+		const cas = Number(editCassava);
+		if (qty > 0 && cas > 0) {
+			const calculated = (qty / cas) * 100;
+			return Math.round(calculated * 10) / 10;
+		}
+		return 0;
+	});
+
+	function openEditModal(item: any) {
+		editTarget = item;
+		editProductId = item.productId || '';
+		editQuantity = item.quantityKg ? String(item.quantityKg) : '';
+		editCassava = item.cassavaUsedKg ? String(item.cassavaUsedKg) : '';
+		editDate = item.productionDate ? new Date(item.productionDate).toISOString().slice(0, 10) : '';
+		editNotes = item.notes || '';
+	}
+
+	// Yield dihitung otomatis: (Tepung Dihasilkan / Singkong Digunakan) * 100
+	let autoYield = $derived.by(() => {
+		const qty = Number(quantityInput);
+		const cas = Number(cassavaInput);
+		if (qty > 0 && cas > 0) {
+			const calculated = (qty / cas) * 100;
+			return Math.round(calculated * 10) / 10;
+		}
+		return 0;
+	});
 </script>
 
 <svelte:head>
@@ -77,9 +116,8 @@
 					<table class="w-full text-sm">
 						<thead class="bg-muted/50">
 							<tr>
-								<th class="px-4 py-3 text-left font-medium text-muted-foreground">Produk</th>
-								<th class="px-4 py-3 text-right font-medium text-muted-foreground">Tepung</th>
-								<th class="hidden sm:table-cell px-4 py-3 text-right font-medium text-muted-foreground">Singkong</th>
+								<th class="px-4 py-3 text-right font-medium text-muted-foreground">Hasil Tepung (kg)</th>
+								<th class="hidden sm:table-cell px-4 py-3 text-right font-medium text-muted-foreground">Singkong Diproses (kg)</th>
 								<th class="hidden md:table-cell px-4 py-3 text-right font-medium text-muted-foreground">Yield</th>
 								<th class="px-4 py-3 text-center font-medium text-muted-foreground">Status</th>
 								<th class="hidden lg:table-cell px-4 py-3 text-left font-medium text-muted-foreground">Keterangan</th>
@@ -89,12 +127,8 @@
 						<tbody>
 							{#each data.todayItems as item}
 								<tr class="border-t transition-colors hover:bg-muted/30">
-									<td class="px-4 py-3">
-										<div class="font-medium">{item.productName}</div>
-										<div class="text-xs text-muted-foreground">{item.productCode}</div>
-									</td>
-									<td class="px-4 py-3 text-right font-medium">{item.tapiocaFlourResult?.toLocaleString('id-ID') || '—'}</td>
-									<td class="hidden sm:table-cell px-4 py-3 text-right">{item.cassavaUsedKg?.toLocaleString('id-ID') || '—'}</td>
+									<td class="px-4 py-3 text-right font-semibold text-primary">{item.tapiocaFlourResult?.toLocaleString('id-ID') || item.quantityKg?.toLocaleString('id-ID') || '—'} kg</td>
+									<td class="hidden sm:table-cell px-4 py-3 text-right font-medium">{item.cassavaUsedKg?.toLocaleString('id-ID') || '—'} kg</td>
 									<td class="hidden md:table-cell px-4 py-3 text-right text-xs text-muted-foreground">{item.yieldPercentage ? `${item.yieldPercentage}%` : '—'}</td>
 									<td class="px-4 py-3 text-center">
 										{#if item.status === 'CONFIRMED'}
@@ -105,11 +139,18 @@
 									</td>
 									<td class="hidden lg:table-cell px-4 py-3 text-xs text-muted-foreground">{item.notes || '—'}</td>
 									<td class="px-4 py-3 text-center">
-										<Button variant="ghost" size="sm" type="button" onclick={() => deleteTargetId = item.id} class="text-destructive hover:text-destructive" aria-label="Hapus"><Trash2 size={14} /></Button>
+										<div class="flex items-center justify-center gap-1">
+											<Button variant="ghost" size="sm" type="button" onclick={() => openEditModal(item)} class="text-primary hover:text-primary" aria-label="Edit">
+												<Pencil size={14} />
+											</Button>
+											<Button variant="ghost" size="sm" type="button" onclick={() => deleteTargetId = item.id} class="text-destructive hover:text-destructive" aria-label="Hapus">
+												<Trash2 size={14} />
+											</Button>
+										</div>
 									</td>
 								</tr>
 							{:else}
-								<tr><td colspan="7" class="px-4 py-8 text-center text-sm text-muted-foreground">Belum ada produksi</td></tr>
+								<tr><td colspan="6" class="px-4 py-8 text-center text-sm text-muted-foreground">Belum ada produksi</td></tr>
 							{/each}
 						</tbody>
 					</table>
@@ -134,20 +175,21 @@
 			}} class="flex min-h-0 flex-1 flex-col">
 				<div class="flex-1 space-y-4 overflow-y-auto overflow-x-hidden px-4 py-4 sm:px-0">
 					<div class="grid gap-2">
-						<label for="prod-productId" class="text-sm font-medium">Produk *</label>
-						<select id="prod-productId" name="productId" class="h-9 rounded-md border border-input bg-transparent px-2.5 py-1 text-base" required>
-							<option value="">Pilih produk</option>
-							{#each data.products as p}
-								<option value={p.id}>{p.code} — {p.name}</option>
-							{/each}
-						</select>
-					</div>
-					<div class="grid gap-2">
-						<label for="prod-quantityKg" class="text-sm font-medium">Quantity (kg) *</label>
-						<Input id="prod-quantityKg" name="quantityKg" type="number" step="0.1" required placeholder="Contoh: 2500" class="text-[16px]" inputmode="decimal" />
+						<label for="prod-quantityKg" class="text-sm font-medium">Quantity / Hasil Tepung (kg) *</label>
+						<Input
+							id="prod-quantityKg"
+							name="quantityKg"
+							type="number"
+							step="0.1"
+							required
+							placeholder="Contoh: 2500"
+							bind:value={quantityInput}
+							class="text-[16px]"
+							inputmode="decimal"
+						/>
 					</div>
 					<div class="rounded-lg border bg-primary/5 p-3 text-sm">
-						<p class="font-medium text-primary">Stok Singkong: {Math.max(0, data.cassavaStock).toLocaleString('id-ID')} kg</p>
+						<p class="font-medium text-primary">Stok Singkong Tersedia: {Math.max(0, data.cassavaStock).toLocaleString('id-ID')} kg</p>
 						{#if Math.max(0, data.cassavaStock) <= 0}
 							<p class="mt-1 flex items-center gap-1 text-xs text-destructive"><AlertTriangle size={12} /> Stok singkong habis!</p>
 						{/if}
@@ -155,20 +197,33 @@
 					{#if Math.max(0, data.cassavaStock) > 0}
 					<div class="grid gap-2">
 						<label for="prod-cassava" class="text-sm font-medium">Singkong Digunakan (kg) *</label>
-						<Input id="prod-cassava" name="cassavaUsedKg" type="number" step="0.1" required placeholder="Berapa kg singkong diproses?" bind:value={cassavaInput} class="text-[16px]" inputmode="decimal" />
+						<Input
+							id="prod-cassava"
+							name="cassavaUsedKg"
+							type="number"
+							step="0.1"
+							required
+							placeholder="Berapa kg singkong diproses?"
+							bind:value={cassavaInput}
+							class="text-[16px]"
+							inputmode="decimal"
+						/>
 					</div>
 					{/if}
 					<div class="grid gap-2">
-						<label for="prod-yield" class="text-sm font-medium">Yield (%)</label>
-						<Input id="prod-yield" name="yieldPercentage" type="number" step="0.1" placeholder="Contoh: 25" bind:value={yieldInput} class="text-[16px]" inputmode="decimal" />
-						<p class="text-xs text-muted-foreground">Persentase tepung yang dihasilkan dari singkong</p>
+						<label for="prod-yield" class="text-sm font-medium">Yield / Rendemen (%)</label>
+						<div class="relative">
+							<Input
+								id="prod-yield"
+								type="text"
+								value={autoYield > 0 ? `${autoYield}% (Otomatis)` : '0% (Otomatis dihitung)'}
+								readonly
+								class="bg-muted/50 font-semibold text-foreground cursor-not-allowed"
+							/>
+							<input type="hidden" name="yieldPercentage" value={autoYield > 0 ? autoYield : ''} />
+						</div>
+						<p class="text-xs text-muted-foreground">Dihitung otomatis: (Hasil Tepung ÷ Singkong Digunakan) × 100%</p>
 					</div>
-					{#if flourResult > 0}
-					<div class="rounded-lg border bg-info/10 p-3 text-sm">
-						<p class="font-medium text-info">Hasil Tepung: {flourResult.toLocaleString('id-ID')} kg</p>
-						<p class="text-xs text-info">Hasil tepung tapioka dari singkong yang diproses</p>
-					</div>
-					{/if}
 					<div class="grid gap-2">
 						<label for="prod-productionDate" class="text-sm font-medium">Tanggal</label>
 						<Input id="prod-productionDate" name="productionDate" type="date" bind:value={productionDate} class="text-[16px]" />
@@ -206,5 +261,88 @@
 				<Button variant="destructive" type="submit">Hapus</Button>
 			</form>
 		</DialogFooter>
+	</DialogContent>
+</Dialog>
+
+<!-- Edit Production Modal -->
+<Dialog open={editTarget !== null} onOpenChange={(o) => { if (!o) editTarget = null; }}>
+	<DialogContent class="!p-0 sm:!p-6 w-full max-w-[calc(100%-2rem)] sm:max-w-lg overflow-hidden">
+		<div class="flex max-h-[90dvh] overflow-hidden flex-col">
+			<DialogHeader class="px-4 pt-4 pb-0 sm:px-0 sm:pt-0">
+				<DialogTitle>Edit Produksi</DialogTitle>
+				<DialogDescription>Perbarui data hasil produksi</DialogDescription>
+			</DialogHeader>
+			<form method="post" action="?/update" use:enhance={() => {
+				return async ({ result, update }) => {
+					update();
+					if (result.type === 'success') {
+						editTarget = null;
+						toast.success('Produksi berhasil diperbarui');
+						await invalidateAll();
+					} else if (result.type === 'failure') {
+						const msg = (result.data as any)?.message;
+						if (msg) toast.error(msg);
+					}
+				};
+			}} class="flex min-h-0 flex-1 flex-col">
+				<input type="hidden" name="id" value={editTarget?.id ?? ''} />
+				<div class="flex-1 space-y-4 overflow-y-auto overflow-x-hidden px-4 py-4 sm:px-0">
+					<div class="grid gap-2">
+						<label for="edit-quantityKg" class="text-sm font-medium">Quantity / Hasil Tepung (kg) *</label>
+						<Input
+							id="edit-quantityKg"
+							name="quantityKg"
+							type="number"
+							step="0.1"
+							required
+							placeholder="Contoh: 2500"
+							bind:value={editQuantity}
+							class="text-[16px]"
+							inputmode="decimal"
+						/>
+					</div>
+					<div class="grid gap-2">
+						<label for="edit-cassava" class="text-sm font-medium">Singkong Digunakan (kg) *</label>
+						<Input
+							id="edit-cassava"
+							name="cassavaUsedKg"
+							type="number"
+							step="0.1"
+							required
+							placeholder="Berapa kg singkong diproses?"
+							bind:value={editCassava}
+							class="text-[16px]"
+							inputmode="decimal"
+						/>
+					</div>
+					<div class="grid gap-2">
+						<label for="edit-yield" class="text-sm font-medium">Yield / Rendemen (%)</label>
+						<div class="relative">
+							<Input
+								id="edit-yield"
+								type="text"
+								value={editAutoYield > 0 ? `${editAutoYield}% (Otomatis)` : '0% (Otomatis dihitung)'}
+								readonly
+								class="bg-muted/50 font-semibold text-foreground cursor-not-allowed"
+							/>
+							<input type="hidden" name="yieldPercentage" value={editAutoYield > 0 ? editAutoYield : ''} />
+						</div>
+						<p class="text-xs text-muted-foreground">Dihitung otomatis: (Hasil Tepung ÷ Singkong Digunakan) × 100%</p>
+					</div>
+					<div class="grid gap-2">
+						<label for="edit-date" class="text-sm font-medium">Tanggal</label>
+						<Input id="edit-date" name="productionDate" type="date" bind:value={editDate} class="text-[16px]" />
+					</div>
+					<div class="grid gap-2">
+						<label for="edit-notes" class="text-sm font-medium">Keterangan</label>
+						<textarea id="edit-notes" name="notes" bind:value={editNotes} class="h-11 rounded-lg border bg-background px-3 py-2.5 text-[16px]" rows="2"></textarea>
+					</div>
+				</div>
+				<div class="sticky bottom-0 flex justify-end gap-3 border-t bg-popover px-4 py-4 sm:px-0 sm:pb-0 sm:pt-4">
+					<Button type="button" variant="outline" onclick={() => editTarget = null}>Batal</Button>
+					<Button type="submit">Simpan</Button>
+				</div>
+			</form>
+		</div>
 	</DialogContent>
 </Dialog>

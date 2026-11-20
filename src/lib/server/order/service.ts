@@ -9,22 +9,40 @@ import { createInvoice } from '../xendit/service';
 import type { CheckoutInput } from '../xendit/validation';
 
 export async function createOrder(input: CheckoutInput, userId: string | undefined) {
-	const prod = await db.select().from(products).where(and(eq(products.id, input.productId), isNull(products.deletedAt))).limit(1);
+	const prod = await db
+		.select()
+		.from(products)
+		.where(and(eq(products.id, input.productId), isNull(products.deletedAt)))
+		.limit(1);
 	if (!prod.length) throw new Error('Produk tidak ditemukan');
 
 	const p = prod[0];
-	const totalAmount = Number(p.price) * input.quantity;
-	if (isNaN(totalAmount) || totalAmount <= 0) throw new Error('Jumlah pesanan tidak valid');
+	const productSubtotal = Number(p.price) * input.quantity;
+	if (isNaN(productSubtotal) || productSubtotal <= 0) throw new Error('Jumlah pesanan tidak valid');
 
-	const [order] = await db.insert(orders).values({
-		userId,
-		totalAmount: String(totalAmount),
-		customerName: input.customerName,
-		customerPhone: input.customerPhone,
-		customerAddress: input.customerAddress,
-		notes: input.notes,
-		status: 'PENDING'
-	}).returning();
+	const shippingFee = Math.max(0, Number(input.shippingFee) || 0);
+	const totalAmount = productSubtotal + shippingFee;
+
+	// Simpan detail kurir di catatan jika ada
+	let orderNotes = input.notes || '';
+	if (input.shippingCourier) {
+		const courierInfo = `[Pengiriman: ${input.shippingCourier} ${input.shippingService || ''} - Ongkir: Rp ${shippingFee.toLocaleString('id-ID')}]`;
+		orderNotes = orderNotes ? `${courierInfo}\n${orderNotes}` : courierInfo;
+	}
+
+	const [order] = await db
+		.insert(orders)
+		.values({
+			userId,
+			totalAmount: String(totalAmount),
+			shippingFee: String(shippingFee),
+			customerName: input.customerName,
+			customerPhone: input.customerPhone,
+			customerAddress: input.customerAddress,
+			notes: orderNotes || null,
+			status: 'PENDING'
+		})
+		.returning();
 
 	await db.insert(orderItems).values({
 		orderId: order.id,
@@ -39,7 +57,11 @@ export async function createOrder(input: CheckoutInput, userId: string | undefin
 	return { orderId: order.id };
 }
 
-export async function approveOrder(orderId: string, requestOrigin: string) {
+export async function approveOrder(
+	orderId: string,
+	requestOrigin: string,
+	shippingFeeInput?: number
+) {
 	const [order] = await db.select().from(orders).where(eq(orders.id, orderId)).limit(1);
 	if (!order) throw new Error('Pesanan tidak ditemukan');
 
@@ -50,6 +72,20 @@ export async function approveOrder(orderId: string, requestOrigin: string) {
 	const items = await db.select().from(orderItems).where(eq(orderItems.orderId, orderId));
 	if (!items.length) throw new Error('Item pesanan kosong');
 
+	// Hitung subtotal produk
+	const productSubtotal = items.reduce(
+		(sum, item) => sum + Number(item.quantity) * Number(item.unitPrice),
+		0
+	);
+
+	// Tentukan ongkir (jika diinput gunakan nilai input, jika tidak gunakan nilai yang sudah ada)
+	const shippingFee =
+		shippingFeeInput !== undefined
+			? Math.max(0, Number(shippingFeeInput) || 0)
+			: Math.max(0, Number(order.shippingFee || 0));
+
+	const totalAmount = Math.round(productSubtotal + shippingFee);
+
 	const item = items[0];
 	const invoiceInput: CheckoutInput = {
 		productId: item.productId || '',
@@ -57,25 +93,31 @@ export async function approveOrder(orderId: string, requestOrigin: string) {
 		customerName: order.customerName || '',
 		customerPhone: order.customerPhone || '',
 		customerAddress: order.customerAddress || '',
-		notes: order.notes || undefined
+		notes: order.notes || undefined,
+		shippingFee: shippingFee
 	};
 
 	let invoiceUrl = '';
 	let invoiceId = '';
 	try {
-		const inv = await createInvoice(order.id, invoiceInput, Number(order.totalAmount), requestOrigin);
+		const inv = await createInvoice(order.id, invoiceInput, totalAmount, requestOrigin);
 		invoiceUrl = inv.invoiceUrl;
 		invoiceId = inv.invoiceId;
 	} catch (e) {
 		console.error('Xendit createInvoice error:', e);
 	}
 
-	await db.update(orders).set({
-		status: 'APPROVED',
-		xenditInvoiceId: invoiceId || null,
-		xenditInvoiceUrl: invoiceUrl || null,
-		updatedAt: new Date()
-	}).where(eq(orders.id, order.id));
+	await db
+		.update(orders)
+		.set({
+			status: 'APPROVED',
+			shippingFee: String(shippingFee),
+			totalAmount: String(totalAmount),
+			xenditInvoiceId: invoiceId || null,
+			xenditInvoiceUrl: invoiceUrl || null,
+			updatedAt: new Date()
+		})
+		.where(eq(orders.id, order.id));
 
 	// Create notification for customer when admin approves the order
 	if (order.userId) {
@@ -84,7 +126,7 @@ export async function approveOrder(orderId: string, requestOrigin: string) {
 			orderId: order.id,
 			type: 'order_approved',
 			message: `Pesanan #${order.id.slice(0, 8)} telah disetujui. Silakan lakukan pembayaran.`,
-			totalAmount: order.totalAmount,
+			totalAmount: String(totalAmount),
 			read: false
 		});
 	}
@@ -104,11 +146,24 @@ export type UserOrderWithItems = typeof orders.$inferSelect & {
 	items: OrderItemSummary[];
 };
 
-export async function getUserOrders(userId: string, page = 1, limit = 20): Promise<{ items: UserOrderWithItems[]; total: number; page: number; limit: number }> {
+export async function getUserOrders(
+	userId: string,
+	page = 1,
+	limit = 20
+): Promise<{ items: UserOrderWithItems[]; total: number; page: number; limit: number }> {
 	const where = eq(orders.userId, userId);
 	const offset = (page - 1) * limit;
-	const items = await db.select().from(orders).where(where).orderBy(desc(orders.createdAt)).limit(limit).offset(offset);
-	const [countResult] = await db.select({ count: sql<number>`count(*)` }).from(orders).where(where);
+	const items = await db
+		.select()
+		.from(orders)
+		.where(where)
+		.orderBy(desc(orders.createdAt))
+		.limit(limit)
+		.offset(offset);
+	const [countResult] = await db
+		.select({ count: sql<number>`count(*)` })
+		.from(orders)
+		.where(where);
 
 	const ordersWithItems: UserOrderWithItems[] = [];
 	for (const order of items) {
@@ -131,11 +186,27 @@ export async function getUserOrders(userId: string, page = 1, limit = 20): Promi
 	return { items: ordersWithItems, total: Number(countResult.count), page, limit };
 }
 
-export async function getUserPaidOrders(userId: string, page = 1, limit = 10): Promise<{ items: UserOrderWithItems[]; total: number; page: number; limit: number }> {
-	const where = and(eq(orders.userId, userId), inArray(orders.status, ['PAID', 'PROCESSING', 'SHIPPED', 'COMPLETED']));
+export async function getUserPaidOrders(
+	userId: string,
+	page = 1,
+	limit = 10
+): Promise<{ items: UserOrderWithItems[]; total: number; page: number; limit: number }> {
+	const where = and(
+		eq(orders.userId, userId),
+		inArray(orders.status, ['PAID', 'PROCESSING', 'SHIPPED', 'COMPLETED'])
+	);
 	const offset = (page - 1) * limit;
-	const items = await db.select().from(orders).where(where).orderBy(desc(orders.createdAt)).limit(limit).offset(offset);
-	const [countResult] = await db.select({ count: sql<number>`count(*)` }).from(orders).where(where);
+	const items = await db
+		.select()
+		.from(orders)
+		.where(where)
+		.orderBy(desc(orders.createdAt))
+		.limit(limit)
+		.offset(offset);
+	const [countResult] = await db
+		.select({ count: sql<number>`count(*)` })
+		.from(orders)
+		.where(where);
 
 	const ordersWithItems: UserOrderWithItems[] = [];
 	for (const order of items) {
@@ -161,10 +232,9 @@ export async function getUserPaidOrders(userId: string, page = 1, limit = 10): P
 function buildOrderConditions(search?: string, status?: string): SQL<unknown>[] {
 	const conditions: SQL<unknown>[] = [];
 	if (search) {
-		conditions.push(or(
-			ilike(orders.customerName, `%${search}%`),
-			ilike(orders.id, `%${search}%`)
-		) as SQL<unknown>);
+		conditions.push(
+			or(ilike(orders.customerName, `%${search}%`), ilike(orders.id, `%${search}%`)) as SQL<unknown>
+		);
 	}
 	if (status && status !== 'all') {
 		conditions.push(eq(orders.status, status as never));
@@ -199,8 +269,11 @@ const ORDER_SELECT = {
 	userId: orders.userId,
 	status: orders.status,
 	totalAmount: orders.totalAmount,
+	shippingFee: orders.shippingFee,
 	customerName: orders.customerName,
 	customerPhone: orders.customerPhone,
+	cancelledBy: orders.cancelledBy,
+	cancellationReason: orders.cancellationReason,
 	createdAt: orders.createdAt
 };
 
@@ -261,7 +334,10 @@ export async function getAdminOrdersCursor(opts: {
 		.select(ORDER_SELECT)
 		.from(orders)
 		.where(where)
-		.orderBy(opts.dir === 'prev' ? asc(orders.createdAt) : desc(orders.createdAt), opts.dir === 'prev' ? asc(orders.id) : desc(orders.id))
+		.orderBy(
+			opts.dir === 'prev' ? asc(orders.createdAt) : desc(orders.createdAt),
+			opts.dir === 'prev' ? asc(orders.id) : desc(orders.id)
+		)
 		.limit(limit + 1);
 
 	const hasMore = items.length > limit;
@@ -272,7 +348,10 @@ export async function getAdminOrdersCursor(opts: {
 	}
 
 	// nextCursor: barang terakhir yang ditampilkan (untuk maju ke data lama)
-	const nextCursor = rows.length > 0 ? encodeCursor(rows[rows.length - 1].createdAt, rows[rows.length - 1].id) : null;
+	const nextCursor =
+		rows.length > 0
+			? encodeCursor(rows[rows.length - 1].createdAt, rows[rows.length - 1].id)
+			: null;
 	// prevCursor: barang pertama yang ditampilkan (untuk mundur ke data baru)
 	const prevCursor = rows.length > 0 ? encodeCursor(rows[0].createdAt, rows[0].id) : null;
 
@@ -289,7 +368,8 @@ export async function getAdminOrdersCursor(opts: {
 
 export async function getAllOrders(search?: string, page = 1, limit = 20) {
 	const offset = (page - 1) * limit;
-	const where = buildOrderConditions(search).length > 0 ? and(...buildOrderConditions(search)) : undefined;
+	const where =
+		buildOrderConditions(search).length > 0 ? and(...buildOrderConditions(search)) : undefined;
 
 	const items = await db
 		.select(ORDER_SELECT)
@@ -305,7 +385,10 @@ export async function getAllOrders(search?: string, page = 1, limit = 20) {
 export async function getOrderCount(search?: string, status?: string) {
 	const conditions = buildOrderConditions(search, status);
 	const where = conditions.length > 0 ? and(...conditions) : undefined;
-	const [countResult] = await db.select({ count: sql<number>`count(*)` }).from(orders).where(where);
+	const [countResult] = await db
+		.select({ count: sql<number>`count(*)` })
+		.from(orders)
+		.where(where);
 	return Number(countResult.count);
 }
 
@@ -339,7 +422,11 @@ export async function getOrder(id: string) {
 
 	let userEmail: string | null = null;
 	if (order.userId) {
-		const [u] = await db.select({ email: user.email }).from(user).where(eq(user.id, order.userId)).limit(1);
+		const [u] = await db
+			.select({ email: user.email })
+			.from(user)
+			.where(eq(user.id, order.userId))
+			.limit(1);
 		if (u) {
 			userEmail = u.email;
 		}
@@ -366,21 +453,30 @@ export async function handleXenditCallback(externalId: string, invoiceId: string
 			});
 		}
 
-		await db.update(orders).set({
-			status: 'PAID',
-			xenditInvoiceId: invoiceId,
-			paidAt: new Date(),
-			updatedAt: new Date()
-		}).where(eq(orders.id, externalId));
+		await db
+			.update(orders)
+			.set({
+				status: 'PAID',
+				xenditInvoiceId: invoiceId,
+				paidAt: new Date(),
+				updatedAt: new Date()
+			})
+			.where(eq(orders.id, externalId));
 	}
 }
 
-export async function cancelOrder(orderId: string, cancelledBy: 'ADMIN' | 'CUSTOMER' = 'CUSTOMER') {
+export async function cancelOrder(
+	orderId: string,
+	cancelledBy: 'ADMIN' | 'CUSTOMER' = 'CUSTOMER',
+	cancellationReason?: string
+) {
 	const [order] = await db.select().from(orders).where(eq(orders.id, orderId)).limit(1);
 	if (!order) throw new Error('Pesanan tidak ditemukan');
 
 	if (order.status !== 'PENDING' && order.status !== 'APPROVED') {
-		throw new Error('Hanya pesanan dengan status Menunggu Persetujuan atau Menunggu Pembayaran yang dapat dibatalkan');
+		throw new Error(
+			'Hanya pesanan dengan status Menunggu Persetujuan atau Menunggu Pembayaran yang dapat dibatalkan'
+		);
 	}
 
 	// Remove any stock deduction that happened at APPROVED stage (restore stock)
@@ -390,13 +486,16 @@ export async function cancelOrder(orderId: string, cancelledBy: 'ADMIN' | 'CUSTO
 		if (!item.productId) continue;
 
 		// Check if stock was deducted for this order (APPROVED stage)
-		const [deducted] = await db.select({ count: sql<number>`count(*)` })
+		const [deducted] = await db
+			.select({ count: sql<number>`count(*)` })
 			.from(stockMovements)
-			.where(and(
-				eq(stockMovements.referenceId, orderId),
-				eq(stockMovements.productId, item.productId),
-				eq(stockMovements.movementType, 'MANUAL_OUT')
-			));
+			.where(
+				and(
+					eq(stockMovements.referenceId, orderId),
+					eq(stockMovements.productId, item.productId),
+					eq(stockMovements.movementType, 'MANUAL_OUT')
+				)
+			);
 
 		if (Number(deducted?.count || 0) > 0) {
 			// Restore stock by adding the quantity back
@@ -410,20 +509,28 @@ export async function cancelOrder(orderId: string, cancelledBy: 'ADMIN' | 'CUSTO
 		}
 	}
 
-	// Update order status to CANCELLED with who cancelled
-	await db.update(orders).set({
-		status: 'CANCELLED',
-		cancelledBy,
-		updatedAt: new Date()
-	}).where(eq(orders.id, orderId));
+	const cleanReason = cancellationReason?.trim() || null;
+
+	// Update order status to CANCELLED with who cancelled and reason
+	await db
+		.update(orders)
+		.set({
+			status: 'CANCELLED',
+			cancelledBy,
+			cancellationReason: cleanReason,
+			updatedAt: new Date()
+		})
+		.where(eq(orders.id, orderId));
 
 	// Create notification for customer if cancelled by admin
 	if (cancelledBy === 'ADMIN' && order.userId) {
+		const reasonSnippet = cleanReason ? ` Alasan: ${cleanReason}` : '';
 		await db.insert(customerNotifications).values({
 			userId: order.userId,
 			orderId: order.id,
 			type: 'order_cancelled',
-			message: `Pesanan #${order.id.slice(0, 8)} telah dibatalkan.`,
+			message: `Pesanan #${order.id.slice(0, 8)} telah dibatalkan oleh Admin.${reasonSnippet}`,
+			cancellationReason: cleanReason,
 			totalAmount: order.totalAmount,
 			read: false
 		});

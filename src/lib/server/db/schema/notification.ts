@@ -10,6 +10,7 @@ export const customerNotifications = pgTable('customer_notifications', {
 	orderId: text('orderId').notNull(),
 	type: text('type', { enum: userNotificationTypes }).default('order_cancelled').notNull(),
 	message: text('message').notNull(),
+	cancellationReason: text('cancellation_reason'),
 	totalAmount: decimal('total_amount', { precision: 15, scale: 2 }),
 	read: boolean('read').default(false).notNull(),
 	createdAt: timestamp('createdAt', { withTimezone: true }).defaultNow().notNull()
@@ -24,6 +25,7 @@ export type CustomerNotification = {
 	orderId: string;
 	type: UserNotificationType;
 	message: string;
+	cancellationReason?: string | null;
 	totalAmount: number;
 	read: boolean;
 	createdAt: Date;

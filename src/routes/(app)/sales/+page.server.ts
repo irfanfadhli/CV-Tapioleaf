@@ -49,25 +49,56 @@ export const actions: Actions = {
 			return fail(400, { message: 'Format berat karung tidak valid' });
 		}
 
-		const buyerTypeRaw = formData.get('buyerType')?.toString();
-		const productIdRaw = formData.get('productId')?.toString();
-		if (buyerTypeRaw !== 'pengepul' && buyerTypeRaw !== 'umkm') {
-			return fail(400, { message: 'Jenis pembeli wajib dipilih' });
-		}
+		const buyerTypeRaw = formData.get('buyerType')?.toString() || 'pengepul';
+		let productIdRaw = formData.get('productId')?.toString() || '';
 		if (!productIdRaw) {
-			return fail(400, { message: 'Produk wajib dipilih' });
+			let [firstProduct] = await db
+				.select({ id: products.id })
+				.from(products)
+				.where(and(eq(products.isActive, true), isNull(products.deletedAt)))
+				.limit(1);
+			if (!firstProduct) {
+				[firstProduct] = await db
+					.select({ id: products.id })
+					.from(products)
+					.where(isNull(products.deletedAt))
+					.limit(1);
+			}
+			productIdRaw = firstProduct?.id || '';
 		}
 
+		const taraRaw = formData.get('taraPerSack')?.toString();
+		const totalTaraCalculatedRaw = formData.get('totalTaraCalculated')?.toString();
+		let totalTaraValue: number;
+		if (taraRaw && !isNaN(Number(taraRaw))) {
+			totalTaraValue = Number(taraRaw);
+		} else if (totalTaraCalculatedRaw && !isNaN(Number(totalTaraCalculatedRaw))) {
+			totalTaraValue = Number(totalTaraCalculatedRaw);
+		} else {
+			totalTaraValue = Math.ceil(sackWeights.length / 2);
+		}
+
+		const weigherNameVal = formData.get('weigherName')?.toString() || '';
+		const buyerNameVal = formData.get('buyerName')?.toString() || '';
+		const buyerPhoneVal = formData.get('buyerPhone')?.toString() || '';
+		const entryType = (formData.get('entryType')?.toString() || 'weighing') as 'weighing' | 'sale';
+		const directlyConfirm = formData.get('status')?.toString() === 'confirmed';
+
 		const input = {
-			buyerName: formData.get('buyerName')?.toString() ?? '',
+			buyerName: buyerNameVal || (entryType === 'weighing' ? (weigherNameVal || 'Hasil Penimbangan') : 'Pembeli'),
+			buyerPhone: buyerPhoneVal || undefined,
 			buyerType: buyerTypeRaw as 'pengepul' | 'umkm',
-			productId: productIdRaw,
+			weigherName: weigherNameVal || undefined,
+			weigherAddress: formData.get('weigherAddress')?.toString() || undefined,
+			weigherPhone: formData.get('weigherPhone')?.toString() || undefined,
+			productId: productIdRaw || '',
 			sackWeights,
-			taraPerSack: Number(formData.get('taraPerSack') ?? 2),
-			pricePerKg: Number(formData.get('pricePerKg') ?? 0),
-			kuliFeePerSack: Number(formData.get('kuliFeePerSack') ?? 3000),
+			taraPerSack: totalTaraValue,
+			pricePerKg: Number(formData.get('pricePerKg') ?? 6000),
+			kuliFeePerSack: Number(formData.get('kuliFeePerSack') ?? 3500),
 			saleDate: formData.get('saleDate')?.toString() || undefined,
-			status: (formData.get('status')?.toString() || 'draft') as 'draft' | 'confirmed'
+			status: directlyConfirm ? ('confirmed' as const) : ('draft' as const),
+			entryType
 		};
 
 		try {
@@ -76,6 +107,54 @@ export const actions: Actions = {
 			return fail(400, { message: e instanceof Error ? e.message : 'Gagal membuat transaksi' });
 		}
 		return { success: true, message: 'Transaksi berhasil dibuat' };
+	},
+
+	update: async (event) => {
+		const formData = await event.request.formData();
+		const saleId = formData.get('saleId')?.toString() ?? '';
+		if (!saleId) return fail(400, { message: 'ID transaksi tidak valid' });
+
+		const sackWeightsRaw = formData.get('sackWeights')?.toString() ?? '[]';
+		let sackWeights: number[];
+		try {
+			sackWeights = JSON.parse(sackWeightsRaw);
+		} catch {
+			return fail(400, { message: 'Format berat karung tidak valid' });
+		}
+
+		const taraRaw = formData.get('taraPerSack')?.toString();
+		const totalTaraCalculatedRaw = formData.get('totalTaraCalculated')?.toString();
+		let totalTaraValue: number;
+		if (taraRaw && !isNaN(Number(taraRaw))) {
+			totalTaraValue = Number(taraRaw);
+		} else if (totalTaraCalculatedRaw && !isNaN(Number(totalTaraCalculatedRaw))) {
+			totalTaraValue = Number(totalTaraCalculatedRaw);
+		} else {
+			totalTaraValue = Math.ceil(sackWeights.length / 2);
+		}
+
+		const weigherNameVal = formData.get('weigherName')?.toString() || '';
+		const buyerNameVal = formData.get('buyerName')?.toString() || '';
+		const buyerPhoneVal = formData.get('buyerPhone')?.toString() || '';
+
+		const input = {
+			buyerName: buyerNameVal || weigherNameVal || 'Pembeli',
+			buyerPhone: buyerPhoneVal || undefined,
+			weigherName: weigherNameVal || undefined,
+			weigherAddress: formData.get('weigherAddress')?.toString() || undefined,
+			weigherPhone: formData.get('weigherPhone')?.toString() || undefined,
+			sackWeights,
+			taraPerSack: totalTaraValue,
+			pricePerKg: Number(formData.get('pricePerKg') ?? 6000),
+			kuliFeePerSack: Number(formData.get('kuliFeePerSack') ?? 3500)
+		};
+
+		try {
+			await salesService.updateDraftSale(saleId, input, event.locals.user?.id);
+		} catch (e) {
+			return fail(400, { message: e instanceof Error ? e.message : 'Gagal memperbarui transaksi' });
+		}
+		return { success: true, message: 'Transaksi berhasil diperbarui' };
 	},
 
 	confirm: async (event) => {

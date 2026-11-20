@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 export const createProductionSchema = z.object({
-	productId: z.string().min(1, 'Produk wajib dipilih'),
+	productId: z.string().optional().default(''),
 	quantityKg: z.coerce.number().positive('Quantity harus lebih dari 0').max(10000, 'Maksimal 10.000 kg per entry'),
 	cassavaUsedKg: z.coerce.number().positive('Jumlah singkong digunakan harus lebih dari 0'),
 	yieldPercentage: z.coerce.number().min(0, 'Yield tidak boleh negatif').max(100, 'Yield maksimal 100%').optional(),

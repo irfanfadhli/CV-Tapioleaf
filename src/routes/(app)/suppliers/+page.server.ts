@@ -8,6 +8,21 @@ export const load: PageServerLoad = async (event) => {
 };
 
 export const actions: Actions = {
+	addSupplier: async (event) => {
+		const formData = await event.request.formData();
+		const name = formData.get('name')?.toString() ?? '';
+		if (!name) return fail(400, { message: 'Nama supplier wajib diisi' });
+		try {
+			await supplierService.createSupplier({
+				name,
+				phone: formData.get('phone')?.toString() || undefined,
+				address: formData.get('address')?.toString() || undefined
+			});
+		} catch (e) {
+			return fail(400, { message: e instanceof Error ? e.message : 'Gagal' });
+		}
+		return { success: true, message: 'Supplier ditambahkan' };
+	},
 	delete: async (event) => {
 		const formData = await event.request.formData();
 		const id = formData.get('id')?.toString() ?? '';

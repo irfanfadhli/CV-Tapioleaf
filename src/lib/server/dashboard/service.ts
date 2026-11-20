@@ -55,6 +55,19 @@ export type DashboardData = {
 	}>;
 	categoryDistribution: Array<{ category: string; total: number }>;
 	marginPerProduct: Array<{ name: string; revenue: number; cost: number; margin: number | null }>;
+	details: {
+		users: Array<{ id: string; name: string; email: string; role: string; createdAt: Date }>;
+		sales: Array<{ id: string; invoice: string; customerName: string; type: 'Online' | 'Offline'; amount: number; date: Date | null; status: string }>;
+		productions: Array<{ id: string; productName: string; quantityKg: number; cassavaUsedKg: number; yieldPct: number; date: Date; status: string }>;
+		stocks: Array<{ id: string; name: string; code: string; unit: string; currentStock: number; minimumStock: number; status: 'Normal' | 'Kritis' }>;
+		profit: {
+			totalRevenue: number;
+			totalCost: number;
+			grossProfit: number;
+			marginPct: number | null;
+			items: Array<{ name: string; soldQty: number; unit: string; revenue: number; cost: number; profit: number; marginPct: number | null }>;
+		};
+	};
 };
 
 export async function getDashboardData(periodStr: string): Promise<DashboardData> {
@@ -106,6 +119,8 @@ export async function getDashboardData(periodStr: string): Promise<DashboardData
 	const prevProfitTotal = marginPct !== null && prevSales.total > 0 ? Math.round(prevSales.total * marginPct / 100) : prevSales.total;
 	const profitChange = prevProfitTotal > 0 ? ((profitTotal - prevProfitTotal) / prevProfitTotal) * 100 : null;
 
+	const details = await getDashboardDetails(range.start, range.end);
+
 	return {
 		sales: { total: sales.total, count: sales.count, change: salesChange },
 		production: { totalKg: production.totalKg, targetKg, percentage, count: production.count },
@@ -118,6 +133,7 @@ export async function getDashboardData(periodStr: string): Promise<DashboardData
 		stockAlerts: criticalProducts,
 		categoryDistribution: categoryDist,
 		marginPerProduct: marginPerProductData,
+		details,
 	};
 }
 
@@ -269,6 +285,7 @@ async function getRecentTransactions() {
 	const saleResults = await db.select({
 		id: sales.id,
 		buyerName: sales.buyer_name,
+		weigherName: sales.weigher_name,
 		totalPayment: sales.total_payment,
 		status: sales.status,
 		createdAt: sales.created_at,
@@ -290,7 +307,7 @@ async function getRecentTransactions() {
 		})),
 		...saleResults.map(r => ({
 			id: r.id,
-			customerName: r.buyerName,
+			customerName: r.weigherName || r.buyerName || 'Penimbangan Tepung',
 			totalAmount: r.totalPayment || '0',
 			status: r.status === 'confirmed' ? 'PAID' : 'PENDING',
 			createdAt: r.createdAt,
@@ -373,4 +390,174 @@ async function getTotalUsers(): Promise<number> {
 		.from(user)
 		.limit(1);
 	return Number(result[0]?.count || 0);
+}
+
+async function getDashboardDetails(start: Date, end: Date) {
+	// 1. Registered Users
+	const usersData = await db.select({
+		id: user.id,
+		name: user.name,
+		email: user.email,
+		role: user.role,
+		createdAt: user.createdAt,
+	})
+		.from(user)
+		.orderBy(desc(user.createdAt))
+		.limit(100);
+
+	// 2. Sales in Period (Online PAID + Offline Confirmed)
+	const onlineOrders = await db.select({
+		id: orders.id,
+		customerName: orders.customerName,
+		totalAmount: orders.totalAmount,
+		createdAt: orders.createdAt,
+		status: orders.status,
+	})
+		.from(orders)
+		.where(and(eq(orders.status, 'PAID'), gte(orders.createdAt, start), lte(orders.createdAt, end)))
+		.orderBy(desc(orders.createdAt))
+		.limit(100);
+
+	const offlineSales = await db.select({
+		id: sales.id,
+		saleNumber: sales.sale_number,
+		buyerName: sales.buyer_name,
+		totalPayment: sales.total_payment,
+		saleDate: sales.sale_date,
+		status: sales.status,
+	})
+		.from(sales)
+		.where(and(eq(sales.status, 'confirmed'), gte(sales.sale_date, start), lte(sales.sale_date, end)))
+		.orderBy(desc(sales.sale_date))
+		.limit(100);
+
+	const salesList = [
+		...onlineOrders.map(o => ({
+			id: o.id,
+			invoice: `#${o.id.slice(0, 8)}`,
+			customerName: o.customerName || 'Pelanggan Online',
+			type: 'Online' as const,
+			amount: Number(o.totalAmount),
+			date: o.createdAt,
+			status: 'Lunas',
+		})),
+		...offlineSales.map(s => ({
+			id: s.id,
+			invoice: s.saleNumber || `#${s.id.slice(0, 8)}`,
+			customerName: s.buyerName || 'Pembeli Offline',
+			type: 'Offline' as const,
+			amount: Number(s.totalPayment || 0),
+			date: s.saleDate,
+			status: 'Terkonfirmasi',
+		})),
+	];
+	salesList.sort((a, b) => {
+		const timeA = a.date ? new Date(a.date).getTime() : 0;
+		const timeB = b.date ? new Date(b.date).getTime() : 0;
+		return timeB - timeA;
+	});
+
+	// 3. Productions in Period
+	const productionsData = await db.select({
+		id: productionEntries.id,
+		productName: products.name,
+		quantityKg: productionEntries.quantityKg,
+		cassavaUsedKg: productionEntries.cassavaUsedKg,
+		yieldPercentage: productionEntries.yieldPercentage,
+		productionDate: productionEntries.productionDate,
+		status: productionEntries.status,
+	})
+		.from(productionEntries)
+		.innerJoin(products, eq(products.id, productionEntries.productId))
+		.where(and(eq(productionEntries.status, 'CONFIRMED'), gte(productionEntries.productionDate, start), lte(productionEntries.productionDate, end)))
+		.orderBy(desc(productionEntries.productionDate))
+		.limit(100);
+
+	const productionsList = productionsData.map(p => ({
+		id: p.id,
+		productName: p.productName,
+		quantityKg: Number(p.quantityKg || 0),
+		cassavaUsedKg: Number(p.cassavaUsedKg || 0),
+		yieldPct: Number(p.yieldPercentage || 0),
+		date: p.productionDate,
+		status: p.status,
+	}));
+
+	// 4. Current Stock of all active products
+	const allProductsStock = await db.select({
+		id: products.id,
+		name: products.name,
+		code: products.code,
+		unit: products.unit,
+		minimumStock: products.minimumStock,
+		currentStock: sql<string>`COALESCE(SUM(${stockMovements.quantityChange}), 0)`,
+	})
+		.from(products)
+		.leftJoin(stockMovements, eq(stockMovements.productId, products.id))
+		.where(and(isNull(products.deletedAt), eq(products.isActive, true)))
+		.groupBy(products.id)
+		.orderBy(products.name);
+
+	const stocksList = allProductsStock.map(p => {
+		const cur = Number(p.currentStock);
+		return {
+			id: p.id,
+			name: p.name,
+			code: p.code,
+			unit: p.unit,
+			currentStock: cur,
+			minimumStock: p.minimumStock,
+			status: (cur < p.minimumStock ? 'Kritis' : 'Normal') as 'Normal' | 'Kritis',
+		};
+	});
+
+	// 5. Detailed Profit Analysis
+	const marginItems = await db.select({
+		name: products.name,
+		unit: products.unit,
+		soldQty: sql<string>`COALESCE(SUM(${orderItems.quantity}::numeric), 0)`,
+		revenue: sql<string>`COALESCE(SUM(${orderItems.quantity}::numeric * ${orderItems.unitPrice}::numeric), 0)`,
+		cost: sql<string>`COALESCE(SUM(${orderItems.quantity}::numeric * ${products.costPrice}::numeric), 0)`,
+	})
+		.from(orderItems)
+		.innerJoin(orders, eq(orders.id, orderItems.orderId))
+		.innerJoin(products, eq(products.id, orderItems.productId))
+		.where(and(eq(orders.status, 'PAID'), gte(orders.createdAt, start), lte(orders.createdAt, end), sql`${products.costPrice} IS NOT NULL`))
+		.groupBy(products.name, products.unit);
+
+	let totalRevenue = 0;
+	let totalCost = 0;
+	const profitItems = marginItems.map(m => {
+		const rev = Number(m.revenue);
+		const cst = Number(m.cost);
+		const prof = rev - cst;
+		totalRevenue += rev;
+		totalCost += cst;
+		return {
+			name: m.name,
+			soldQty: Number(m.soldQty),
+			unit: m.unit,
+			revenue: rev,
+			cost: cst,
+			profit: prof,
+			marginPct: rev > 0 ? Math.round((prof / rev) * 100 * 10) / 10 : null,
+		};
+	});
+
+	const grossProfit = totalRevenue - totalCost;
+	const overallMarginPct = totalRevenue > 0 ? Math.round((grossProfit / totalRevenue) * 100 * 10) / 10 : null;
+
+	return {
+		users: usersData,
+		sales: salesList,
+		productions: productionsList,
+		stocks: stocksList,
+		profit: {
+			totalRevenue,
+			totalCost,
+			grossProfit,
+			marginPct: overallMarginPct,
+			items: profitItems,
+		},
+	};
 }

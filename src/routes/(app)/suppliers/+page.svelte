@@ -1,6 +1,7 @@
 <script lang="ts">
-	import { Building2, Phone, MapPin, Trash2 } from '@lucide/svelte';
+	import { Building2, Phone, MapPin, Trash2, Plus } from '@lucide/svelte';
 	import { Button } from '$lib/components/ui/button';
+	import { Input } from '$lib/components/ui/input';
 	import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '$lib/components/ui/dialog';
 	import { toast } from 'svelte-sonner';
 	import { enhance } from '$app/forms';
@@ -8,6 +9,7 @@
 
 	let { data } = $props();
 
+	let showSupplierModal = $state(false);
 	let deleteTargetId = $state<string | null>(null);
 </script>
 
@@ -16,9 +18,14 @@
 </svelte:head>
 
 <div class="space-y-6">
-	<div class="flex items-center gap-3">
-		<Building2 size={24} class="text-primary" />
-		<h1 class="text-xl font-bold md:text-2xl">Daftar Supplier</h1>
+	<div class="flex flex-wrap items-center justify-between gap-2">
+		<div class="flex items-center gap-3">
+			<Building2 size={24} class="text-primary" />
+			<h1 class="text-xl font-bold md:text-2xl">Daftar Supplier</h1>
+		</div>
+		<Button onclick={() => showSupplierModal = true} size="sm" class="md:default">
+			<Plus size={16} class="mr-1" /> Supplier
+		</Button>
 	</div>
 
 	{#if data.suppliers.length === 0}
@@ -66,5 +73,47 @@
 				<Button variant="destructive" type="submit">Hapus</Button>
 			</form>
 		</DialogFooter>
+	</DialogContent>
+</Dialog>
+
+<!-- Add Supplier Modal -->
+<Dialog open={showSupplierModal} onOpenChange={(o) => { if (!o) showSupplierModal = false; }}>
+	<DialogContent class="sm:max-w-sm">
+		<DialogHeader>
+			<DialogTitle>Tambah Supplier</DialogTitle>
+			<DialogDescription>Tambahkan supplier singkong baru</DialogDescription>
+		</DialogHeader>
+		<form method="post" action="?/addSupplier" use:enhance={() => {
+			return async ({ result, update }) => {
+				update();
+				if (result.type === 'success') {
+					showSupplierModal = false;
+					toast.success('Supplier berhasil ditambahkan');
+					await invalidateAll();
+				} else if (result.type === 'failure') {
+					const msg = (result.data as any)?.message;
+					if (msg) toast.error(msg);
+				}
+			};
+		}}>
+			<div class="grid gap-4 py-4">
+				<div class="grid gap-2">
+					<label for="sup-name" class="text-sm font-medium">Nama Supplier *</label>
+					<Input id="sup-name" name="name" required placeholder="Nama supplier" />
+				</div>
+				<div class="grid gap-2">
+					<label for="sup-phone" class="text-sm font-medium">Telepon</label>
+					<Input id="sup-phone" name="phone" placeholder="Opsional" />
+				</div>
+				<div class="grid gap-2">
+					<label for="sup-addr" class="text-sm font-medium">Alamat</label>
+					<textarea id="sup-addr" name="address" class="rounded-lg border bg-background px-3 py-2 text-sm" rows="2" placeholder="Opsional"></textarea>
+				</div>
+			</div>
+			<DialogFooter>
+				<Button type="button" variant="outline" onclick={() => showSupplierModal = false}>Batal</Button>
+				<Button type="submit">Simpan</Button>
+			</DialogFooter>
+		</form>
 	</DialogContent>
 </Dialog>

@@ -20,6 +20,11 @@ export const sales = pgTable('sales', {
 		enum: ['draft', 'confirmed', 'cancelled']
 	}).default('draft').notNull(),
 	sale_date: timestamp('sale_date', { withTimezone: true }),
+	buyer_phone: text('buyer_phone'),
+	buyer_address: text('buyer_address'),
+	weigher_name: text('weigher_name'),
+	weigher_address: text('weigher_address'),
+	weigher_phone: text('weigher_phone'),
 	created_by: text('created_by'),
 	created_at: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
 	updated_at: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull()

@@ -3,7 +3,21 @@
 	import { goto } from '$app/navigation';
 	import { Button } from '$lib/components/ui/button';
 	import { Separator } from '$lib/components/ui/separator';
-	import { LogOut, LayoutDashboard, Package, Warehouse, Factory, Tags, Menu, X, Wheat, Building2, Home, ShoppingBag, Receipt, Scale, FileText } from '@lucide/svelte';
+	import LogOut from '@lucide/svelte/icons/log-out';
+	import LayoutDashboard from '@lucide/svelte/icons/layout-dashboard';
+	import Package from '@lucide/svelte/icons/package';
+	import Warehouse from '@lucide/svelte/icons/warehouse';
+	import Factory from '@lucide/svelte/icons/factory';
+	import Tags from '@lucide/svelte/icons/tags';
+	import Menu from '@lucide/svelte/icons/menu';
+	import X from '@lucide/svelte/icons/x';
+	import Wheat from '@lucide/svelte/icons/wheat';
+	import Building2 from '@lucide/svelte/icons/building-2';
+	import Home from '@lucide/svelte/icons/home';
+	import ShoppingBag from '@lucide/svelte/icons/shopping-bag';
+	import Receipt from '@lucide/svelte/icons/receipt';
+	import Scale from '@lucide/svelte/icons/scale';
+	import FileText from '@lucide/svelte/icons/file-text';
 	import { Toaster } from 'svelte-sonner';
 	import { onMount } from 'svelte';
 	import { get } from 'svelte/store';
@@ -109,43 +123,52 @@
 			<a href="/dashboard" onclick={closeSidebar} class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors hover:bg-accent hover:text-accent-foreground" class:bg-accent={$page.url.pathname === '/dashboard'}>
 				<LayoutDashboard size={18} /> Dashboard
 			</a>
-		<a href="/admin-orders" onclick={closeSidebar} class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors hover:bg-accent hover:text-accent-foreground" class:bg-accent={$page.url.pathname === '/admin-orders' || $page.url.pathname.startsWith('/admin-orders')}>
-			<ShoppingBag size={18} /> Pesanan
-			{#if $notifications.pendingCount > 0}
-				<span class="inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-red-500/10 px-1.5 text-[10px] font-bold text-red-600">
-					{$notifications.pendingCount > 9 ? '9+' : $notifications.pendingCount}
-				</span>
-			{/if}
-		</a>
-		<a href="/sales" onclick={closeSidebar} class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors hover:bg-accent hover:text-accent-foreground" class:bg-accent={$page.url.pathname === '/sales' || $page.url.pathname.startsWith('/sales/')}>
-			<Scale size={18} /> Timbangan Tepung
-		</a>
-			<div class="px-3 pt-2 pb-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Bahan Baku</div>
+
+			<!-- 1. Bahan Baku & Supplier -->
+			<div class="px-3 pt-3 pb-1 text-[11px] font-bold uppercase tracking-wider text-muted-foreground/70">1. Bahan Baku</div>
 			<a href="/suppliers" onclick={closeSidebar} class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors hover:bg-accent hover:text-accent-foreground" class:bg-accent={$page.url.pathname === '/suppliers'}>
-				<Building2 size={18} /> Supplier
+				<Building2 size={18} /> Supplier Singkong
 			</a>
 			<a href="/cassava" onclick={closeSidebar} class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors hover:bg-accent hover:text-accent-foreground" class:bg-accent={$page.url.pathname === '/cassava'}>
 				<Wheat size={18} /> Penerimaan Singkong
 			</a>
-			<div class="px-3 pt-2 pb-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Produksi</div>
-			<a href="/production" onclick={closeSidebar} class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors hover:bg-accent hover:text-accent-foreground" class:bg-accent={$page.url.pathname === '/production' || $page.url.pathname === '/production/history'}>
-				<Factory size={18} /> Produksi Harian
+
+			<!-- 2. Master Produk -->
+			<div class="px-3 pt-3 pb-1 text-[11px] font-bold uppercase tracking-wider text-muted-foreground/70">2. Produk & Kategori</div>
+			<a href="/categories" onclick={closeSidebar} class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors hover:bg-accent hover:text-accent-foreground" class:bg-accent={$page.url.pathname === '/categories'}>
+				<Tags size={18} /> Kategori Produk
 			</a>
-			<div class="px-3 pt-2 pb-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Stok & Produk</div>
-<a href="/warehouses" onclick={closeSidebar} class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors hover:bg-accent hover:text-accent-foreground" class:bg-accent={$page.url.pathname === '/warehouses' || $page.url.pathname === '/warehouses/history'}>
-			<Warehouse size={18} /> Gudang
-		</a>
-		{#if data.user.role === 'owner' || data.user.role === 'admin_penjualan' || data.user.role === 'petugas_gudang' || data.user.role === 'bagian_produksi'}
-			<a href="/laporan" onclick={closeSidebar} class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors hover:bg-accent hover:text-accent-foreground" class:bg-accent={$page.url.pathname === '/laporan' || $page.url.pathname.startsWith('/laporan/')}>
-				<FileText size={18} /> Laporan
-			</a>
-		{/if}
-		<a href="/categories" onclick={closeSidebar} class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors hover:bg-accent hover:text-accent-foreground" class:bg-accent={$page.url.pathname === '/categories'}>
-			<Tags size={18} /> Kategori Produk
-		</a>
 			<a href="/products" onclick={closeSidebar} class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors hover:bg-accent hover:text-accent-foreground" class:bg-accent={$page.url.pathname === '/products'}>
 				<Package size={18} /> Produk
 			</a>
+
+			<!-- 3. Produksi & Penimbangan -->
+			<div class="px-3 pt-3 pb-1 text-[11px] font-bold uppercase tracking-wider text-muted-foreground/70">3. Proses Produksi</div>
+			<a href="/production" onclick={closeSidebar} class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors hover:bg-accent hover:text-accent-foreground" class:bg-accent={$page.url.pathname === '/production' || $page.url.pathname === '/production/history'}>
+				<Factory size={18} /> Produksi Harian
+			</a>
+			<a href="/sales" onclick={closeSidebar} class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors hover:bg-accent hover:text-accent-foreground" class:bg-accent={$page.url.pathname === '/sales' || $page.url.pathname.startsWith('/sales/')}>
+				<Scale size={18} /> Penimbangan Tepung
+			</a>
+			<a href="/warehouses" onclick={closeSidebar} class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors hover:bg-accent hover:text-accent-foreground" class:bg-accent={$page.url.pathname === '/warehouses' || $page.url.pathname === '/warehouses/history'}>
+				<Warehouse size={18} /> Stok Gudang
+			</a>
+
+			<!-- 4. Penjualan & Laporan -->
+			<div class="px-3 pt-3 pb-1 text-[11px] font-bold uppercase tracking-wider text-muted-foreground/70">4. Penjualan & Laporan</div>
+			<a href="/admin-orders" onclick={closeSidebar} class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors hover:bg-accent hover:text-accent-foreground" class:bg-accent={$page.url.pathname === '/admin-orders' || $page.url.pathname.startsWith('/admin-orders')}>
+				<ShoppingBag size={18} /> Pesanan Pelanggan
+				{#if $notifications.pendingCount > 0}
+					<span class="inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-red-500/10 px-1.5 text-[10px] font-bold text-red-600">
+						{$notifications.pendingCount > 9 ? '9+' : $notifications.pendingCount}
+					</span>
+				{/if}
+			</a>
+			{#if data.user.role === 'owner' || data.user.role === 'admin_penjualan' || data.user.role === 'petugas_gudang' || data.user.role === 'bagian_produksi'}
+				<a href="/laporan" onclick={closeSidebar} class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors hover:bg-accent hover:text-accent-foreground" class:bg-accent={$page.url.pathname === '/laporan' || $page.url.pathname.startsWith('/laporan/')}>
+					<FileText size={18} /> Laporan
+				</a>
+			{/if}
 		</nav>
 		<Separator class="my-4" />
 		<a href="/" class="mb-2"><Button variant="ghost" class="w-full justify-start gap-3"><Home size={18} /> Landing Page</Button></a>

@@ -68,9 +68,9 @@ let searchQuery = $state($page.url.searchParams.get('search') || '');
 	<!-- Stock Summary -->
 	<div class="grid gap-4 sm:grid-cols-2">
 		<div class="rounded-xl border bg-primary/5 p-4 shadow-sm">
-			<p class="text-xs font-medium text-primary">Stok Singkong (Bahan Baku)</p>
-			<p class="text-2xl font-bold text-primary">{Math.max(0, data.cassavaStock).toLocaleString('id-ID')} kg</p>
-			<p class="text-xs text-primary">Dari penerimaan singkong</p>
+			<p class="text-xs font-medium text-primary">Total Stok Tepung Tapioka</p>
+			<p class="text-2xl font-bold text-primary">{Math.max(0, data.totalTapiocaStockKg ?? 0).toLocaleString('id-ID')} kg</p>
+			<p class="text-xs text-primary">Total akumulasi berat bersih penimbangan tepung</p>
 		</div>
 		<div class="rounded-xl border bg-info/10 p-4 shadow-sm">
 			<p class="text-xs font-medium text-info">Stok Produk Jadi</p>
@@ -195,8 +195,8 @@ let searchQuery = $state($page.url.searchParams.get('search') || '');
 						</select>
 					</div>
 					<div class="grid gap-2">
-						<label for="quantityChange" class="text-sm font-medium">Quantity *</label>
-						<Input id="quantityChange" name="quantityChange" type="number" step="0.01" required placeholder="Nilai positif" class="text-[16px]" inputmode="decimal" />
+						<label for="quantityChange" class="text-sm font-medium">Jumlah (kg) *</label>
+						<Input id="quantityChange" name="quantityChange" type="number" step="0.01" required placeholder="Contoh: 100" class="text-[16px]" inputmode="decimal" />
 					</div>
 					<div class="grid gap-2">
 						<label for="movementDate" class="text-sm font-medium">Tanggal</label>
@@ -219,20 +219,20 @@ let searchQuery = $state($page.url.searchParams.get('search') || '');
 <Dialog open={deleteTargetId !== null} onOpenChange={(o) => { if (!o) deleteTargetId = null; }}>
 	<DialogContent class="sm:max-w-sm">
 		<DialogHeader>
-			<DialogTitle>Hapus Stok Produk?</DialogTitle>
-			<DialogDescription>Produk akan dihapus dan tidak muncul lagi di daftar stok.</DialogDescription>
+			<DialogTitle>Kosongkan Stok Gudang?</DialogTitle>
+			<DialogDescription>Stok produk ini di gudang akan direset menjadi 0. Data master produk di Manajemen Produk tetap aman dan tidak akan terhapus.</DialogDescription>
 		</DialogHeader>
 		<DialogFooter class="gap-2">
 			<Button variant="outline" onclick={() => deleteTargetId = null}>Batal</Button>
 			<form method="post" action="?/deleteStock" use:enhance={() => {
 				return async ({ result, update }) => {
 					update();
-					if (result.type === 'success') { deleteTargetId = null; toast.success('Produk dihapus dari gudang'); await invalidateAll(); }
+					if (result.type === 'success') { deleteTargetId = null; toast.success('Stok gudang berhasil dikosongkan'); await invalidateAll(); }
 					else if (result.type === 'failure') { const msg = (result.data as any)?.message; if (msg) toast.error(msg); }
 				};
 			}}>
 				<input type="hidden" name="productId" value={deleteTargetId ?? ''} />
-				<Button variant="destructive" type="submit">Hapus</Button>
+				<Button variant="destructive" type="submit">Kosongkan Stok</Button>
 			</form>
 		</DialogFooter>
 	</DialogContent>

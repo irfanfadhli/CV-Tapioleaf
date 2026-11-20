@@ -40,30 +40,7 @@ export const GET: RequestHandler = async (event) => {
 
 	// Divider
 	doc.moveTo(36, doc.y).lineTo(559, doc.y).lineWidth(1).stroke('#cbd5e1');
-	doc.moveDown(0.6);
-
-	// Summary Cards in PDF
-	const summaryY = doc.y;
-	const cardW = 120;
-	const cardH = 50;
-	const startX = 36;
-	const spacing = (559 - 36 - cardW * 4) / 3;
-
-	const cards = [
-		{ label: 'Total Rekap', val: `${result.pagination.total} Transaksi` },
-		{ label: 'Pendapatan Bulan Ini', val: `Rp ${Number(summary.monthlyRevenue).toLocaleString('id-ID')}` },
-		{ label: 'Berat Bersih Terjual', val: `${Number(summary.monthlyWeight).toLocaleString('id-ID', { minimumFractionDigits: 2 })} kg` },
-		{ label: 'Draft Pending', val: `${summary.draftCount} Transaksi` }
-	];
-
-	cards.forEach((c, idx) => {
-		const x = startX + idx * (cardW + spacing);
-		doc.rect(x, summaryY, cardW, cardH).lineWidth(0.5).strokeColor('#e2e8f0').fillAndStroke('#f8fafc', '#e2e8f0');
-		doc.font('Helvetica').fontSize(8).fillColor('#64748b').text(c.label, x + 8, summaryY + 8, { width: cardW - 16 });
-		doc.font('Helvetica-Bold').fontSize(10).fillColor('#0f172a').text(c.val, x + 8, summaryY + 24, { width: cardW - 16 });
-	});
-
-	doc.y = summaryY + cardH + 15;
+	doc.moveDown(1);
 
 	// Table Header
 	const tableTop = doc.y;

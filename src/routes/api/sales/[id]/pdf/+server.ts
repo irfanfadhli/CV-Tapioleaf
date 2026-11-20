@@ -35,8 +35,8 @@ export const GET: RequestHandler = async (event) => {
 	doc.font('Helvetica-Bold').fontSize(10).fillColor('#334155').text('INFORMASI TRANSAKSI', 40, metaY);
 	doc.font('Helvetica').fontSize(9).fillColor('#475569');
 	doc.text(`No. Nota: ${sale.sale_number || '-'}`, 40, metaY + 18);
-	doc.text(`Pembeli: ${sale.buyer_name || '-'}`, 40, metaY + 32);
-	doc.text(`Produk: ${sale.product_name || 'Tepung Tapioka'}`, 40, metaY + 46);
+	doc.text(`Penimbang: ${sale.weigher_name || '-'} ${sale.weigher_phone ? `(${sale.weigher_phone})` : ''}`, 40, metaY + 32);
+	doc.text(`Pembeli: ${sale.buyer_name || '-'} ${sale.buyer_phone ? `(${sale.buyer_phone})` : ''}`, 40, metaY + 46);
 
 	const dateStr = sale.sale_date ? new Date(sale.sale_date).toLocaleDateString('id-ID', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' }) : '-';
 	doc.text(`Tanggal: ${dateStr}`, 320, metaY + 18);
@@ -107,7 +107,7 @@ export const GET: RequestHandler = async (event) => {
 
 	printRow('Jumlah Karung', `${items.length} karung`);
 	printRow('Berat Kotor (Gross)', `${Number(sale.gross_weight || 0).toLocaleString('id-ID', { minimumFractionDigits: 2 })} kg`);
-	printRow(`Tara Total (${items.length} × ${Number(sale.tara_per_sack || 0)} kg)`, `-${(items.length * Number(sale.tara_per_sack || 0)).toLocaleString('id-ID', { minimumFractionDigits: 2 })} kg`);
+	printRow('Tara Total', `-${Number(sale.tara_per_sack || 0).toLocaleString('id-ID', { minimumFractionDigits: 2 })} kg`);
 	printRow('Berat Bersih (Net)', `${Number(sale.net_weight || 0).toLocaleString('id-ID', { minimumFractionDigits: 2 })} kg`, true);
 	printRow(`Harga (@ Rp ${Number(sale.price_per_kg || 0).toLocaleString('id-ID')})`, `Rp ${Number(sale.total_cost || 0).toLocaleString('id-ID')}`);
 	printRow(`Biaya Kuli (${items.length} × Rp ${Number(sale.kuli_fee_per_sack || 0).toLocaleString('id-ID')})`, `-Rp ${(items.length * Number(sale.kuli_fee_per_sack || 0)).toLocaleString('id-ID')}`);

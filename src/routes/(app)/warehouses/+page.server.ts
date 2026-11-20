@@ -6,16 +6,42 @@ import { db } from '$lib/server/db';
 import { cassavaReceipts } from '$lib/server/db/schema/cassava';
 import { productionEntries } from '$lib/server/db/schema/production';
 import { products } from '$lib/server/db/schema/product';
-import { sql, eq } from 'drizzle-orm';
+import { sales } from '$lib/server/db/schema/sales';
+import { sql, eq, isNull } from 'drizzle-orm';
 
 export const load: PageServerLoad = async (event) => {
 	try {
 		const query = Object.fromEntries(event.url.searchParams) as Record<string, string>;
 		const result = await stockService.getAllCurrentStock(query as any);
 		const allProducts = await productService.listProducts({ search: '', status: 'all', page: 1, limit: 50, sort: 'name', order: 'asc' } as any);
-		const [cassavaIn] = await db.select({ total: sql<string>`COALESCE(SUM(final_weight::numeric), 0)` }).from(cassavaReceipts).limit(1);
-		const [cassavaOut] = await db.select({ total: sql<string>`COALESCE(SUM(cassava_used_kg::numeric), 0)` }).from(productionEntries).limit(1);
+		const [cassavaIn] = await db.select({ total: sql<string>`COALESCE(SUM(final_weight::numeric), 0)` }).from(cassavaReceipts).where(isNull(cassavaReceipts.deletedAt)).limit(1);
+		const [cassavaOut] = await db.select({ total: sql<string>`COALESCE(SUM(cassava_used_kg::numeric), 0)` }).from(productionEntries).where(isNull(productionEntries.deletedAt)).limit(1);
 		const cassavaStock = Math.max(0, Number(cassavaIn?.total || 0) - Number(cassavaOut?.total || 0));
+
+		// Total berat bersih dari penimbangan tepung (sales) yang sudah dikonfirmasi
+		const [totalWeighed] = await db
+			.select({ total: sql<string>`COALESCE(SUM(net_weight::numeric), 0)` })
+			.from(sales)
+			.where(eq(sales.status, 'confirmed'))
+			.limit(1);
+		const totalWeighedKg = Number(totalWeighed?.total || 0);
+
+		// Hitung total berat stok produk jadi di gudang
+		const productStockKg = (result.items || []).reduce((sum, item: any) => {
+			const stock = Number(item.currentStock || 0);
+			const unit = (item.unit || '').toUpperCase();
+			const name = (item.productName || item.name || '').toLowerCase();
+			if (unit === 'SAK' || unit.includes('SAK')) {
+				const match = name.match(/(\d+)\s*kg/);
+				const sakWeight = match ? Number(match[1]) : 25;
+				return sum + (stock * sakWeight);
+			}
+			return sum + stock;
+		}, 0);
+
+		// Total stok tepung tapioka = stok produk di gudang + total hasil penimbangan tepung bersih
+		const totalTapiocaStockKg = totalWeighedKg > 0 ? totalWeighedKg : productStockKg;
+
 		return {
 			items: result.items,
 			pagination: result.pagination,
@@ -23,7 +49,8 @@ export const load: PageServerLoad = async (event) => {
 			query,
 			sort: query.sort || 'name',
 			order: query.order || 'asc',
-			cassavaStock
+			cassavaStock,
+			totalTapiocaStockKg
 		};
 	} catch (e) {
 		console.error('Gudang load error:', e);
@@ -37,9 +64,20 @@ export const actions: Actions = {
 		const productId = formData.get('productId')?.toString() ?? '';
 		if (!productId) return fail(400, { message: 'ID tidak valid' });
 		try {
-			await db.update(products).set({ deletedAt: new Date(), updatedAt: new Date() }).where(eq(products.id, productId));
+			// Reset stok produk di gudang menjadi 0 (menggunakan stock movement penyesuaian/reset)
+			// Produk di manajemen produk TETAP ADA (tidak dihapus)
+			const currentStock = await stockService.getCurrentStock(productId);
+			if (currentStock !== 0) {
+				await stockService.addMovement({
+					productId,
+					quantityChange: -currentStock,
+					movementType: 'ADJUSTMENT',
+					reason: 'Pengosongan/reset stok gudang manual',
+					note: 'Reset stok gudang ke 0'
+				}, event.locals.user?.id);
+			}
 		} catch (e) {
-			return fail(400, { message: e instanceof Error ? e.message : 'Gagal menghapus' });
+			return fail(400, { message: e instanceof Error ? e.message : 'Gagal mengosongkan stok' });
 		}
 		return { success: true };
 	},
