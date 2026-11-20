@@ -6,9 +6,10 @@
 
 	let loading = $state(false);
 
-	// Jika dari klik produk (checkout=1), redirect balik ke / dengan flag checkout
-	const isCheckoutFlow = $derived($page.url.searchParams.get('checkout') === '1');
-	const callbackURL = $derived(isCheckoutFlow ? '/?checkout=1' : '/account');
+	// Cek apakah ada tujuan pengalihan khusus (misal: /checkout?productId=...)
+	const redirectParam = $derived($page.url.searchParams.get('redirect'));
+	const isCheckoutFlow = $derived($page.url.searchParams.get('checkout') === '1' || !!redirectParam);
+	const callbackURL = $derived(redirectParam || (isCheckoutFlow ? '/#products' : '/dashboard'));
 
 	async function signInGoogle() {
 		if (loading) return;
