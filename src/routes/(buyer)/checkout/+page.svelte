@@ -356,10 +356,6 @@
 				<ArrowLeft size={16} />
 				<span>Kembali</span>
 			</button>
-			<div class="flex items-center gap-2">
-				<ShieldCheck size={16} class="text-primary" />
-				<span class="text-xs font-medium text-muted-foreground">Checkout Aman & Terpercaya</span>
-			</div>
 		</div>
 
 		<form onsubmit={handleSubmit}>
@@ -425,58 +421,64 @@
 
 						{#if deliveryMethod === 'DELIVERY'}
 							<div class="space-y-3.5 border-t border-border/60 pt-3.5">
-								<!-- 3 Cascading Select: Provinsi -> Kota/Kabupaten -> Kecamatan (Dengan Pencarian) -->
-								<div class="grid grid-cols-1 md:grid-cols-3 gap-3.5">
+								<!-- 3 Dropdown Wilayah: Provinsi -> Kota/Kabupaten -> Kecamatan -->
+								<div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
 									<!-- 1. Provinsi -->
-									<div class="grid gap-1.5 min-w-0">
-										<label for="co-prov" class="text-xs font-semibold text-foreground">Provinsi *</label>
-										<SearchableSelect
-											id="co-prov"
-											placeholder="Pilih Provinsi"
-											searchPlaceholder="Ketik nama provinsi..."
-											items={provinces}
-											value={selectedProvCode}
-											disabled={submitting}
-											onSelect={(item) => onProvinceChange(item.kode)}
-										/>
+									<div class="flex flex-col gap-1.5 w-full min-w-0">
+										<label for="co-prov" class="text-xs font-semibold text-foreground truncate">Provinsi *</label>
+										<div class="w-full min-w-0">
+											<SearchableSelect
+												id="co-prov"
+												placeholder="Pilih Provinsi"
+												searchPlaceholder="Ketik nama provinsi..."
+												items={provinces}
+												value={selectedProvCode}
+												disabled={submitting}
+												onSelect={(item) => onProvinceChange(item.kode)}
+											/>
+										</div>
 									</div>
 
 									<!-- 2. Kota / Kabupaten -->
-									<div class="grid gap-1.5 min-w-0">
-										<div class="flex items-center justify-between">
-											<label for="co-reg" class="text-xs font-semibold text-foreground">Kota / Kabupaten *</label>
+									<div class="flex flex-col gap-1.5 w-full min-w-0">
+										<div class="flex items-center justify-between min-w-0">
+											<label for="co-reg" class="text-xs font-semibold text-foreground truncate">Kota / Kabupaten *</label>
 											{#if isLoadingRegencies}
-												<Loader2 size={12} class="animate-spin text-primary" />
+												<Loader2 size={12} class="animate-spin text-primary shrink-0 ml-1" />
 											{/if}
 										</div>
-										<SearchableSelect
-											id="co-reg"
-											placeholder={!selectedProvCode ? 'Pilih Provinsi dulu' : isLoadingRegencies ? 'Memuat kab/kota...' : 'Pilih Kota/Kabupaten'}
-											searchPlaceholder="Ketik nama kab/kota..."
-											items={regenciesList}
-											value={selectedRegCode}
-											disabled={submitting || !selectedProvCode || isLoadingRegencies}
-											onSelect={(item) => onRegencyChange(item.kode)}
-										/>
+										<div class="w-full min-w-0">
+											<SearchableSelect
+												id="co-reg"
+												placeholder={!selectedProvCode ? 'Pilih Provinsi dulu' : isLoadingRegencies ? 'Memuat kab/kota...' : 'Pilih Kota/Kabupaten'}
+												searchPlaceholder="Ketik nama kab/kota..."
+												items={regenciesList}
+												value={selectedRegCode}
+												disabled={submitting || !selectedProvCode || isLoadingRegencies}
+												onSelect={(item) => onRegencyChange(item.kode)}
+											/>
+										</div>
 									</div>
 
 									<!-- 3. Kecamatan -->
-									<div class="grid gap-1.5 min-w-0">
-										<div class="flex items-center justify-between">
-											<label for="co-dist" class="text-xs font-semibold text-foreground">Kecamatan *</label>
+									<div class="flex flex-col gap-1.5 w-full min-w-0">
+										<div class="flex items-center justify-between min-w-0">
+											<label for="co-dist" class="text-xs font-semibold text-foreground truncate">Kecamatan *</label>
 											{#if isLoadingDistricts}
-												<Loader2 size={12} class="animate-spin text-primary" />
+												<Loader2 size={12} class="animate-spin text-primary shrink-0 ml-1" />
 											{/if}
 										</div>
-										<SearchableSelect
-											id="co-dist"
-											placeholder={!selectedRegCode ? 'Pilih Kab/Kota dulu' : isLoadingDistricts ? 'Memuat kecamatan...' : 'Pilih Kecamatan'}
-											searchPlaceholder="Ketik nama kecamatan..."
-											items={districtsList}
-											value={selectedDistCode}
-											disabled={submitting || !selectedRegCode || isLoadingDistricts}
-											onSelect={(item) => onDistrictChange(item.kode)}
-										/>
+										<div class="w-full min-w-0">
+											<SearchableSelect
+												id="co-dist"
+												placeholder={!selectedRegCode ? 'Pilih Kab/Kota dulu' : isLoadingDistricts ? 'Memuat kecamatan...' : 'Pilih Kecamatan'}
+												searchPlaceholder="Ketik nama kecamatan..."
+												items={districtsList}
+												value={selectedDistCode}
+												disabled={submitting || !selectedRegCode || isLoadingDistricts}
+												onSelect={(item) => onDistrictChange(item.kode)}
+											/>
+										</div>
 									</div>
 								</div>
 
@@ -508,7 +510,7 @@
 																class="text-primary focus:ring-primary w-4 h-4"
 															/>
 															<div>
-																<p class="font-bold text-foreground">{rate.courier_name} &mdash; <span class="font-medium text-xs">{rate.service_name}</span></p>
+																<p class="font-bold text-foreground">{rate.courier_name}</p>
 																{#if rate.etd}
 																	<p class="text-[11px] text-muted-foreground mt-0.5">Estimasi tiba: {rate.etd} hari</p>
 																{/if}
@@ -667,11 +669,6 @@
 							</div>
 
 							<div class="flex items-center justify-between text-muted-foreground">
-								<span>Metode Penerimaan</span>
-								<span class="font-medium text-foreground">{deliveryMethod === 'DELIVERY' ? 'Pengiriman Reguler' : 'Ambil di Pabrik'}</span>
-							</div>
-
-							<div class="flex items-center justify-between text-muted-foreground">
 								<span>Total Ongkos Kirim</span>
 								<span class="font-semibold text-foreground">
 									{#if deliveryMethod === 'DELIVERY'}
@@ -684,7 +681,7 @@
 
 							{#if selectedShippingRate && deliveryMethod === 'DELIVERY'}
 								<p class="text-[11px] text-muted-foreground italic pl-1 -mt-1">
-									{selectedShippingRate.courier_name} ({selectedShippingRate.service_name})
+									{selectedShippingRate.courier_name}
 								</p>
 							{/if}
 
@@ -713,10 +710,6 @@
 								Buat Pesanan Sekarang
 							{/if}
 						</Button>
-
-						<p class="text-[11px] text-center text-muted-foreground">
-							Dengan membuat pesanan, Anda menyetujui ketentuan pemesanan dari CV TapioLeaf.
-						</p>
 					</div>
 				</div>
 			</div>
