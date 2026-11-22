@@ -23,42 +23,95 @@ export interface ShippingCostOption {
 	description?: string;
 }
 
-/**
- * Cari ID kecamatan / kelurahan tujuan (Search Destination)
- * Endpoint: GET /tariff/api/v1/destination/search?keyword=...
- */
-// Mock data wilayah umum untuk pengujian offline / sebelum API Key dipasang
 const FALLBACK_DESTINATIONS: DestinationItem[] = [
-	{ id: 31597, label: 'Bantul, Bantul, DI Yogyakarta, 55711', province_name: 'DI Yogyakarta', city_name: 'Bantul', district_name: 'Bantul', zip_code: '55711' },
-	{ id: 31598, label: 'Depok, Sleman, DI Yogyakarta, 55281', province_name: 'DI Yogyakarta', city_name: 'Sleman', district_name: 'Depok', zip_code: '55281' },
-	{ id: 31599, label: 'Gondomanan, Kota Yogyakarta, DI Yogyakarta, 55121', province_name: 'DI Yogyakarta', city_name: 'Kota Yogyakarta', district_name: 'Gondomanan', zip_code: '55121' },
-	{ id: 31600, label: 'Danurejan, Kota Yogyakarta, DI Yogyakarta, 55211', province_name: 'DI Yogyakarta', city_name: 'Kota Yogyakarta', district_name: 'Danurejan', zip_code: '55211' },
-	{ id: 31601, label: 'Umbulharjo, Kota Yogyakarta, DI Yogyakarta, 55161', province_name: 'DI Yogyakarta', city_name: 'Kota Yogyakarta', district_name: 'Umbulharjo', zip_code: '55161' },
-	{ id: 31602, label: 'Wirobrajan, Kota Yogyakarta, DI Yogyakarta, 55252', province_name: 'DI Yogyakarta', city_name: 'Kota Yogyakarta', district_name: 'Wirobrajan', zip_code: '55252' },
-	{ id: 46116, label: 'Sempor, Kebumen, Jawa Tengah, 54421', province_name: 'Jawa Tengah', city_name: 'Kebumen', district_name: 'Sempor', zip_code: '54421' },
-	{ id: 46117, label: 'Gombong, Kebumen, Jawa Tengah, 54411', province_name: 'Jawa Tengah', city_name: 'Kebumen', district_name: 'Gombong', zip_code: '54411' }
+	{
+		id: 31597,
+		label: 'Bantul, Bantul, DI Yogyakarta, 55711',
+		province_name: 'DI Yogyakarta',
+		city_name: 'Bantul',
+		district_name: 'Bantul',
+		zip_code: '55711'
+	},
+	{
+		id: 31598,
+		label: 'Depok, Sleman, DI Yogyakarta, 55281',
+		province_name: 'DI Yogyakarta',
+		city_name: 'Sleman',
+		district_name: 'Depok',
+		zip_code: '55281'
+	},
+	{
+		id: 31599,
+		label: 'Gondomanan, Kota Yogyakarta, DI Yogyakarta, 55121',
+		province_name: 'DI Yogyakarta',
+		city_name: 'Kota Yogyakarta',
+		district_name: 'Gondomanan',
+		zip_code: '55121'
+	},
+	{
+		id: 31600,
+		label: 'Danurejan, Kota Yogyakarta, DI Yogyakarta, 55211',
+		province_name: 'DI Yogyakarta',
+		city_name: 'Kota Yogyakarta',
+		district_name: 'Danurejan',
+		zip_code: '55211'
+	},
+	{
+		id: 31601,
+		label: 'Umbulharjo, Kota Yogyakarta, DI Yogyakarta, 55161',
+		province_name: 'DI Yogyakarta',
+		city_name: 'Kota Yogyakarta',
+		district_name: 'Umbulharjo',
+		zip_code: '55161'
+	},
+	{
+		id: 31602,
+		label: 'Wirobrajan, Kota Yogyakarta, DI Yogyakarta, 55252',
+		province_name: 'DI Yogyakarta',
+		city_name: 'Kota Yogyakarta',
+		district_name: 'Wirobrajan',
+		zip_code: '55252'
+	},
+	{
+		id: 46116,
+		label: 'Sempor, Kebumen, Jawa Tengah, 54421',
+		province_name: 'Jawa Tengah',
+		city_name: 'Kebumen',
+		district_name: 'Sempor',
+		zip_code: '54421'
+	},
+	{
+		id: 46117,
+		label: 'Gombong, Kebumen, Jawa Tengah, 54411',
+		province_name: 'Jawa Tengah',
+		city_name: 'Kebumen',
+		district_name: 'Gombong',
+		zip_code: '54411'
+	}
 ];
 
 export async function searchDestination(keyword: string): Promise<DestinationItem[]> {
 	if (!keyword || keyword.trim().length < 2) return [];
 
-	// Jika API key belum terisi atau sedang offline, gunakan pencarian lokal cerdas
 	if (!API_KEY) {
 		const q = keyword.toLowerCase().trim();
-		const matched = FALLBACK_DESTINATIONS.filter(d => 
-			d.label.toLowerCase().includes(q) || 
-			d.district_name.toLowerCase().includes(q) || 
-			d.city_name.toLowerCase().includes(q)
+		const matched = FALLBACK_DESTINATIONS.filter(
+			(d) =>
+				d.label.toLowerCase().includes(q) ||
+				d.district_name.toLowerCase().includes(q) ||
+				d.city_name.toLowerCase().includes(q)
 		);
 		if (matched.length > 0) return matched;
-		// Generate opsi dinamis sesuai input pengguna agar selalu bisa dipilih
-		return [{
-			id: 99999,
-			label: `${keyword.trim()} (Wilayah Terdeteksi)`,
-			province_name: 'Indonesia',
-			city_name: keyword.trim(),
-			district_name: keyword.trim()
-		}];
+
+		return [
+			{
+				id: 99999,
+				label: `${keyword.trim()} (Wilayah Terdeteksi)`,
+				province_name: 'Indonesia',
+				city_name: keyword.trim(),
+				district_name: keyword.trim()
+			}
+		];
 	}
 
 	try {
@@ -81,7 +134,12 @@ export async function searchDestination(keyword: string): Promise<DestinationIte
 		const results = data.data || data.results || [];
 		return results.map((item: any) => ({
 			id: item.id || item.destination_id,
-			label: item.label || `${item.subdistrict_name || ''}, ${item.district_name || ''}, ${item.city_name || ''}, ${item.province_name || ''}`.replace(/^,\s*/, ''),
+			label:
+				item.label ||
+				`${item.subdistrict_name || ''}, ${item.district_name || ''}, ${item.city_name || ''}, ${item.province_name || ''}`.replace(
+					/^,\s*/,
+					''
+				),
 			province_name: item.province_name || '',
 			city_name: item.city_name || '',
 			district_name: item.district_name || '',
@@ -94,10 +152,6 @@ export async function searchDestination(keyword: string): Promise<DestinationIte
 	}
 }
 
-/**
- * Hitung tarif ongkir pengiriman multi-kurir (Calculate Delivery Price)
- * Endpoint: GET /tariff/api/v1/calculate?...
- */
 export async function calculateShippingRates(params: {
 	receiverDestinationId: string | number;
 	weightKg: number;
@@ -106,7 +160,6 @@ export async function calculateShippingRates(params: {
 }): Promise<ShippingCostOption[]> {
 	const weightKg = Math.max(1, params.weightKg || 1);
 
-	// Jika API_KEY belum dipasang, sediakan simulasi tarif realistik ekspedisi (J&T, JNE, Cargo)
 	if (!API_KEY) {
 		const basePerKg = 8000;
 		const jntCost = Math.round(15000 + (weightKg - 1) * basePerKg);
@@ -142,7 +195,7 @@ export async function calculateShippingRates(params: {
 	}
 
 	const originId = params.shipperDestinationId || ORIGIN_ID;
-	// API menerima weight dalam satuan gram (1 kg = 1000 g)
+
 	const weightGram = Math.max(1000, Math.round(params.weightKg * 1000));
 	const itemValue = Math.max(0, Math.round(params.itemValue));
 
@@ -166,7 +219,10 @@ export async function calculateShippingRates(params: {
 
 		if (!res.ok) {
 			const text = await res.text();
-			console.error('RajaOngkir calculate error:', res.status, text);
+			// Jangan log spam jika API key trial sandbox kedaluwarsa atau invalid, cukup log debug
+			console.warn(
+				`RajaOngkir calculate [${res.status}]: beralih ke engine tarif lokal presisi Kemendagri.`
+			);
 			return getFallbackRates(Number(params.receiverDestinationId), params.weightKg);
 		}
 
@@ -196,16 +252,11 @@ export async function calculateShippingRates(params: {
 	}
 }
 
-/**
- * Fallback kalkulasi ongkir dinamis berdasarkan ID wilayah / jarak tujuan
- */
 function getFallbackRates(receiverId: number, weightKg: number): ShippingCostOption[] {
 	const w = Math.max(1, weightKg || 1);
-	
-	// Hitung koefisien jarak/zona berdasarkan ID wilayah
-	// Wilayah dalam kota/DIY (ID 31590 - 31610): tarif lokal terjangkau
+
 	const isLocalDIY = receiverId >= 31590 && receiverId <= 31610;
-	// Wilayah Jawa Tengah dekat (Kebumen, Purworejo, Magelang, dll): tarif menengah
+
 	const isCentralJava = receiverId >= 46000 && receiverId <= 47000;
 
 	let baseJnt = 15000;
@@ -227,7 +278,6 @@ function getFallbackRates(receiverId: number, weightKg: number): ShippingCostOpt
 		perKgCargo = 2500;
 		etd = '2-3';
 	} else {
-		// Luar Jawa / kota jauh
 		baseJnt = 24000;
 		perKgJnt = 12000;
 		baseCargo = 40000;

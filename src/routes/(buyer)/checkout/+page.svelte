@@ -426,9 +426,9 @@
 						{#if deliveryMethod === 'DELIVERY'}
 							<div class="space-y-3.5 border-t border-border/60 pt-3.5">
 								<!-- 3 Cascading Select: Provinsi -> Kota/Kabupaten -> Kecamatan (Dengan Pencarian) -->
-								<div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+								<div class="grid grid-cols-1 md:grid-cols-3 gap-3.5">
 									<!-- 1. Provinsi -->
-									<div class="grid gap-1.5">
+									<div class="grid gap-1.5 min-w-0">
 										<label for="co-prov" class="text-xs font-semibold text-foreground">Provinsi *</label>
 										<SearchableSelect
 											id="co-prov"
@@ -442,7 +442,7 @@
 									</div>
 
 									<!-- 2. Kota / Kabupaten -->
-									<div class="grid gap-1.5">
+									<div class="grid gap-1.5 min-w-0">
 										<div class="flex items-center justify-between">
 											<label for="co-reg" class="text-xs font-semibold text-foreground">Kota / Kabupaten *</label>
 											{#if isLoadingRegencies}
@@ -461,7 +461,7 @@
 									</div>
 
 									<!-- 3. Kecamatan -->
-									<div class="grid gap-1.5">
+									<div class="grid gap-1.5 min-w-0">
 										<div class="flex items-center justify-between">
 											<label for="co-dist" class="text-xs font-semibold text-foreground">Kecamatan *</label>
 											{#if isLoadingDistricts}
