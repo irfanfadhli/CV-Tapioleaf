@@ -425,24 +425,20 @@
 
 						{#if deliveryMethod === 'DELIVERY'}
 							<div class="space-y-3.5 border-t border-border/60 pt-3.5">
-								<!-- 3 Cascading Select: Provinsi -> Kota/Kabupaten -> Kecamatan -->
+								<!-- 3 Cascading Select: Provinsi -> Kota/Kabupaten -> Kecamatan (Dengan Pencarian) -->
 								<div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
 									<!-- 1. Provinsi -->
 									<div class="grid gap-1.5">
 										<label for="co-prov" class="text-xs font-semibold text-foreground">Provinsi *</label>
-										<select
+										<SearchableSelect
 											id="co-prov"
-											class="h-9 w-full rounded-xl border border-border bg-background px-2.5 py-1 text-xs sm:text-sm text-foreground focus:ring-1 focus:ring-primary outline-hidden"
+											placeholder="Pilih Provinsi"
+											searchPlaceholder="Ketik nama provinsi..."
+											items={provinces}
 											value={selectedProvCode}
-											onchange={(e) => onProvinceChange((e.target as HTMLSelectElement).value)}
 											disabled={submitting}
-											required
-										>
-											<option value="">Pilih Provinsi</option>
-											{#each provinces as prov}
-												<option value={prov.kode}>{prov.nama}</option>
-											{/each}
-										</select>
+											onSelect={(item) => onProvinceChange(item.kode)}
+										/>
 									</div>
 
 									<!-- 2. Kota / Kabupaten -->
@@ -453,21 +449,15 @@
 												<Loader2 size={12} class="animate-spin text-primary" />
 											{/if}
 										</div>
-										<select
+										<SearchableSelect
 											id="co-reg"
-											class="h-9 w-full rounded-xl border border-border bg-background px-2.5 py-1 text-xs sm:text-sm text-foreground focus:ring-1 focus:ring-primary outline-hidden disabled:bg-muted/50"
+											placeholder={!selectedProvCode ? 'Pilih Provinsi dulu' : isLoadingRegencies ? 'Memuat kab/kota...' : 'Pilih Kota/Kabupaten'}
+											searchPlaceholder="Ketik nama kab/kota..."
+											items={regenciesList}
 											value={selectedRegCode}
-											onchange={(e) => onRegencyChange((e.target as HTMLSelectElement).value)}
 											disabled={submitting || !selectedProvCode || isLoadingRegencies}
-											required
-										>
-											<option value="">
-												{!selectedProvCode ? 'Pilih Provinsi dulu' : isLoadingRegencies ? 'Memuat kab/kota...' : 'Pilih Kota/Kabupaten'}
-											</option>
-											{#each regenciesList as reg}
-												<option value={reg.kode}>{reg.nama}</option>
-											{/each}
-										</select>
+											onSelect={(item) => onRegencyChange(item.kode)}
+										/>
 									</div>
 
 									<!-- 3. Kecamatan -->
@@ -478,21 +468,15 @@
 												<Loader2 size={12} class="animate-spin text-primary" />
 											{/if}
 										</div>
-										<select
+										<SearchableSelect
 											id="co-dist"
-											class="h-9 w-full rounded-xl border border-border bg-background px-2.5 py-1 text-xs sm:text-sm text-foreground focus:ring-1 focus:ring-primary outline-hidden disabled:bg-muted/50"
+											placeholder={!selectedRegCode ? 'Pilih Kab/Kota dulu' : isLoadingDistricts ? 'Memuat kecamatan...' : 'Pilih Kecamatan'}
+											searchPlaceholder="Ketik nama kecamatan..."
+											items={districtsList}
 											value={selectedDistCode}
-											onchange={(e) => onDistrictChange((e.target as HTMLSelectElement).value)}
 											disabled={submitting || !selectedRegCode || isLoadingDistricts}
-											required
-										>
-											<option value="">
-												{!selectedRegCode ? 'Pilih Kab/Kota dulu' : isLoadingDistricts ? 'Memuat kecamatan...' : 'Pilih Kecamatan'}
-											</option>
-											{#each districtsList as dist}
-												<option value={dist.kode}>{dist.nama}</option>
-											{/each}
-										</select>
+											onSelect={(item) => onDistrictChange(item.kode)}
+										/>
 									</div>
 								</div>
 
