@@ -41,6 +41,7 @@ export const actions: Actions = {
 			pricePerKg: Number(formData.get('pricePerKg') ?? '0'),
 			notes: formData.get('notes')?.toString() || undefined,
 		};
+		if (input.refraction < 0 || input.refraction > 100) return fail(400, { message: 'Refraksi harus antara 0% dan 100%' });
 		try {
 			await cassavaService.updateReceipt(id, input, event.locals.user!.id);
 		} catch (e) {
@@ -77,7 +78,7 @@ export const actions: Actions = {
 		if (!input.supplierId) return fail(400, { message: 'Pilih supplier' });
 		if (input.grossWeight <= 0) return fail(400, { message: 'Gross weight harus > 0' });
 		if (input.taraWeight > input.grossWeight) return fail(400, { message: 'Tara tidak boleh melebihi gross' });
-		if (input.refraction > input.grossWeight - input.taraWeight) return fail(400, { message: 'Refraction tidak boleh melebihi net' });
+		if (input.refraction < 0 || input.refraction > 100) return fail(400, { message: 'Refraksi harus antara 0% dan 100%' });
 
 		try {
 			await cassavaService.createReceipt(input, event.locals.user!.id);

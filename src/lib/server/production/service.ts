@@ -14,14 +14,18 @@ export async function createProduction(input: CreateProductionInput, userId?: st
 	const isLate = date < today;
 
 	const cassavaKg = data.cassavaUsedKg || 0;
-	const tapiocaResult = data.yieldPercentage ? (cassavaKg * (data.yieldPercentage / 100)) : null;
+	let calculatedYield = data.yieldPercentage;
+	if (!calculatedYield && cassavaKg > 0 && data.quantityKg > 0) {
+		calculatedYield = Math.round((data.quantityKg / cassavaKg) * 100 * 10) / 10;
+	}
+	const tapiocaResult = data.quantityKg;
 
 	const [entry] = await db.insert(productionEntries).values({
 		productId: data.productId,
 		quantityKg: String(data.quantityKg),
 		cassavaUsedKg: data.cassavaUsedKg ? String(data.cassavaUsedKg) : null,
-		yieldPercentage: data.yieldPercentage ? String(data.yieldPercentage) : null,
-		tapiocaFlourResult: tapiocaResult !== null ? String(tapiocaResult) : null,
+		yieldPercentage: calculatedYield ? String(calculatedYield) : null,
+		tapiocaFlourResult: String(tapiocaResult),
 		productionDate: date,
 		notes: data.notes,
 		isLateEntry: isLate,
@@ -41,28 +45,72 @@ export async function createProduction(input: CreateProductionInput, userId?: st
 	return entry;
 }
 
-export async function updateProduction(id: string, input: { quantityKg?: number; notes?: string }, userId?: string) {
-	const [existing] = await db.select().from(productionEntries).where(eq(productionEntries.id, id)).limit(1);
+export async function updateProduction(
+	id: string,
+	input: {
+		productId?: string;
+		quantityKg?: number;
+		cassavaUsedKg?: number;
+		yieldPercentage?: number;
+		productionDate?: string;
+		notes?: string;
+	},
+	userId?: string
+) {
+	const [existing] = await db.select().from(productionEntries).where(and(eq(productionEntries.id, id), isNull(productionEntries.deletedAt))).limit(1);
 	if (!existing) throw new Error('Entry produksi tidak ditemukan');
-	if (existing.status === 'CONFIRMED') throw new Error('Produksi yang sudah dikonfirmasi tidak bisa diedit');
 
-	const diff = input.quantityKg ? input.quantityKg - Number(existing.quantityKg) : 0;
+	const date = input.productionDate ? new Date(input.productionDate) : existing.productionDate;
+	const newQuantity = input.quantityKg !== undefined ? input.quantityKg : Number(existing.quantityKg);
+	const newCassava = input.cassavaUsedKg !== undefined ? input.cassavaUsedKg : (existing.cassavaUsedKg ? Number(existing.cassavaUsedKg) : null);
+	
+	let calculatedYield = input.yieldPercentage;
+	if (!calculatedYield && newCassava && newCassava > 0 && newQuantity > 0) {
+		calculatedYield = Math.round((newQuantity / newCassava) * 100 * 10) / 10;
+	}
+
+	const oldQuantity = Number(existing.quantityKg);
+	const diff = newQuantity - oldQuantity;
 
 	const [updated] = await db.update(productionEntries)
 		.set({
-			quantityKg: input.quantityKg ? String(input.quantityKg) : existing.quantityKg,
-			notes: input.notes ?? existing.notes,
+			productId: input.productId ?? existing.productId,
+			quantityKg: String(newQuantity),
+			tapiocaFlourResult: String(newQuantity),
+			cassavaUsedKg: newCassava ? String(newCassava) : null,
+			yieldPercentage: calculatedYield ? String(calculatedYield) : (existing.yieldPercentage ? String(existing.yieldPercentage) : null),
+			productionDate: date,
+			notes: input.notes !== undefined ? input.notes : existing.notes,
 			updatedAt: new Date()
 		})
 		.where(eq(productionEntries.id, id))
 		.returning();
 
-	if (diff !== 0) {
+	// Jika produk berubah atau jumlah berubah, sesuaikan mutasi stok
+	if (input.productId && input.productId !== existing.productId) {
+		// Tarik kembali stok produk lama
+		await addMovement({
+			productId: existing.productId,
+			quantityChange: -oldQuantity,
+			movementType: 'ADJUSTMENT',
+			reason: `Koreksi ganti produk produksi: ${id}`,
+			note: `Koreksi ganti produk produksi: ${id}`
+		}, userId);
+		// Tambah stok ke produk baru
+		await addMovement({
+			productId: input.productId,
+			quantityChange: newQuantity,
+			movementType: 'ADJUSTMENT',
+			reason: `Koreksi ganti produk produksi: ${id}`,
+			note: `Koreksi ganti produk produksi: ${id}`
+		}, userId);
+	} else if (diff !== 0) {
 		await addMovement({
 			productId: existing.productId,
 			quantityChange: diff,
 			movementType: 'ADJUSTMENT',
-			note: `Koreksi produksi: ${id}`
+			reason: `Koreksi kuantitas produksi: ${id}`,
+			note: `Koreksi kuantitas produksi: ${id}`
 		}, userId);
 	}
 
@@ -83,11 +131,24 @@ export async function confirmTodayProduction(userId?: string) {
 	return entries;
 }
 
-export async function deleteProduction(id: string) {
+export async function deleteProduction(id: string, userId?: string) {
 	const [existing] = await db.select().from(productionEntries).where(and(eq(productionEntries.id, id), isNull(productionEntries.deletedAt))).limit(1);
 	if (!existing) throw new Error('Entry produksi tidak ditemukan');
 
+	// Soft delete entry produksi
 	await db.update(productionEntries).set({ deletedAt: new Date() }).where(eq(productionEntries.id, id));
+
+	// Kembalikan/kurangi stok tepung yang sebelumnya ditambahkan
+	const qtyToReverse = Number(existing.tapiocaFlourResult || existing.quantityKg || 0);
+	if (qtyToReverse > 0 && existing.productId) {
+		await addMovement({
+			productId: existing.productId,
+			quantityChange: -qtyToReverse,
+			movementType: 'ADJUSTMENT',
+			reason: `Penyesuaian stok karena penghapusan batch produksi: ${id}`,
+			note: `Batal/Hapus produksi: ${id}`
+		}, userId);
+	}
 }
 
 export async function listProductions(query: ProductionQuery) {

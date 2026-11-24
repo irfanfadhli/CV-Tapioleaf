@@ -39,11 +39,12 @@ export const actions: Actions = {
 		
 		const formData = await event.request.formData();
 		const orderId = formData.get('orderId')?.toString() ?? '';
+		const reason = (formData.get('cancellationReason')?.toString() || formData.get('reason')?.toString() || '').trim();
 		
 		if (!orderId) return fail(400, { message: 'ID pesanan tidak valid' });
 		
 		try {
-			await orderService.cancelOrder(orderId, 'ADMIN');
+			await orderService.cancelOrder(orderId, 'ADMIN', reason || undefined);
 			return { success: true, message: 'Pesanan berhasil dibatalkan' };
 		} catch (e) {
 			return fail(400, { message: e instanceof Error ? e.message : 'Gagal membatalkan pesanan' });
@@ -78,6 +79,14 @@ export const actions: Actions = {
 			return fail(400, { message: 'Nama pelanggan wajib diisi' });
 		}
 
+		if (/\d/.test(customerName)) {
+			return fail(400, { message: 'Nama pelanggan tidak boleh mengandung angka' });
+		}
+
+		if (customerPhone && (/[a-zA-Z]/.test(customerPhone) || !/^(\+62|62|0)[0-9]{7,14}$/.test(customerPhone))) {
+			return fail(400, { message: 'Nomor telepon tidak valid dan tidak boleh mengandung huruf' });
+		}
+
 		let items: Array<{ productId: string; quantity: number }> = [];
 		try {
 			items = JSON.parse(itemsJson);
@@ -87,6 +96,12 @@ export const actions: Actions = {
 
 		if (!items || items.length === 0) {
 			return fail(400, { message: 'Pilih minimal satu produk' });
+		}
+
+		for (const it of items) {
+			if (!it.quantity || Number(it.quantity) <= 0) {
+				return fail(400, { message: 'Jumlah produk tidak boleh minus atau 0' });
+			}
 		}
 
 		try {

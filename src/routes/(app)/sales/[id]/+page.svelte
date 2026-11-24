@@ -53,16 +53,25 @@
 	<!-- Info Cards -->
 	<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
 		<div class="rounded-xl border p-4 space-y-1">
-			<div class="flex items-center gap-2 text-xs font-medium text-muted-foreground"><User size={14} /> Pembeli</div>
-			<p class="text-lg font-semibold">{sale.buyer_name || '-'}</p>
-			{#if sale.buyer_type}
+			<div class="flex items-center gap-2 text-xs font-medium text-muted-foreground"><User size={14} /> Penimbang</div>
+			<p class="text-lg font-semibold">{sale.weigher_name || sale.buyer_name || '-'}</p>
+			{#if sale.weigher_phone || sale.weigher_address}
+				<div class="text-xs text-muted-foreground space-y-0.5 pt-1">
+					{#if sale.weigher_phone}<p>📞 {sale.weigher_phone}</p>{/if}
+					{#if sale.weigher_address}<p>📍 {sale.weigher_address}</p>{/if}
+				</div>
+			{:else if sale.buyer_type}
 				<span class="text-xs text-muted-foreground">{sale.buyer_type === 'umkm' ? 'UMKM / Retail' : 'Pengepul'}</span>
 			{/if}
 		</div>
 		<div class="rounded-xl border p-4 space-y-1">
-			<div class="flex items-center gap-2 text-xs font-medium text-muted-foreground"><Package size={14} /> Produk</div>
-			<p class="text-lg font-semibold">{sale.product_name || '-'}</p>
-			<p class="text-xs text-muted-foreground">{sale.product_code || ''}</p>
+			<div class="flex items-center gap-2 text-xs font-medium text-muted-foreground"><User size={14} /> Pembeli</div>
+			<p class="text-lg font-semibold">{sale.buyer_name || '-'}</p>
+			{#if sale.buyer_phone}
+				<div class="text-xs text-muted-foreground space-y-0.5 pt-1">
+					<p>📞 {sale.buyer_phone}</p>
+				</div>
+			{/if}
 		</div>
 		<div class="rounded-xl border p-4 space-y-1">
 			<div class="flex items-center gap-2 text-xs font-medium text-muted-foreground"><Calendar size={14} /> Tanggal</div>
@@ -107,8 +116,7 @@
 		<div class="grid gap-3 text-sm max-w-md">
 			<div class="flex justify-between"><span class="text-muted-foreground">Jumlah Karung</span><span class="font-medium">{sale.items.length} karung</span></div>
 			<div class="flex justify-between"><span class="text-muted-foreground">Berat Kotor (Gross Weight)</span><span class="font-medium">{fmtWeight(sale.gross_weight || 0)}</span></div>
-			<div class="flex justify-between"><span class="text-muted-foreground">Tara/Karung</span><span class="font-medium">{fmtWeight(sale.tara_per_sack || 0)}</span></div>
-			<div class="flex justify-between"><span class="text-muted-foreground">Tara Total ({sale.items.length} × {Number(sale.tara_per_sack || 0)} kg)</span><span class="font-medium">-{fmtWeight(sale.items.length * Number(sale.tara_per_sack || 0))}</span></div>
+			<div class="flex justify-between"><span class="text-muted-foreground">Tara Total</span><span class="font-medium text-destructive">-{fmtWeight(sale.tara_per_sack || 0)}</span></div>
 			<div class="flex justify-between border-t pt-2"><span class="font-medium">Berat Bersih (Net Weight)</span><span class="font-bold">{fmtWeight(sale.net_weight || 0)}</span></div>
 
 			<div class="flex justify-between mt-3"><span class="text-muted-foreground">Harga per Kg</span><span class="font-medium">{fmtCurrency(sale.price_per_kg || 0)}</span></div>

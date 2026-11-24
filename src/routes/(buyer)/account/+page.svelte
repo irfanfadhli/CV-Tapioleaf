@@ -1,7 +1,11 @@
 <script lang="ts">
 	import { Button } from '$lib/components/ui/button';
-	import { Card, CardContent, CardHeader, CardTitle } from '$lib/components/ui/card';
-	import { User, ShoppingBag, Package, CheckCircle2, ChevronRight, ShieldCheck } from '@lucide/svelte';
+	import User from '@lucide/svelte/icons/user';
+	import ShoppingBag from '@lucide/svelte/icons/shopping-bag';
+	import CheckCircle2 from '@lucide/svelte/icons/check-circle-2';
+	import ChevronRight from '@lucide/svelte/icons/chevron-right';
+	import Calendar from '@lucide/svelte/icons/calendar';
+	import Receipt from '@lucide/svelte/icons/receipt';
 
 	let { data } = $props();
 </script>
@@ -10,172 +14,150 @@
 	<title>Akun Saya — CV TapioLeaf</title>
 </svelte:head>
 
-<div class="mx-auto max-w-2xl space-y-5">
+<div class="mx-auto max-w-3xl space-y-6">
 	<!-- Page Header -->
 	<div>
-		<h1 class="text-2xl font-bold tracking-tight">Akun Saya</h1>
-		<p class="text-xs text-muted-foreground sm:text-sm">Kelola profil dan pantau riwayat transaksi Anda</p>
+		<h1 class="text-2xl font-extrabold tracking-tight text-foreground">Akun Saya</h1>
+		<p class="text-xs sm:text-sm text-muted-foreground mt-0.5">Kelola informasi akun dan pantau seluruh transaksi pembelian Anda</p>
 	</div>
 
-	<!-- Profile Card -->
-	<Card class="overflow-hidden border shadow-sm">
-		<CardContent class="p-4 sm:p-5">
-			<div class="flex items-center justify-between gap-4">
-				<div class="flex items-center gap-3.5">
-					<div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary ring-1 ring-primary/20">
-						<User size={24} />
-					</div>
-					<div class="min-w-0">
-						<div class="flex items-center gap-2">
-							<h2 class="truncate text-base font-semibold text-foreground sm:text-lg">{data.user.name || 'Pelanggan'}</h2>
-							<span class="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-medium text-primary">
-								<ShieldCheck size={12} /> Pembeli
-							</span>
-						</div>
-						<p class="truncate text-xs text-muted-foreground sm:text-sm">{data.user.email}</p>
-					</div>
-				</div>
+	<!-- Profile Hero Card (Modern Clean Gradient) -->
+	<div class="relative overflow-hidden rounded-2xl border border-border/80 bg-gradient-to-br from-card via-card to-primary/5 p-5 sm:p-6 shadow-xs">
+		<div class="flex items-center gap-4">
+			<div class="relative flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary shadow-inner ring-1 ring-primary/20">
+				<User size={28} />
 			</div>
-		</CardContent>
-	</Card>
+			<div class="min-w-0">
+				<h2 class="text-lg font-bold text-foreground truncate">{data.user.name || 'Pelanggan CV TapioLeaf'}</h2>
+				<p class="text-xs text-muted-foreground mt-0.5 font-medium">{data.user.email}</p>
+			</div>
+		</div>
+	</div>
 
-	<!-- Quick Navigation Banner -->
-	<div class="grid grid-cols-2 gap-3">
+	<!-- Quick Navigation Card: Semua Pesanan -->
+	<div>
 		<a
 			href="/orders"
-			class="group relative flex flex-col justify-between rounded-xl border bg-card p-3.5 transition-all hover:border-primary/40 hover:shadow-sm active:scale-[0.98] sm:p-4"
+			class="group relative flex items-center justify-between rounded-2xl border border-border/80 bg-card p-4 sm:p-5 transition-all duration-200 hover:border-primary/50 hover:shadow-md hover:-translate-y-0.5 active:scale-[0.99]"
 		>
-			<div class="flex items-center justify-between">
-				<div class="relative flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary sm:h-9 sm:w-9">
-					<ShoppingBag size={18} />
+			<div class="flex items-center gap-3.5">
+				<div class="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
+					<ShoppingBag size={20} />
 					{#if data.unreadCount && data.unreadCount > 0}
-						<span class="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-destructive text-[10px] font-bold text-destructive-foreground animate-pulse">
+						<span class="absolute -top-1 -right-1 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-destructive px-1 text-[9px] font-bold text-destructive-foreground animate-pulse">
 							{data.unreadCount}
 						</span>
 					{/if}
 				</div>
-				<div class="flex items-center gap-1.5">
-					{#if data.unreadCount && data.unreadCount > 0}
-						<span class="inline-flex items-center rounded-full bg-destructive/10 px-2 py-0.5 text-[10px] font-semibold text-destructive">
-							Notifikasi Baru
-						</span>
-					{/if}
-					<ChevronRight size={16} class="text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:text-primary" />
+				<div>
+					<div class="flex items-center gap-2">
+						<p class="text-sm font-bold text-foreground group-hover:text-primary transition-colors">Semua Pesanan</p>
+						{#if data.unreadCount && data.unreadCount > 0}
+							<span class="rounded-full bg-destructive/10 px-2 py-0.5 text-[10px] font-bold text-destructive">
+								Ada Update
+							</span>
+						{/if}
+					</div>
+					<p class="text-xs text-muted-foreground mt-0.5">Pantau status pesanan, pembayaran, dan riwayat belanja</p>
 				</div>
 			</div>
-			<div class="mt-2.5">
-				<div class="flex items-center gap-1.5">
-					<p class="text-xs font-semibold text-foreground sm:text-sm">Semua Pesanan</p>
-					{#if data.unreadCount && data.unreadCount > 0}
-						<span class="h-2 w-2 rounded-full bg-destructive animate-ping"></span>
-					{/if}
-				</div>
-				<p class="text-[11px] text-muted-foreground">Lihat status & proses pesanan</p>
-			</div>
-		</a>
-
-		<a
-			href="/#products"
-			class="group flex flex-col justify-between rounded-xl border bg-card p-3.5 transition-all hover:border-primary/40 hover:shadow-sm active:scale-[0.98] sm:p-4"
-		>
-			<div class="flex items-center justify-between">
-				<div class="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary sm:h-9 sm:w-9">
-					<Package size={18} />
-				</div>
-				<ChevronRight size={16} class="text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:text-primary" />
-			</div>
-			<div class="mt-2.5">
-				<p class="text-xs font-semibold text-foreground sm:text-sm">Katalog Produk</p>
-				<p class="text-[11px] text-muted-foreground">Pesan tepung tapioka</p>
-			</div>
+			<span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-muted/60 text-muted-foreground transition-all group-hover:bg-primary/10 group-hover:text-primary group-hover:translate-x-1">
+				<ChevronRight size={16} />
+			</span>
 		</a>
 	</div>
 
-	<!-- Paid Orders Card -->
-	<Card class="border shadow-sm">
-		<CardHeader class="p-4 pb-2 sm:p-5 sm:pb-3">
-			<div class="flex items-center gap-2.5">
-				<div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
-					<CheckCircle2 size={16} />
+	<!-- Orders Section (Pesanan Saya) -->
+	<div class="rounded-2xl border border-border/80 bg-card p-5 sm:p-6 shadow-xs space-y-4">
+		<!-- Section Header -->
+		<div class="flex items-center justify-between border-b border-border/60 pb-3.5">
+			<div class="flex items-center gap-3">
+				<div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+					<Receipt size={18} />
 				</div>
 				<div>
-					<CardTitle class="text-base font-semibold sm:text-lg">Pesanan Lunas</CardTitle>
-					<p class="text-xs text-muted-foreground">Riwayat pesanan yang telah dibayar</p>
+					<h3 class="text-sm sm:text-base font-bold text-foreground">Pesanan Saya</h3>
+					<p class="text-[11px] sm:text-xs text-muted-foreground">Riwayat transaksi pembelian Anda</p>
 				</div>
 			</div>
-		</CardHeader>
+			{#if data.orders.length > 0}
+				<span class="rounded-full bg-muted/70 px-2.5 py-0.5 text-xs font-semibold text-muted-foreground">
+					{data.orders.length} Transaksi
+				</span>
+			{/if}
+		</div>
 
-		<CardContent class="p-4 pt-2 sm:p-5 sm:pt-2">
-			{#if data.orders.length === 0}
-				<div class="rounded-lg border border-dashed p-6 text-center">
-					<div class="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-muted text-muted-foreground">
-						<ShoppingBag size={20} />
-					</div>
-					<p class="text-sm font-medium text-foreground">Belum ada pesanan yang lunas</p>
-					<p class="mx-auto mt-1 max-w-xs text-xs text-muted-foreground">
-						Pesanan yang menunggu persetujuan atau belum dibayar dapat Anda pantau di menu Pesanan.
-					</p>
-					<div class="mt-4 flex items-center justify-center gap-2">
-						<a href="/orders">
-							<Button variant="default" size="sm" class="gap-1.5">
-								<ShoppingBag size={14} /> Cek Pesanan
-							</Button>
-						</a>
-						<a href="/#products">
-							<Button variant="outline" size="sm" class="gap-1.5">
-								<Package size={14} /> Katalog
-							</Button>
-						</a>
-					</div>
+		<!-- Orders List -->
+		{#if data.orders.length === 0}
+			<div class="rounded-xl border border-dashed border-border/80 p-8 text-center bg-muted/20">
+				<div class="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-muted/70 text-muted-foreground">
+					<ShoppingBag size={22} />
 				</div>
-			{:else}
-				<div class="space-y-2.5">
-					{#each data.orders as order}
-						<a
-							href="/orders/{order.id}"
-							class="group flex flex-col justify-between gap-2 rounded-xl border bg-card p-3.5 transition-all hover:border-primary/40 hover:bg-muted/30 active:scale-[0.99] sm:flex-row sm:items-center"
-						>
-							<div class="min-w-0 flex-1">
-								<div class="flex items-center gap-2">
-									<span class="font-mono text-xs font-medium text-muted-foreground">
-										#{order.id.slice(0, 8)}
-									</span>
-									<span class="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary">
-										<CheckCircle2 size={10} /> Lunas
-									</span>
-								</div>
+				<p class="text-sm font-bold text-foreground">Belum ada riwayat pesanan</p>
+				<p class="mx-auto mt-1 max-w-sm text-xs text-muted-foreground">
+					Pesanan Anda akan muncul di sini setelah Anda melakukan pemesanan.
+				</p>
+				<div class="mt-4 flex items-center justify-center">
+					<a href="/orders">
+						<Button variant="default" size="sm" class="rounded-full px-5 text-xs font-semibold gap-1.5 shadow-xs">
+							<ShoppingBag size={14} /> Cek Status Pesanan
+						</Button>
+					</a>
+				</div>
+			</div>
+		{:else}
+			<div class="space-y-3">
+				{#each data.orders as order}
+					<a
+						href="/orders/{order.id}"
+						class="group flex flex-col sm:flex-row sm:items-center justify-between gap-3.5 rounded-xl border border-border/60 bg-card p-4 transition-all duration-200 hover:border-primary/40 hover:bg-muted/20 hover:shadow-xs active:scale-[0.99]"
+					>
+						<!-- Left: ID, Product Info, Date -->
+						<div class="min-w-0 flex-1 space-y-1">
+							<div class="flex items-center gap-2">
+								<span class="font-mono text-xs font-semibold text-muted-foreground">
+									#{order.id.slice(0, 8)}
+								</span>
+								<span class="inline-flex items-center gap-1 rounded-md bg-emerald-500/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
+									<CheckCircle2 size={10} /> Lunas
+								</span>
+							</div>
 
-								{#if order.items && order.items.length > 0}
-									<p class="mt-1 text-sm font-medium text-foreground">
-										{order.items.map((i: any) => `${i.productName} (${i.quantity} ${i.unit})`).join(', ')}
-									</p>
-								{/if}
+							{#if order.items && order.items.length > 0}
+								<p class="text-sm font-bold text-foreground line-clamp-1 group-hover:text-primary transition-colors">
+									{order.items.map((i: any) => `${i.productName} (${i.quantity} ${i.unit})`).join(', ')}
+								</p>
+							{/if}
 
-								<p class="mt-0.5 text-[11px] text-muted-foreground">
+							<div class="flex items-center gap-1 text-[11px] text-muted-foreground">
+								<Calendar size={12} />
+								<span>
 									{new Date(order.createdAt).toLocaleDateString('id-ID', {
-										weekday: 'long',
-										year: 'numeric',
-										month: 'long',
-										day: 'numeric'
+										weekday: 'short',
+										day: 'numeric',
+										month: 'short',
+										year: 'numeric'
 									})}
+								</span>
+							</div>
+						</div>
+
+						<!-- Right: Total & Action -->
+						<div class="flex items-center justify-between sm:justify-end gap-3 pt-2 sm:pt-0 border-t sm:border-t-0 border-border/50">
+							<div class="text-left sm:text-right">
+								<p class="text-[10px] uppercase font-bold tracking-wider text-muted-foreground">Total Transaksi</p>
+								<p class="text-sm sm:text-base font-extrabold text-primary tracking-tight">
+									Rp {Number(order.totalAmount).toLocaleString('id-ID')}
 								</p>
 							</div>
 
-							<div class="flex items-center justify-between border-t pt-2 sm:border-t-0 sm:pt-0 sm:text-right">
-								<span class="text-xs text-muted-foreground sm:hidden">Total Bayar:</span>
-								<div class="flex items-center gap-1.5 sm:flex-col sm:items-end sm:gap-0">
-									<p class="text-sm font-bold text-primary">
-										Rp {Number(order.totalAmount).toLocaleString('id-ID')}
-									</p>
-									<span class="hidden text-[11px] text-muted-foreground group-hover:text-primary sm:inline-flex sm:items-center">
-										Detail <ChevronRight size={12} class="ml-0.5" />
-									</span>
-								</div>
+							<div class="hidden sm:flex h-8 w-8 items-center justify-center rounded-lg bg-muted/60 text-muted-foreground transition-all group-hover:bg-primary/10 group-hover:text-primary group-hover:translate-x-0.5">
+								<ChevronRight size={16} />
 							</div>
-						</a>
-					{/each}
-				</div>
-			{/if}
-		</CardContent>
-	</Card>
+						</div>
+					</a>
+				{/each}
+			</div>
+		{/if}
+	</div>
 </div>

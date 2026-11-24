@@ -37,11 +37,24 @@ async function generateSaleNumber(): Promise<string> {
 
 /**
  * Calculate sale business formulas server-side
+ * Aturan tara: Total Tara (kg) = Math.ceil(jumlahKarung / 2) (misal 35 karung / 2 = 17.5 -> 18 kg)
+ * Atau jika manualTotalTara disediakan, gunakan manualTotalTara
  */
-function calculateSale(sackWeights: number[], taraPerSack: number, pricePerKg: number, kuliFeePerSack: number) {
+export function calculateTotalTara(sackCount: number, manualTotalTara?: number): number {
+	if (manualTotalTara !== undefined && manualTotalTara >= 0 && !isNaN(manualTotalTara)) {
+		return manualTotalTara;
+	}
+	if (sackCount <= 0) return 0;
+	// Dibagi 2, jika ganjil (desimal .5) dibulatkan ke atas jadi genap/bilangan bulat terdekat
+	return Math.ceil(sackCount / 2);
+}
+
+function calculateSale(sackWeights: number[], taraInput: number, pricePerKg: number, kuliFeePerSack: number) {
 	const sackCount = sackWeights.length;
 	const grossWeight = sackWeights.reduce((sum, w) => sum + w, 0);
-	const netWeight = grossWeight - (sackCount * taraPerSack);
+	// Jika taraInput > 0 dan tidak sama dengan rumus standar, gunakan input, jika tidak hitung Math.ceil(sackCount / 2)
+	const totalTara = (taraInput !== undefined && taraInput >= 0) ? taraInput : calculateTotalTara(sackCount);
+	const netWeight = grossWeight - totalTara;
 	const totalCost = netWeight * pricePerKg;
 	const kuliFee = sackCount * kuliFeePerSack;
 	const totalPayment = totalCost - kuliFee;
@@ -49,6 +62,7 @@ function calculateSale(sackWeights: number[], taraPerSack: number, pricePerKg: n
 	return {
 		sackCount,
 		grossWeight: Math.round(grossWeight * 100) / 100,
+		totalTara: Math.round(totalTara * 100) / 100,
 		netWeight: Math.round(netWeight * 100) / 100,
 		totalCost: Math.round(totalCost * 100) / 100,
 		kuliFee: Math.round(kuliFee * 100) / 100,
@@ -99,9 +113,14 @@ export async function createSale(input: CreateSaleInput, userId?: string) {
 	const [sale] = await db.insert(sales).values({
 		sale_number: saleNumber,
 		buyer_name: data.buyerName,
+		buyer_phone: data.buyerPhone || null,
+		buyer_address: data.buyerAddress || null,
 		buyer_type: data.buyerType || null,
+		weigher_name: data.weigherName || null,
+		weigher_address: data.weigherAddress || null,
+		weigher_phone: data.weigherPhone || null,
 		product_id: productId || null,
-		tara_per_sack: String(data.taraPerSack),
+		tara_per_sack: String(calc.totalTara),
 		gross_weight: String(calc.grossWeight),
 		net_weight: String(calc.netWeight),
 		price_per_kg: String(data.pricePerKg),
@@ -122,16 +141,27 @@ export async function createSale(input: CreateSaleInput, userId?: string) {
 		});
 	}
 
-	// If confirmed directly, deduct stock
+	// If confirmed directly as SALE, deduct stock. If WEIGHING_IN, add stock into warehouse.
 	if (data.status === 'confirmed' && productId) {
-		await db.insert(stockMovements).values({
-			productId: productId,
-			quantityChange: String(-calc.netWeight),
-			movementType: 'SALE_OUT',
-			note: `Penjualan ${saleNumber} kepada ${data.buyerName}`,
-			referenceId: sale.id,
-			createdByUserId: userId || null
-		});
+		if (data.entryType === 'weighing') {
+			await db.insert(stockMovements).values({
+				productId: productId,
+				quantityChange: String(calc.netWeight),
+				movementType: 'MANUAL_IN',
+				note: `Hasil Penimbangan Tepung ${saleNumber} (Penimbang: ${data.weigherName || 'Petugas'})`,
+				referenceId: sale.id,
+				createdByUserId: userId || null
+			});
+		} else {
+			await db.insert(stockMovements).values({
+				productId: productId,
+				quantityChange: String(-calc.netWeight),
+				movementType: 'SALE_OUT',
+				note: `Penjualan ${saleNumber} kepada ${data.buyerName}`,
+				referenceId: sale.id,
+				createdByUserId: userId || null
+			});
+		}
 	}
 
 	return sale;
@@ -143,29 +173,53 @@ export async function confirmSale(saleId: string, userId?: string) {
 	if (sale.status !== 'draft') throw new Error('Hanya transaksi draft yang dapat dikonfirmasi');
 
 	// Check stock availability
-	const productId = sale.product_id;
-	if (!productId) throw new Error('Produk tidak valid');
-	const netWeight = Number(sale.net_weight);
-	if (netWeight <= 0) throw new Error('Berat bersih tidak boleh nol atau negatif');
-	const currentStock = await getCurrentStock(productId);
-	if (currentStock < netWeight) {
-		throw new Error(`Stok tidak mencukupi. Tersedia: ${currentStock} kg, dibutuhkan: ${netWeight} kg`);
+	let productId = sale.product_id;
+	if (!productId) {
+		// Cari produk aktif tanpa deletedAt, atau produk apa pun yang belum terhapus
+		let [defaultProd] = await db
+			.select({ id: products.id })
+			.from(products)
+			.where(and(eq(products.isActive, true), isNull(products.deletedAt)))
+			.limit(1);
+
+		if (!defaultProd) {
+			[defaultProd] = await db
+				.select({ id: products.id })
+				.from(products)
+				.where(isNull(products.deletedAt))
+				.limit(1);
+		}
+
+		if (defaultProd) {
+			productId = defaultProd.id;
+			await db.update(sales).set({ product_id: productId }).where(eq(sales.id, saleId));
+		}
 	}
 
-	// Atomic: update status + insert stock movement
+	const netWeight = Number(sale.net_weight);
+	if (netWeight <= 0) throw new Error('Berat bersih tidak boleh nol atau negatif');
+
+	if (productId) {
+		const currentStock = await getCurrentStock(productId);
+		if (currentStock < netWeight) {
+			throw new Error(`Stok tidak mencukupi. Tersedia: ${currentStock} kg, dibutuhkan: ${netWeight} kg`);
+		}
+
+		await db.insert(stockMovements).values({
+			productId: productId,
+			quantityChange: String(-netWeight),
+			movementType: 'SALE_OUT',
+			note: `Penjualan ${sale.sale_number} kepada ${sale.weigher_name || sale.buyer_name || 'Penimbang'}`,
+			referenceId: saleId,
+			createdByUserId: userId || null
+		});
+	}
+
+	// Update status sale
 	await db.update(sales).set({
 		status: 'confirmed',
 		updated_at: new Date()
 	}).where(eq(sales.id, saleId));
-
-	await db.insert(stockMovements).values({
-		productId: productId,
-		quantityChange: String(-netWeight),
-		movementType: 'SALE_OUT',
-		note: `Penjualan ${sale.sale_number} kepada ${sale.buyer_name}`,
-		referenceId: saleId,
-		createdByUserId: userId || null
-	});
 
 	return { success: true, message: 'Transaksi berhasil dikonfirmasi' };
 }
@@ -175,7 +229,12 @@ export async function getSale(id: string) {
 		id: sales.id,
 		sale_number: sales.sale_number,
 		buyer_name: sales.buyer_name,
+		buyer_phone: sales.buyer_phone,
+		buyer_address: sales.buyer_address,
 		buyer_type: sales.buyer_type,
+		weigher_name: sales.weigher_name,
+		weigher_address: sales.weigher_address,
+		weigher_phone: sales.weigher_phone,
 		product_id: sales.product_id,
 		tara_per_sack: sales.tara_per_sack,
 		gross_weight: sales.gross_weight,
@@ -245,7 +304,12 @@ export async function listSales(query: SalesQuery) {
 		id: sales.id,
 		sale_number: sales.sale_number,
 		buyer_name: sales.buyer_name,
+		buyer_phone: sales.buyer_phone,
+		buyer_address: sales.buyer_address,
 		buyer_type: sales.buyer_type,
+		weigher_name: sales.weigher_name,
+		weigher_address: sales.weigher_address,
+		weigher_phone: sales.weigher_phone,
 		product_id: sales.product_id,
 		gross_weight: sales.gross_weight,
 		net_weight: sales.net_weight,
@@ -282,7 +346,12 @@ export async function updateDraftSale(id: string, input: UpdateSaleInput, userId
 	const updates: Record<string, any> = { updated_at: new Date() };
 
 	if (data.buyerName !== undefined) updates.buyer_name = data.buyerName;
+	if (data.buyerPhone !== undefined) updates.buyer_phone = data.buyerPhone;
+	if (data.buyerAddress !== undefined) updates.buyer_address = data.buyerAddress;
 	if (data.buyerType !== undefined) updates.buyer_type = data.buyerType;
+	if (data.weigherName !== undefined) updates.weigher_name = data.weigherName;
+	if (data.weigherAddress !== undefined) updates.weigher_address = data.weigherAddress;
+	if (data.weigherPhone !== undefined) updates.weigher_phone = data.weigherPhone;
 	if (data.productId !== undefined) updates.product_id = data.productId;
 	if (data.taraPerSack !== undefined) updates.tara_per_sack = String(data.taraPerSack);
 	if (data.pricePerKg !== undefined) updates.price_per_kg = String(data.pricePerKg);
@@ -297,6 +366,7 @@ export async function updateDraftSale(id: string, input: UpdateSaleInput, userId
 		const calc = calculateSale(data.sackWeights, taraPerSack, pricePerKg, kuliFeePerSack);
 		if (calc.netWeight <= 0) throw new Error('Berat bersih tidak boleh nol atau negatif');
 
+		updates.tara_per_sack = String(calc.totalTara);
 		updates.gross_weight = String(calc.grossWeight);
 		updates.net_weight = String(calc.netWeight);
 		updates.total_cost = String(calc.totalCost);
@@ -320,7 +390,20 @@ export async function updateDraftSale(id: string, input: UpdateSaleInput, userId
 export async function deleteDraftSale(id: string) {
 	const [existing] = await db.select().from(sales).where(eq(sales.id, id)).limit(1);
 	if (!existing) throw new Error('Transaksi tidak ditemukan');
-	if (existing.status !== 'draft') throw new Error('Hanya transaksi draft yang dapat dihapus');
+
+	// Jika berstatus confirmed, kembalikan stok terlebih dahulu
+	if (existing.status === 'confirmed' && existing.product_id) {
+		const netWeight = Number(existing.net_weight || 0);
+		if (netWeight > 0) {
+			await db.insert(stockMovements).values({
+				productId: existing.product_id,
+				quantityChange: String(netWeight),
+				movementType: 'MANUAL_IN',
+				note: `Pengembalian stok pembatalan/penghapusan penjualan ${existing.sale_number || ''}`,
+				referenceId: id
+			});
+		}
+	}
 
 	// sale_items will cascade delete
 	await db.delete(sales).where(eq(sales.id, id));
